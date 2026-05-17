@@ -1,986 +1,1428 @@
 <!DOCTYPE html>
-<!-- saved from url=(0061)file:///C:/Users/User/Downloads/krafton_tasks_firebase_8.html -->
-<html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KRAFTON CAFE — 업무 관리</title>
-<link href="./index_files/css2" rel="stylesheet">
-<script src="./index_files/firebase-app-compat.js.다운로드"></script>
-<script src="./index_files/firebase-database-compat.js.다운로드"></script>
+<title>☕ 크래프톤 서초카페 현지구매 관리대장</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-:root{
-  --bg:#F5F5F3;--card:#FFFFFF;--card2:#FAFAF9;
-  --bdr:#E8E8E6;--bdr2:#D4D4D0;
-  --t1:#18181B;--t2:#52525B;--t3:#A1A1AA;
-  --acc:#18181B;--gold:#C9A84C;
-  --err-bg:#FEF2F2;--err-t:#B91C1C;
-  --wrn-bg:#FFFBEB;--wrn-t:#92400E;
-  --ok-bg:#F0FDF4;--ok-t:#166534;
-  --inf-bg:#EFF6FF;--inf-t:#1D4ED8;
-  --r8:8px;--r12:12px;--r16:16px;
-  --font:"Noto Sans KR",-apple-system,sans-serif;
-  --sb:248px;
-  --sh:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
-  --sh2:0 4px 16px rgba(0,0,0,.10);
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans KR',sans-serif;background:#f5f5f5;color:#222;font-size:13px}
+
+/* ── 헤더 ── */
+.header{background:#fff;border-bottom:2px solid #1a3a5c;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:54px;position:sticky;top:0;z-index:100;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.header-logo{display:flex;align-items:center;gap:10px}
+.header-logo .icon{font-size:20px}
+.header-logo .title{font-size:15px;font-weight:700;color:#1a3a5c}
+.header-logo .sub{font-size:11px;color:#2563eb;background:#eff6ff;padding:2px 8px;border-radius:12px;font-weight:600;border:1px solid #bfdbfe}
+.header-actions{display:flex;gap:8px;align-items:center}
+
+/* ── 월 탭 ── */
+.month-tabs{background:#fff;border-bottom:1px solid #dde3ea;padding:0 20px;display:flex;gap:0;overflow-x:auto}
+.month-tab{padding:10px 14px;font-size:12px;font-weight:500;color:#888;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:all .15s}
+.month-tab:hover{color:#1a3a5c;background:#f8f9fb}
+.month-tab.active{color:#1a3a5c;border-bottom-color:#1a3a5c;font-weight:700}
+.month-tab .badge{display:inline-block;background:#e53e3e;color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;margin-left:3px;font-weight:700;line-height:1.4}
+
+/* ── 레이아웃 ── */
+.main{display:flex;height:calc(100vh - 54px - 42px)}
+.sidebar{width:240px;min-width:240px;background:#fff;border-right:1px solid #dde3ea;display:flex;flex-direction:column;overflow:hidden}
+.content{flex:1;overflow:auto;padding:16px 20px;background:#f5f5f5}
+
+/* ── 사이드바 ── */
+.sb-section{padding:14px;border-bottom:1px solid #eef0f3}
+.sb-section h3{font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+.stat-row{display:flex;gap:6px;margin-bottom:6px}
+.stat-card{flex:1;background:#f8f9fb;border:1px solid #eef0f3;border-radius:6px;padding:10px}
+.stat-card .lbl{font-size:10px;color:#999;margin-bottom:3px}
+.stat-card .val{font-size:16px;font-weight:700;color:#1a3a5c;font-family:monospace}
+.stat-card .val.sm{font-size:12px}
+.chk-list{display:flex;flex-direction:column;gap:6px}
+.chk-row{display:flex;justify-content:space-between;align-items:center;font-size:11px}
+.chk-lbl{color:#555;font-weight:500}
+.chk-cnt .d{color:#16a34a;font-weight:700}
+.chk-cnt .t{color:#bbb}
+.prog{height:3px;background:#eef0f3;border-radius:2px;margin-top:4px;overflow:hidden}
+.prog-fill{height:100%;background:#16a34a;border-radius:2px;transition:width .4s}
+.mchnt-row{display:flex;flex-direction:column;padding:5px 0;border-bottom:1px solid #f0f0f0;gap:2px}
+.mchnt-row:last-child{border:none}
+.mchnt-name{color:#444;font-weight:500;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.mchnt-amt{color:#2563eb;font-weight:600;font-family:monospace;font-size:11px;}
+
+/* ── 입력 폼 ── */
+.form-card{background:#fff;border:1px solid #dde3ea;border-radius:8px;padding:16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.form-title{font-size:12px;font-weight:700;color:#1a3a5c;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #eef0f3;display:flex;align-items:center;gap:6px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:12px}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fg label{font-size:10px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.3px}
+.fg input,.fg select{border:1px solid #dde3ea;border-radius:5px;color:#222;padding:6px 9px;font-size:12px;font-family:'Noto Sans KR',sans-serif;transition:border .15s;width:100%;background:#fff}
+.fg input:focus,.fg select:focus{outline:none;border-color:#1a3a5c;box-shadow:0 0 0 2px rgba(26,58,92,.08)}
+.fg input[readonly]{background:#f8f9fb;color:#999}
+.fg input[readonly]:focus{box-shadow:none;border-color:#dde3ea}
+.form-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* ── 버튼 ── */
+.btn{padding:7px 14px;border-radius:5px;border:none;font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+.btn-primary{background:#1a3a5c;color:#fff}
+.btn-primary:hover{background:#0f2744}
+.btn-excel{background:#217346;color:#fff}
+.btn-excel:hover{background:#185c37}
+.btn-secondary{background:#fff;color:#444;border:1px solid #dde3ea}
+.btn-secondary:hover{background:#f5f5f5}
+.btn-danger{background:#fff0f0;color:#dc2626;border:1px solid #fecaca}
+.btn-danger:hover{background:#fee2e2}
+.btn-sm{padding:4px 9px;font-size:11px}
+
+/* ── 테이블 ── */
+.tbl-card{background:#fff;border:1px solid #dde3ea;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.tbl-header{padding:12px 16px;border-bottom:1px solid #dde3ea;display:flex;align-items:center;justify-content:space-between;background:#fff}
+.tbl-header h3{font-size:13px;font-weight:700;color:#1a3a5c}
+.tbl-header-right{display:flex;gap:6px;align-items:center}
+.tbl-cnt{font-size:11px;color:#2563eb;background:#eff6ff;padding:2px 9px;border-radius:10px;font-weight:600;border:1px solid #bfdbfe}
+.tbl-wrap{overflow-x:auto}
+
+/* ── 테이블 스타일 (이미지와 동일) ── */
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead tr{background:#f0f4f8}
+thead th{
+  padding:8px 10px;text-align:center;font-size:11px;font-weight:700;
+  color:#333;border:1px solid #d0d7de;white-space:nowrap;
+  background:#f0f4f8;position:sticky;top:0;
 }
-body{font-family:var(--font);background:var(--bg);color:var(--t1);font-size:14px;line-height:1.6;display:flex;min-height:100vh;}
+thead th.left{text-align:left}
+thead th.right{text-align:right}
+tbody tr{border-bottom:1px solid #e8ecf0}
+tbody tr:hover{background:#f8fbff}
+tbody tr.done{opacity:.6}
+tbody td{padding:7px 10px;border:1px solid #e8ecf0;font-size:12px;vertical-align:middle}
+tbody td.center{text-align:center}
+tbody td.right{text-align:right;font-family:monospace}
+tbody td.num{text-align:right;font-family:monospace;color:#1a3a5c}
+tbody td.code{font-family:monospace;font-size:11px;color:#666;text-align:center}
 
-/* ── SIDEBAR ── */
-.sb{width:var(--sb);background:var(--card);border-right:1px solid var(--bdr);position:fixed;top:0;left:0;bottom:0;z-index:30;display:flex;flex-direction:column;overflow-y:auto;}
-.sb-head{padding:24px 20px 18px;border-bottom:1px solid var(--bdr);}
-.sb-logo{font-size:22px;font-weight:700;letter-spacing:.14em;color:var(--t1);line-height:1;}
-.sb-logo-sub{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--t3);margin-top:3px;font-weight:500;}
-.sb-rule{height:1.5px;background:var(--t1);margin:10px 0 8px;width:48px;}
-.sb-tag{font-size:12px;color:var(--t2);font-weight:500;}
-.sb-date-bar{padding:9px 20px;font-size:12px;color:var(--t3);border-bottom:1px solid var(--bdr);}
-.sb-sec{padding:16px 20px 4px;font-size:10px;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;font-weight:700;}
-.sb-list{padding:0 10px 12px;display:flex;flex-direction:column;gap:1px;}
-.sb-btn{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:var(--r8);cursor:pointer;border:none;background:none;width:100%;font-family:var(--font);font-size:13px;color:var(--t2);text-align:left;transition:background .1s,color .1s;}
-.sb-btn:hover{background:#F4F4F5;color:var(--t1);}
-.sb-btn.on{background:var(--t1);color:#fff;}
-.sb-btn.on .cnt{background:rgba(255,255,255,.2);color:#fff;}
-.sb-btn.cat-on{background:#F4F4F5;color:var(--t1);font-weight:500;}
-.sb-dot{width:8px;height:8px;border-radius:3px;flex-shrink:0;margin-right:2px;}
-.sb-l{display:flex;align-items:center;gap:7px;}
-.cnt{font-size:11px;background:#F4F4F5;color:var(--t3);padding:1px 8px;border-radius:99px;font-weight:500;}
-.sb-hr{height:1px;background:var(--bdr);margin:6px 20px;}
-.sb-foot{margin-top:auto;padding:12px 12px;border-top:1px solid var(--bdr);}
-.sb-foot-btn{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r8);cursor:pointer;border:none;background:none;font-family:var(--font);font-size:12px;color:var(--t3);width:100%;transition:all .1s;}
-.sb-foot-btn:hover{background:#F4F4F5;color:var(--t1);}
+/* 분류 배지 */
+.cat{display:inline-block;padding:1px 7px;border-radius:3px;font-size:10px;font-weight:700}
+.cat-식재{background:#e6f7ee;color:#15803d;border:1px solid #bbf7d0}
+.cat-서초주류{background:#fef9c3;color:#854d0e;border:1px solid #fde68a}
+.cat-펍{background:#fee2e2;color:#b91c1c;border:1px solid #fecaca}
+.cat-웰니스{background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd}
+.cat-네스프레소{background:#f3e8ff;color:#6b21a8;border:1px solid #e9d5ff}
+.cat-식재라운지{background:#ecfdf5;color:#065f46}
+.cat-콜라보{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa}
 
-/* ── MAIN ── */
-.main{margin-left:var(--sb);flex:1;display:flex;flex-direction:column;min-height:100vh;}
-.topbar{padding:14px 28px;border-bottom:1px solid var(--bdr);background:rgba(255,255,255,.92);backdrop-filter:blur(8px);position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;}
-.tb-info{}
-.tb-title{font-size:17px;font-weight:700;}
-.tb-sub{font-size:12px;color:var(--t3);margin-top:1px;}
-.tb-btns{display:flex;gap:8px;}
+/* 체크 */
+.chk-grp{display:flex;gap:2px;justify-content:center}
+.chk-btn{width:22px;height:22px;border-radius:4px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700;border:1px solid;transition:all .12s}
+.chk-btn.on{background:#dcfce7;border-color:#86efac;color:#15803d}
+.chk-btn.off{background:#f9fafb;border-color:#d1d5db;color:#ccc}
+.chk-btn:hover{transform:scale(1.15)}
 
-/* Firebase 상태: 우하단 pill */
-#fb-pill{position:fixed;bottom:18px;right:22px;z-index:200;font-size:12px;font-weight:500;font-family:var(--font);padding:7px 16px;border-radius:99px;border:1px solid #BBF7D0;background:#F0FDF4;color:#166534;box-shadow:var(--sh2);transition:all .4s;pointer-events:none;}
+/* 빈 상태 */
+.empty{text-align:center;padding:50px 20px;color:#aaa}
+.empty .ico{font-size:36px;margin-bottom:10px}
 
-/* ── TABS ── */
-.tabs{display:flex;gap:0;border-bottom:1px solid var(--bdr);padding:0 28px;background:rgba(255,255,255,.9);}
-.tab{padding:11px 20px;font-size:14px;color:var(--t3);cursor:pointer;border:none;background:none;border-bottom:2.5px solid transparent;font-family:var(--font);transition:color .1s,border-color .1s;margin-bottom:-1px;}
-.tab:hover{color:var(--t1);}
-.tab.on{color:var(--t1);border-bottom-color:var(--t1);font-weight:700;}
+/* 토스트 */
+.toast{position:fixed;bottom:20px;right:20px;background:#fff;border:1px solid #dde3ea;border-radius:6px;padding:10px 16px;font-size:12px;color:#222;z-index:1000;transform:translateY(60px);opacity:0;transition:all .25s cubic-bezier(.34,1.56,.64,1);box-shadow:0 4px 16px rgba(0,0,0,.12);font-weight:500}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{border-left:3px solid #16a34a}
+.toast.err{border-left:3px solid #dc2626}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:#cdd5df;border-radius:3px}
+.hidden{display:none!important}
 
-/* ── VIEWS ── */
-.view{display:none;padding:20px 28px 60px;flex:1;}
-.view.on{display:block;}
+/* ── 품목 검색 드롭다운 ── */
+.item-search-wrap { position:relative; }
+.item-search-input {
+  border:1px solid #dde3ea; border-radius:5px; color:#222;
+  padding:6px 9px; font-size:12px; font-family:'Noto Sans KR',sans-serif;
+  width:100%; background:#fff; transition:border .15s;
+  ime-mode:active;
+}
+.item-search-input:focus { outline:none; border-color:#1a3a5c; box-shadow:0 0 0 2px rgba(26,58,92,.08); }
+.item-dropdown {
+  position:absolute; top:100%; left:0; z-index:200;
+  min-width:320px; width:max-content; max-width:680px;
+  background:#fff; border:1px solid #1a3a5c; border-top:none;
+  border-radius:0 0 5px 5px; max-height:280px; overflow-y:auto; overflow-x:hidden;
+  box-shadow:0 4px 16px rgba(0,0,0,.15); display:none;
+}
+.item-dropdown.open { display:block; }
+.item-option {
+  padding:7px 12px; cursor:pointer;
+  border-bottom:1px solid #f0f0f0;
+}
+.item-option:last-child { border-bottom:none; }
+.item-option:hover { background:#eff6ff; }
+.item-option .opt-name {
+  font-size:12px; font-weight:500; color:#1a1f2e;
+  white-space:nowrap; display:block;
+}
+.no-result { padding:10px; font-size:12px; color:#aaa; text-align:center; }
 
-/* toolbar */
-.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
-input.srch{flex:1;min-width:160px;padding:9px 14px;font-size:13px;border:1.5px solid var(--bdr);border-radius:var(--r8);background:var(--card);color:var(--t1);font-family:var(--font);box-shadow:var(--sh);}
-input.srch:focus{outline:none;border-color:var(--t1);}
-input.srch::placeholder{color:var(--t3);}
-select.fsel{padding:9px 11px;font-size:13px;border:1.5px solid var(--bdr);border-radius:var(--r8);background:var(--card);color:var(--t1);font-family:var(--font);box-shadow:var(--sh);}
-select.fsel:focus{outline:none;border-color:var(--t1);}
 
-/* drag hint */
-.drag-hint{display:none;padding:9px 14px;background:var(--wrn-bg);border:1px solid rgba(201,168,76,.3);border-radius:var(--r8);font-size:13px;color:var(--wrn-t);margin-bottom:12px;}
-.drag-hint.show{display:flex;align-items:center;gap:8px;}
+/* ── 마스터 관리 탭 ── */
+.tab-bar {
+  background:#fff; border-bottom:2px solid #1a3a5c;
+  padding:0 20px; display:flex; gap:0;
+}
+.tab-btn {
+  padding:11px 20px; font-size:13px; font-weight:600;
+  color:#888; border:none; background:none; cursor:pointer;
+  border-bottom:3px solid transparent; margin-bottom:-2px;
+  transition:all .15s; white-space:nowrap;
+}
+.tab-btn:hover { color:#1a3a5c; background:#f8f9fb; }
+.tab-btn.active { color:#1a3a5c; border-bottom-color:#1a3a5c; }
+.tab-btn .tab-badge {
+  display:inline-block; background:#e53e3e; color:#fff;
+  font-size:9px; padding:1px 5px; border-radius:8px; margin-left:3px; font-weight:700;
+}
+.page { display:none; }
+.page.active { display:flex; }
 
-/* ── ADD PANEL ── */
-.add-panel{display:none;background:var(--card);border:1.5px solid var(--bdr2);border-radius:var(--r16);padding:20px;margin-bottom:16px;box-shadow:var(--sh2);}
-.add-panel.open{display:block;}
-.ap-title{font-size:15px;font-weight:700;margin-bottom:14px;}
-.form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px;}
-.fg{display:flex;flex-direction:column;gap:4px;}
-.fg.full{grid-column:1/-1;}
-.fg label{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;font-weight:700;}
-.fg input,.fg select,.fg textarea{padding:8px 11px;font-size:13px;border:1.5px solid var(--bdr);border-radius:var(--r8);background:var(--card2);color:var(--t1);font-family:var(--font);width:100%;}
-.fg input:focus,.fg select:focus{outline:none;border-color:var(--t1);}
-.step-row{display:flex;gap:6px;margin-bottom:5px;align-items:center;}
-.step-row input{flex:1;padding:7px 10px;font-size:13px;border:1.5px solid var(--bdr);border-radius:var(--r8);background:var(--card2);color:var(--t1);font-family:var(--font);}
-.step-row input:focus{outline:none;border-color:var(--t1);}
-.step-rm{width:26px;height:26px;border:1.5px solid var(--bdr);border-radius:6px;background:none;cursor:pointer;font-size:14px;color:var(--t3);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.step-rm:hover{background:var(--err-bg);color:var(--err-t);}
-.form-actions{display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:4px;}
+/* 마스터 페이지 레이아웃 */
+.master-page { flex-direction:column; height:calc(100vh - 54px - 43px - 43px); overflow:hidden; }
+.master-toolbar {
+  background:#fff; border-bottom:1px solid #dde3ea;
+  padding:12px 20px; display:flex; align-items:center; gap:10px; flex-shrink:0;
+}
+.master-content { flex:1; overflow:auto; padding:16px 20px; background:#f5f5f5; }
 
-/* ── BUTTONS ── */
-.btn{padding:9px 18px;border-radius:var(--r8);font-size:13px;cursor:pointer;border:1.5px solid var(--bdr2);font-family:var(--font);font-weight:500;transition:all .1s;white-space:nowrap;}
-.btn-primary{background:var(--t1);color:#fff;border-color:var(--t1);}
-.btn-primary:hover{background:#3F3F46;}
-.btn-ghost{background:var(--card);color:var(--t2);}
-.btn-ghost:hover{background:#F4F4F5;color:var(--t1);}
-.btn-gcal{background:#EFF6FF;color:var(--inf-t);border-color:#BFDBFE;}
-.btn-gcal:hover{background:#DBEAFE;}
-.btn-text{background:none;border:none;font-size:12px;color:var(--t2);padding:5px 8px;cursor:pointer;border-radius:6px;font-family:var(--font);}
-.btn-text:hover{background:#F4F4F5;color:var(--t1);}
-.btn-text.danger{color:var(--err-t);}
-.btn-text.danger:hover{background:var(--err-bg);}
+/* 마스터 입력 폼 */
+.master-form-card {
+  background:#fff; border:1px solid #dde3ea; border-radius:8px;
+  padding:16px; margin-bottom:16px; box-shadow:0 1px 3px rgba(0,0,0,.05);
+}
+.master-form-title {
+  font-size:12px; font-weight:700; color:#1a3a5c; margin-bottom:12px;
+  padding-bottom:10px; border-bottom:1px solid #eef0f3;
+  display:flex; align-items:center; gap:6px;
+}
+.master-form-grid {
+  display:grid;
+  grid-template-columns: 160px 80px 90px 120px 1fr 70px 120px 1fr;
+  gap:8px; margin-bottom:10px; align-items:end;
+}
+.master-form-grid .fg { display:flex; flex-direction:column; gap:4px; }
+.master-form-grid .fg label {
+  font-size:10px; font-weight:600; color:#666;
+  text-transform:uppercase; letter-spacing:.3px;
+}
+.master-form-grid .fg input,
+.master-form-grid .fg select {
+  border:1px solid #dde3ea; border-radius:5px; color:#222;
+  padding:6px 9px; font-size:12px; font-family:'Noto Sans KR',sans-serif;
+  transition:border .15s; width:100%; background:#fff;
+}
+.master-form-grid .fg input:focus,
+.master-form-grid .fg select:focus {
+  outline:none; border-color:#1a3a5c; box-shadow:0 0 0 2px rgba(26,58,92,.08);
+}
+.master-remark-row {
+  display:flex; gap:8px; align-items:flex-end; margin-bottom:10px;
+}
+.master-remark-row .fg { flex:1; display:flex; flex-direction:column; gap:4px; }
+.master-remark-row .fg label { font-size:10px; font-weight:600; color:#666; text-transform:uppercase; }
+.master-remark-row .fg input {
+  border:1px solid #dde3ea; border-radius:5px; color:#222;
+  padding:6px 9px; font-size:12px; font-family:'Noto Sans KR',sans-serif;
+  width:100%;
+}
+.master-remark-row .fg input:focus {
+  outline:none; border-color:#1a3a5c; box-shadow:0 0 0 2px rgba(26,58,92,.08);
+}
 
-/* ── TASK CARD ── */
-.tcard{background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r12);margin-bottom:8px;overflow:hidden;box-shadow:var(--sh);transition:border-color .1s,box-shadow .1s;cursor:pointer;}
-.tcard:hover{border-color:var(--bdr2);box-shadow:var(--sh2);}
-.tcard.pri-긴급{border-left:3px solid var(--err-t);}
-.tcard.pri-중요{border-left:3px solid var(--gold);}
-.tcard.drag-over-top{border-top:2.5px solid var(--t1);}
-.tcard.drag-over-bot{border-bottom:2.5px solid var(--t1);}
-.tcard.dragging{opacity:.35;border-style:dashed;}
-.tc-top{padding:14px 16px;display:flex;align-items:flex-start;gap:8px;}
-.tc-drag-handle{display:none;flex-direction:column;gap:3px;cursor:grab;opacity:0;transition:opacity .1s;padding-top:3px;flex-shrink:0;}
-.tc-drag-handle span{display:block;width:12px;height:1.5px;background:var(--t3);border-radius:1px;}
-.tcard:hover .tc-drag-handle{opacity:.35;}
-.tc-drag-handle:hover{opacity:.8!important;}
-.sort-mode .tc-drag-handle{display:flex;}
-.tc-body-wrap{flex:1;min-width:0;}
-.tc-row1{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px;}
-.tc-title{font-size:14px;font-weight:500;flex:1;min-width:100px;color:var(--t1);}
-.tc-row2{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;}
-.tc-meta{font-size:12px;color:var(--t3);display:flex;gap:12px;flex-wrap:wrap;}
-.tc-chevron{font-size:11px;color:var(--t3);flex-shrink:0;}
-.tc-prog{height:2px;background:var(--bdr);border-radius:2px;margin-top:9px;overflow:hidden;}
-.tc-prog-bar{height:100%;background:var(--t1);border-radius:2px;transition:width .3s;}
-/* expanded body */
-.tc-detail{display:none;border-top:1.5px solid var(--bdr);padding:14px 16px;background:var(--card2);}
-.tc-detail.open{display:block;}
-.tc-memo-box{font-size:12px;color:var(--t2);background:var(--card);padding:9px 12px;border-radius:var(--r8);margin-bottom:12px;border-left:3px solid var(--bdr2);}
-.tc-steps-label{font-size:11px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
-.tc-step{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bdr);}
-.tc-step:last-child{border-bottom:none;}
-.tc-step input[type=checkbox]{width:15px;height:15px;accent-color:var(--t1);cursor:pointer;flex-shrink:0;}
-.tc-step label{font-size:13px;color:var(--t1);flex:1;cursor:pointer;}
-.tc-step label.done{color:var(--t3);text-decoration:line-through;}
-.tc-actions{display:flex;gap:4px;margin-top:12px;flex-wrap:wrap;}
+/* 마스터 테이블 */
+.master-tbl-card {
+  background:#fff; border:1px solid #dde3ea; border-radius:8px;
+  overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.05);
+}
+.master-tbl-header {
+  padding:12px 16px; border-bottom:1px solid #dde3ea;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.master-tbl-header h3 { font-size:13px; font-weight:700; color:#1a3a5c; }
+.master-search-input {
+  border:1px solid #dde3ea; border-radius:5px; padding:5px 10px;
+  font-size:12px; width:220px; font-family:'Noto Sans KR',sans-serif;
+}
+.master-search-input:focus { outline:none; border-color:#1a3a5c; }
+.master-tbl-wrap { overflow-x:auto; max-height:calc(100vh - 380px); overflow-y:auto; }
+.master-tbl-wrap table { width:100%; border-collapse:collapse; font-size:12px; }
+.master-tbl-wrap thead th {
+  background:#f0f4f8; color:#333; font-size:10px; font-weight:700;
+  text-transform:uppercase; letter-spacing:.5px; padding:8px 10px;
+  text-align:left; border:1px solid #d0d7de; white-space:nowrap;
+  position:sticky; top:0; z-index:10;
+}
+.master-tbl-wrap tbody tr { border-bottom:1px solid #e8ecf0; }
+.master-tbl-wrap tbody tr:hover { background:#f8fbff; }
+.master-tbl-wrap tbody tr.editing { background:#fffbeb !important; }
+.master-tbl-wrap tbody td {
+  padding:7px 10px; border:1px solid #e8ecf0; font-size:12px; vertical-align:middle;
+}
+.master-tbl-wrap tbody td.nocode { color:#e53e3e; font-size:10px; text-align:center; }
 
-/* edit form inside card */
-.tc-edit-form{display:none;border-top:1.5px solid var(--bdr);padding:14px 16px;background:var(--card2);}
-.tc-edit-form.open{display:block;}
+/* 인라인 편집 */
+.edit-input {
+  border:1px solid #1a3a5c; border-radius:4px; padding:4px 7px;
+  font-size:12px; font-family:'Noto Sans KR',sans-serif;
+  background:#fff; width:100%; min-width:60px;
+}
+.edit-input:focus { outline:none; box-shadow:0 0 0 2px rgba(26,58,92,.1); }
+.edit-select {
+  border:1px solid #1a3a5c; border-radius:4px; padding:4px 7px;
+  font-size:12px; font-family:'Noto Sans KR',sans-serif; background:#fff;
+}
+.remark-cell {
+  color:#555; font-style:italic; font-size:11px;
+  max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.remark-cell.empty { color:#ccc; }
 
-/* badges */
-.badge{font-size:11px;padding:3px 10px;border-radius:99px;font-weight:500;display:inline-block;white-space:nowrap;}
-.sta-대기{background:#F4F4F5;color:#52525B;}
-.sta-진행중{background:var(--inf-bg);color:var(--inf-t);}
-.sta-완료{background:var(--ok-bg);color:var(--ok-t);}
-.sta-지연{background:var(--err-bg);color:var(--err-t);}
-.dday{font-size:11px;padding:3px 10px;border-radius:99px;font-weight:700;white-space:nowrap;}
+/* 마스터 cat 배지 */
+.mcat { display:inline-block; padding:1px 7px; border-radius:3px; font-size:10px; font-weight:700; white-space:nowrap; }
+.mcat-식재    { background:#e6f7ee; color:#15803d; border:1px solid #bbf7d0; }
+.mcat-서초주류 { background:#fef9c3; color:#854d0e; border:1px solid #fde68a; }
+.mcat-펍      { background:#fee2e2; color:#b91c1c; border:1px solid #fecaca; }
+.mcat-웰니스  { background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; }
+.mcat-네스프레소 { background:#f3e8ff; color:#6b21a8; border:1px solid #e9d5ff; }
+.mcat-콜라보  { background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; }
 
-/* ── CALENDAR ── */
-.cal-nav{display:flex;align-items:center;gap:12px;margin-bottom:18px;}
-.cal-title{font-size:18px;font-weight:700;min-width:160px;}
-.cal-btn{padding:7px 14px;font-size:13px;border:1.5px solid var(--bdr);border-radius:var(--r8);background:var(--card);cursor:pointer;font-family:var(--font);font-weight:500;box-shadow:var(--sh);}
-.cal-btn:hover{background:#F4F4F5;}
-.cal-grid{border:1.5px solid var(--bdr);border-radius:var(--r12);overflow:hidden;box-shadow:var(--sh);}
-.cal-head{display:grid;grid-template-columns:repeat(7,1fr);background:var(--card2);border-bottom:1.5px solid var(--bdr);}
-.cal-head-cell{padding:10px 0;text-align:center;font-size:11px;color:var(--t3);font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
-.cal-head-cell:first-child{color:var(--err-t);}
-.cal-head-cell:last-child{color:var(--inf-t);}
-.cal-body{display:grid;grid-template-columns:repeat(7,1fr);}
-.cal-cell{min-height:110px;padding:8px;border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr);background:var(--card);}
-.cal-cell:nth-child(7n){border-right:none;}
-.cal-cell.other{background:var(--card2);}
-.cal-cell.today{background:#FEFCE8;}
-.cal-dn{font-size:13px;font-weight:600;color:var(--t2);margin-bottom:5px;}
-.cal-cell.today .cal-dn{background:var(--t1);color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-weight:700;}
-.cal-cell.other .cal-dn{color:var(--t3);}
-.cal-cell:nth-child(7n+1) .cal-dn{color:var(--err-t);}
-.cal-cell:nth-child(7n) .cal-dn{color:var(--inf-t);}
-.cal-ev{font-size:11px;padding:2px 7px;border-radius:99px;margin-bottom:2px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;line-height:1.7;}
-.cal-ev:hover{opacity:.75;}
-.cal-more{font-size:11px;color:var(--t3);padding:1px 4px;cursor:pointer;}
 
-/* ── SETTINGS OVERLAY ── */
-.ov-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;}
-.ov-bg.open{display:flex;align-items:flex-start;justify-content:center;padding:24px 16px 40px;overflow-y:auto;}
-.ov-box{background:var(--card);border:1.5px solid var(--bdr);border-radius:var(--r16);width:100%;max-width:780px;box-shadow:0 24px 64px rgba(0,0,0,.18);}
-.ov-head{padding:18px 24px;border-bottom:1.5px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;}
-.ov-title{font-size:15px;font-weight:700;}
-.ov-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--t3);padding:2px 6px;border-radius:4px;line-height:1;}
-.ov-close:hover{background:#F4F4F5;color:var(--t1);}
-.ov-body{padding:22px 24px 26px;}
-.set-cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;}
-.set-col-title{font-size:10.5px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-bottom:7px;border-bottom:1.5px solid var(--bdr);}
-.set-row{display:flex;align-items:center;gap:6px;padding:7px 4px;border-bottom:1px solid var(--bdr);}
-.set-row:last-of-type{border-bottom:none;}
-.set-swatch{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
-.set-name{flex:1;font-size:13px;color:var(--t1);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.set-mv-wrap{display:flex;flex-direction:column;gap:1px;flex-shrink:0;}
-.set-mv{background:none;border:none;cursor:pointer;color:var(--t3);font-size:11px;line-height:1;padding:1px 3px;border-radius:2px;}
-.set-mv:hover{background:#F4F4F5;color:var(--t1);}
-.set-del{background:none;border:none;color:var(--t3);cursor:pointer;font-size:15px;padding:2px 5px;border-radius:3px;flex-shrink:0;line-height:1;}
-.set-del:hover{background:var(--err-bg);color:var(--err-t);}
-.set-add{display:flex;gap:7px;margin-top:10px;}
-.set-inp{flex:1;min-width:0;padding:8px 10px;font-size:13px;border:1.5px solid var(--bdr);border-radius:var(--r8);font-family:var(--font);color:var(--t1);background:var(--card2);}
-.set-inp:focus{outline:none;border-color:var(--t1);}
-.set-add-btn{padding:8px 14px;font-size:13px;border:1.5px solid var(--bdr2);border-radius:var(--r8);background:var(--card);cursor:pointer;font-family:var(--font);font-weight:500;white-space:nowrap;}
-.set-add-btn:hover{background:#F4F4F5;}
-.color-swatches{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;}
-.csw{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2.5px solid transparent;}
-.csw.sel{border-color:var(--t1);}
+/* ── 필터 바 ── */
+.filter-bar {
+  background:#f8f9fb; border-bottom:2px solid #dde3ea;
+  padding:8px 16px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+}
+.filter-bar label {
+  font-size:10px; font-weight:700; color:#666; text-transform:uppercase; letter-spacing:.3px;
+  white-space:nowrap;
+}
+.filter-select, .filter-input {
+  border:1px solid #dde3ea; border-radius:5px; background:#fff;
+  color:#222; padding:4px 8px; font-size:12px;
+  font-family:'Noto Sans KR',sans-serif; transition:border .15s;
+}
+.filter-select:focus, .filter-input:focus {
+  outline:none; border-color:#1a3a5c; box-shadow:0 0 0 2px rgba(26,58,92,.08);
+}
+.filter-select { min-width:90px; }
+.filter-input  { width:130px; }
+.filter-divider { width:1px; height:20px; background:#dde3ea; flex-shrink:0; }
+.filter-reset {
+  border:1px solid #dde3ea; border-radius:5px; background:#fff;
+  color:#888; padding:4px 10px; font-size:11px; cursor:pointer;
+  font-family:'Noto Sans KR',sans-serif; transition:all .15s;
+}
+.filter-reset:hover { background:#fee2e2; color:#dc2626; border-color:#fecaca; }
+.filter-cnt {
+  font-size:11px; color:#2563eb; background:#eff6ff;
+  padding:2px 9px; border-radius:10px; font-weight:600;
+  border:1px solid #bfdbfe; white-space:nowrap; margin-left:auto;
+}
 
-/* ── MISC ── */
-.empty-msg{text-align:center;padding:60px 20px;color:var(--t3);font-size:14px;}
-.toast{position:fixed;bottom:58px;right:22px;background:var(--t1);color:#fff;padding:11px 18px;border-radius:var(--r12);font-size:13px;z-index:9999;opacity:0;transition:opacity .2s;pointer-events:none;max-width:320px;box-shadow:var(--sh2);}
-.toast.show{opacity:1;}
+
+/* ── 합계 행 ── */
+.sum-row td {
+  background:#f0f4f8;
+  border-top:2px solid #1a3a5c !important;
+  border-bottom:none;
+  padding:9px 12px;
+  font-size:12px;
+}
+.sum-row .sum-label {
+  font-weight:700; color:#333; text-align:right;
+}
+.sum-row .sum-value {
+  font-weight:700; color:#1a3a5c;
+  font-family:'JetBrains Mono',monospace;
+  text-align:right; font-size:13px;
+}
+.sum-row .sum-cnt {
+  font-size:11px; color:#888; font-family:monospace; text-align:left;
+}
+
+</style>
+
+<!-- 추가 CSS -->
+<style>
+/* ── 상단 탭 (페이지 전환) ── */
+.page-tab-bar {
+  background:#1a3a5c; padding:0 20px; display:flex; gap:2px;
+  height:40px; align-items:flex-end;
+}
+.page-tab-btn {
+  padding:8px 18px; font-size:12px; font-weight:600;
+  color:rgba(255,255,255,.6); border:none; background:none; cursor:pointer;
+  border-radius:6px 6px 0 0; transition:all .15s; white-space:nowrap;
+}
+.page-tab-btn:hover { color:#fff; background:rgba(255,255,255,.1); }
+.page-tab-btn.active { color:#1a3a5c; background:#f5f5f5; }
+
+/* ── 페이지 전환 ── */
+.app-page { display:none; flex-direction:column; }
+.app-page.active { display:flex; }
+
+/* ── 마스터 관리 전용 ── */
+.master-toolbar {
+  background:#fff; border-bottom:1px solid #dde3ea;
+  padding:10px 20px; display:flex; align-items:center; gap:10px; flex-shrink:0;
+}
+.master-scroll { flex:1; overflow-y:auto; padding:16px 20px; background:#f5f5f5; }
+
+.mf-card {
+  background:#fff; border:1px solid #dde3ea; border-radius:8px;
+  padding:16px; margin-bottom:16px; box-shadow:0 1px 3px rgba(0,0,0,.05);
+}
+.mf-card-title {
+  font-size:12px; font-weight:700; color:#1a3a5c; margin-bottom:12px;
+  padding-bottom:10px; border-bottom:1px solid #eef0f3;
+}
+.mf-grid {
+  display:grid;
+  grid-template-columns: 150px 75px 95px 110px 1fr 65px 110px;
+  gap:8px; margin-bottom:10px;
+}
+.mf-grid .fg, .mf-remark .fg {
+  display:flex; flex-direction:column; gap:4px;
+}
+.mf-grid .fg label, .mf-remark .fg label {
+  font-size:10px; font-weight:600; color:#666; text-transform:uppercase;
+}
+.mf-grid .fg input, .mf-grid .fg select,
+.mf-remark .fg input {
+  border:1px solid #dde3ea; border-radius:5px; color:#222;
+  padding:6px 9px; font-size:12px; font-family:'Noto Sans KR',sans-serif;
+  transition:border .15s; width:100%; background:#fff;
+}
+.mf-grid .fg input:focus, .mf-grid .fg select:focus,
+.mf-remark .fg input:focus {
+  outline:none; border-color:#1a3a5c; box-shadow:0 0 0 2px rgba(26,58,92,.08);
+}
+.mf-grid .fg input[readonly] { background:#f8f9fb; color:#999; }
+.mf-remark { display:flex; gap:8px; align-items:flex-end; }
+.mf-remark .fg { flex:1; }
+
+/* 마스터 테이블 */
+.mt-card {
+  background:#fff; border:1px solid #dde3ea; border-radius:8px;
+  overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.05);
+}
+.mt-header {
+  padding:10px 16px; border-bottom:1px solid #dde3ea;
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;
+}
+.mt-header h3 { font-size:13px; font-weight:700; color:#1a3a5c; }
+.mt-search {
+  border:1px solid #dde3ea; border-radius:5px; padding:5px 10px;
+  font-size:12px; width:200px; font-family:'Noto Sans KR',sans-serif;
+}
+.mt-search:focus { outline:none; border-color:#1a3a5c; }
+.mt-body { overflow-x:auto; max-height:calc(100vh - 340px); overflow-y:auto; }
+.mt-body table { width:100%; border-collapse:collapse; }
+.mt-body thead th {
+  background:#f0f4f8; color:#333; font-size:10px; font-weight:700;
+  text-transform:uppercase; padding:8px 10px; text-align:left;
+  border:1px solid #d0d7de; white-space:nowrap;
+  position:sticky; top:0; z-index:5;
+}
+.mt-body tbody tr { border-bottom:1px solid #e8ecf0; transition:background .1s; }
+.mt-body tbody tr:hover { background:#f8fbff; }
+.mt-body tbody tr.editing { background:#fffbeb !important; outline:2px solid #f59e0b; }
+.mt-body tbody td { padding:7px 10px; border:1px solid #e8ecf0; font-size:12px; vertical-align:middle; }
+.edit-input {
+  border:1px solid #1a3a5c; border-radius:4px; padding:4px 7px;
+  font-size:12px; font-family:'Noto Sans KR',sans-serif; background:#fff; width:100%;
+}
+.edit-input:focus { outline:none; box-shadow:0 0 0 2px rgba(26,58,92,.1); }
+.edit-sel {
+  border:1px solid #1a3a5c; border-radius:4px; padding:4px 6px;
+  font-size:12px; font-family:'Noto Sans KR',sans-serif; background:#fff;
+}
+.remark-txt {
+  color:#555; font-size:11px; font-style:italic;
+  max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.remark-empty { color:#ccc; font-size:11px; }
+
+/* 분류 배지 */
+.mcat { display:inline-block; padding:1px 7px; border-radius:3px; font-size:10px; font-weight:700; white-space:nowrap; }
+.mcat-식재     { background:#e6f7ee; color:#15803d; border:1px solid #bbf7d0; }
+.mcat-서초주류 { background:#fef9c3; color:#854d0e; border:1px solid #fde68a; }
+.mcat-펍       { background:#fee2e2; color:#b91c1c; border:1px solid #fecaca; }
+.mcat-웰니스   { background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; }
+.mcat-네스프레소{ background:#f3e8ff; color:#6b21a8; border:1px solid #e9d5ff; }
+.mcat-콜라보   { background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; }
+
+/* ── 필터 바 ── */
+.filter-bar {
+  background:#f8f9fb; border-bottom:2px solid #dde3ea;
+  padding:8px 16px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+}
+.filter-bar label {
+  font-size:10px; font-weight:700; color:#666; text-transform:uppercase; letter-spacing:.3px;
+  white-space:nowrap;
+}
+.filter-select, .filter-input {
+  border:1px solid #dde3ea; border-radius:5px; background:#fff;
+  color:#222; padding:4px 8px; font-size:12px;
+  font-family:'Noto Sans KR',sans-serif; transition:border .15s;
+}
+.filter-select:focus, .filter-input:focus {
+  outline:none; border-color:#1a3a5c; box-shadow:0 0 0 2px rgba(26,58,92,.08);
+}
+.filter-select { min-width:90px; }
+.filter-input  { width:130px; }
+.filter-divider { width:1px; height:20px; background:#dde3ea; flex-shrink:0; }
+.filter-reset {
+  border:1px solid #dde3ea; border-radius:5px; background:#fff;
+  color:#888; padding:4px 10px; font-size:11px; cursor:pointer;
+  font-family:'Noto Sans KR',sans-serif; transition:all .15s;
+}
+.filter-reset:hover { background:#fee2e2; color:#dc2626; border-color:#fecaca; }
+.filter-cnt {
+  font-size:11px; color:#2563eb; background:#eff6ff;
+  padding:2px 9px; border-radius:10px; font-weight:600;
+  border:1px solid #bfdbfe; white-space:nowrap; margin-left:auto;
+}
+
+
+/* ── 합계 행 ── */
+.sum-row td {
+  background:#f0f4f8;
+  border-top:2px solid #1a3a5c !important;
+  border-bottom:none;
+  padding:9px 12px;
+  font-size:12px;
+}
+.sum-row .sum-label {
+  font-weight:700; color:#333; text-align:right;
+}
+.sum-row .sum-value {
+  font-weight:700; color:#1a3a5c;
+  font-family:'JetBrains Mono',monospace;
+  text-align:right; font-size:13px;
+}
+.sum-row .sum-cnt {
+  font-size:11px; color:#888; font-family:monospace; text-align:left;
+}
+
 </style>
 </head>
+
 <body>
 
-<div id="fb-pill" style="background: rgb(240, 253, 244); color: rgb(22, 101, 52); border-color: rgb(187, 247, 208);">🟢 실시간 연결됨</div>
-<div class="toast" id="toast"></div>
-
-<!-- Settings Overlay -->
-<div class="ov-bg" id="ov-bg">
-  <div class="ov-box">
-    <div class="ov-head">
-      <div class="ov-title">카테고리 · 우선순위 · 담당자 설정</div>
-      <button class="ov-close" onclick="closeSettings()">×</button>
-    </div>
-    <div class="ov-body"><div class="set-cols" id="set-body"></div></div>
+<!-- ── 헤더 ── -->
+<div class="header">
+  <div class="header-logo">
+    <span class="icon">☕</span>
+    <span class="title">크래프톤 서초카페 현지구매 관리대장</span>
+    <span class="sub">2026</span>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-excel" onclick="exportXLSX()">📊 Excel 내보내기</button>
+    <button class="btn btn-secondary" onclick="exportCSV()">📥 CSV</button>
+    <button class="btn btn-secondary" onclick="backupAll()">💾 전체백업</button>
+    <button class="btn btn-secondary" onclick="importData()">📤 가져오기</button>
+    <button class="btn btn-danger btn-sm" onclick="clearMonth()" title="이번달 초기화">🗑</button>
   </div>
 </div>
 
-<!-- Sidebar -->
-<nav class="sb">
-  <div class="sb-head">
-    <div class="sb-logo">KRAFTON</div>
-    <div class="sb-logo-sub">Brand &amp; Operations</div>
-    <div class="sb-rule"></div>
-    <div class="sb-tag">☕ CAFE 업무 관리</div>
-  </div>
-  <div class="sb-date-bar" id="sb-date">2026년 4월 21일 (화)</div>
+<!-- ── 페이지 탭 ── -->
+<div class="page-tab-bar">
+  <button class="page-tab-btn active" id="ptbPurchase" onclick="switchPage('purchase')">📋 현지구매 입력</button>
+  <button class="page-tab-btn" id="ptbMaster" onclick="switchPage('master')">🗂️ 마스터 관리</button>
+</div>
 
-  <div class="sb-sec">상태</div>
-  <div class="sb-list">
-    <button class="sb-btn on" data-sf="all" onclick="setStatusFilter(&#39;all&#39;)">
-      <span class="sb-l"><span>전체</span></span><span class="cnt" id="cnt-all">3</span>
-    </button>
-    <button class="sb-btn" data-sf="진행중" onclick="setStatusFilter(&#39;진행중&#39;)">
-      <span class="sb-l"><span class="sb-dot" style="background:#3B82F6"></span><span>진행 중</span></span><span class="cnt" id="cnt-진행중">1</span>
-    </button>
-    <button class="sb-btn" data-sf="대기" onclick="setStatusFilter(&#39;대기&#39;)">
-      <span class="sb-l"><span class="sb-dot" style="background:#A1A1AA"></span><span>대기</span></span><span class="cnt" id="cnt-대기">2</span>
-    </button>
-    <button class="sb-btn" data-sf="지연" onclick="setStatusFilter(&#39;지연&#39;)">
-      <span class="sb-l"><span class="sb-dot" style="background:#EF4444"></span><span>지연</span></span><span class="cnt" id="cnt-지연">0</span>
-    </button>
-    <button class="sb-btn" data-sf="완료" onclick="setStatusFilter(&#39;완료&#39;)">
-      <span class="sb-l"><span class="sb-dot" style="background:#22C55E"></span><span>완료</span></span><span class="cnt" id="cnt-완료">0</span>
-    </button>
-  </div>
+<!-- ══ 현지구매 입력 페이지 ══ -->
+<div class="app-page active" id="appPurchase" style="height:calc(100vh - 54px - 40px)">
+  <div class="month-tabs" id="monthTabs"></div>
+  <div class="main" style="height:calc(100% - 42px)">
 
-  <div class="sb-hr"></div>
-  <div class="sb-sec">카테고리</div>
-  <div class="sb-list" id="cat-list"><button class="sb-btn cat-on" onclick="setCatFilter(&#39;all&#39;)"><span class="sb-l">전체</span></button><button class="sb-btn" onclick="setCatFilter(&#39;운영&#39;)"><span class="sb-l"><span class="sb-dot" style="background:#15803D"></span>운영</span></button><button class="sb-btn" onclick="setCatFilter(&#39;발주&#39;)"><span class="sb-l"><span class="sb-dot" style="background:#92400E"></span>발주</span></button><button class="sb-btn" onclick="setCatFilter(&#39;시설&#39;)"><span class="sb-l"><span class="sb-dot" style="background:#6D28D9"></span>시설</span></button><button class="sb-btn" onclick="setCatFilter(&#39;이벤트&#39;)"><span class="sb-l"><span class="sb-dot" style="background:#BE123C"></span>이벤트</span></button><button class="sb-btn" onclick="setCatFilter(&#39;기타&#39;)"><span class="sb-l"><span class="sb-dot" style="background:#52525B"></span>기타</span></button><button class="sb-btn" onclick="setCatFilter(&#39;신제품&#39;)"><span class="sb-l"><span class="sb-dot" style="background:#1D4ED8"></span>신제품</span></button></div>
-
-  <div class="sb-foot">
-    <button class="sb-foot-btn" onclick="openSettings()">⚙ 카테고리 · 우선순위 · 담당자</button>
-  </div>
-</nav>
-
-<!-- Main -->
-<div class="main">
-  <div class="topbar">
-    <div class="tb-info">
-      <div class="tb-title">업무 관리</div>
-      <div class="tb-sub">KRAFTON CAFE 사내카페 운영팀</div>
-    </div>
-    <div class="tb-btns">
-      <button class="btn btn-ghost" onclick="openSettings()">⚙ 설정</button>
-      <button class="btn btn-primary" onclick="toggleAddPanel()">+ 새 업무</button>
-    </div>
-  </div>
-
-  <div class="tabs">
-    <button class="tab on" data-tab="list" onclick="switchTab(&#39;list&#39;)">목록</button>
-    <button class="tab" data-tab="cal" onclick="switchTab(&#39;cal&#39;)">달력</button>
-  </div>
-
-  <!-- LIST VIEW -->
-  <div class="view on" id="view-list">
-    <div class="toolbar">
-      <input class="srch" id="srch" placeholder="🔍 업무명 검색..." oninput="renderList()">
-      <select class="fsel" id="fown" onchange="renderList()"><option value="">전체 담당자</option><option>정만석</option><option>바리스타팀</option><option>김기사</option><option>시설팀</option></select>
-      <select class="fsel" id="fsort" onchange="renderList()">
-        <option value="manual">수동 정렬</option>
-        <option value="dday">마감일순</option>
-        <option value="pri">우선순위순</option>
-        <option value="sta">상태순</option>
-      </select>
-    </div>
-    <div class="drag-hint show" id="drag-hint">☰ 카드를 드래그해서 순서를 변경할 수 있어요.</div>
-
-    <!-- Add Panel -->
-    <div class="add-panel" id="add-panel">
-      <div class="ap-title">새 업무 등록</div>
-      <div class="form-grid">
-        <div class="fg full"><label>업무명 *</label><input id="a-title" placeholder="업무 제목"></div>
-        <div class="fg"><label>카테고리</label><select id="a-cat"></select></div>
-        <div class="fg"><label>우선순위</label><select id="a-pri"></select></div>
-        <div class="fg"><label>상태</label><select id="a-sta"><option>대기</option><option>진행중</option></select></div>
-        <div class="fg"><label>담당자</label><select id="a-own"></select></div>
-        <div class="fg"><label>시작일</label><input id="a-ds" type="date"></div>
-        <div class="fg"><label>종료일</label><input id="a-de" type="date"></div>
-        <div class="fg full"><label>메모</label><input id="a-note" placeholder="간단한 메모 (선택)"></div>
-        <div class="fg full">
-          <label>진행 단계</label>
-          <div id="a-steps"></div>
-          <button class="btn-text" style="margin-top:6px;" onclick="addStepInput(&#39;a-steps&#39;)">+ 단계 추가</button>
+    <!-- 사이드바 -->
+    <div class="sidebar">
+      <div class="sb-section">
+        <h3>📊 월간 현황</h3>
+        <div class="stat-row">
+          <div class="stat-card"><div class="lbl">건수</div><div class="val" id="sc">0</div></div>
+          <div class="stat-card"><div class="lbl">미처리</div><div class="val" id="si" style="color:#dc2626">0</div></div>
+        </div>
+        <div class="stat-card" style="margin-top:6px">
+          <div class="lbl">총 구매금액</div>
+          <div class="val sm" id="sa">₩ 0</div>
         </div>
       </div>
-      <div class="form-actions">
-        <button class="btn btn-gcal" onclick="gcalFromForm()">📅 구글 캘린더</button>
-        <button class="btn btn-ghost" onclick="toggleAddPanel()">취소</button>
-        <button class="btn btn-primary" onclick="submitTask()">등록</button>
+      <div class="sb-section">
+        <h3>✅ 서류 현황</h3>
+        <div class="chk-list" id="checkSummary"></div>
+      </div>
+      <div class="sb-section" style="flex:1;overflow-y:auto">
+        <h3>🏪 거래처별</h3>
+        <div id="merchantSummary"></div>
       </div>
     </div>
 
-    <div id="task-list" class="sort-mode"><div class="tcard pri-긴급" id="card--OqjO7fxJZcy7N27WMvO" draggable="true"><div class="tc-top" onclick="toggleCard(&quot;-OqjO7fxJZcy7N27WMvO&quot;)"><div class="tc-drag-handle"><span></span><span></span><span></span><span></span></div><div class="tc-body-wrap"><div class="tc-row1"><span class="badge" style="background:#F0FDF4;color:#15803D">운영</span><span class="badge" style="background:#FEF2F2;color:#B91C1C">긴급</span><span class="badge sta-대기">대기</span><span class="tc-title">ㅇㄹㅇㅇㅇ</span><span class="dday" style="background:var(--err-bg);color:var(--err-t)">D-Day</span></div><div class="tc-row2"><div class="tc-meta"><span>👤 정만석</span><span>📅 2026/04/21</span></div><span class="tc-chevron">▼</span></div><div class="tc-prog"><div class="tc-prog-bar" style="width:0%"></div></div></div></div></div><div class="tcard pri-중요" id="card--Oq_i8ntQ5zhmGFe1xCS" draggable="true"><div class="tc-top" onclick="toggleCard(&quot;-Oq_i8ntQ5zhmGFe1xCS&quot;)"><div class="tc-drag-handle"><span></span><span></span><span></span><span></span></div><div class="tc-body-wrap"><div class="tc-row1"><span class="badge" style="background:#EFF6FF;color:#1D4ED8">신제품</span><span class="badge" style="background:#FFFBEB;color:#92400E">중요</span><span class="badge sta-진행중">진행중</span><span class="tc-title">VV 메뉴 출시 _ 볼드 재 검토</span><span class="dday" style="background:var(--err-bg);color:var(--err-t)">D+2 초과</span></div><div class="tc-row2"><div class="tc-meta"><span>👤 정만석</span><span>📅 2026/04/19</span></div><span class="tc-chevron">▼</span></div><div class="tc-prog"><div class="tc-prog-bar" style="width:0%"></div></div></div></div></div><div class="tcard pri-긴급" id="card--Oqk2tOPfanG91lA3Wwu" draggable="true"><div class="tc-top" onclick="toggleCard(&quot;-Oqk2tOPfanG91lA3Wwu&quot;)"><div class="tc-drag-handle"><span></span><span></span><span></span><span></span></div><div class="tc-body-wrap"><div class="tc-row1"><span class="badge" style="background:#F0FDF4;color:#15803D">운영</span><span class="badge" style="background:#FEF2F2;color:#B91C1C">긴급</span><span class="badge sta-대기">대기</span><span class="tc-title">ㄹㅇㄴㄹㄴㄹㅇㄴ</span><span class="dday" style="background:var(--err-bg);color:var(--err-t)">D-Day</span></div><div class="tc-row2"><div class="tc-meta"><span>👤 정만석</span><span>📅 2026/04/21</span></div><span class="tc-chevron">▼</span></div></div></div></div></div>
-  </div>
-
-  <!-- CALENDAR VIEW -->
-  <div class="view" id="view-cal">
-    <div style="background:var(--inf-bg);border:1.5px solid #BFDBFE;border-radius:var(--r8);padding:11px 16px;font-size:13px;color:var(--inf-t);margin-bottom:16px;display:flex;align-items:center;gap:8px;">
-      📅 업무 카드에서 <b>구글 캘린더</b> 버튼을 누르면 이벤트로 등록됩니다.
-    </div>
-    <div class="cal-nav">
-      <button class="cal-btn" onclick="calPrev()">‹</button>
-      <div class="cal-title" id="cal-title"></div>
-      <button class="cal-btn" onclick="calNext()">›</button>
-      <button class="cal-btn" style="margin-left:auto;" onclick="calToday()">오늘</button>
-    </div>
-    <div class="cal-grid">
-      <div class="cal-head">
-        <div class="cal-head-cell">일</div><div class="cal-head-cell">월</div><div class="cal-head-cell">화</div>
-        <div class="cal-head-cell">수</div><div class="cal-head-cell">목</div><div class="cal-head-cell">금</div><div class="cal-head-cell">토</div>
+    <!-- 콘텐츠 -->
+    <div class="content">
+      <div class="form-card">
+        <div class="form-title">➕ 구매 내역 입력</div>
+        <div class="form-grid">
+          <div class="fg"><label>입고일 *</label><input type="date" id="f_date"></div>
+          <div class="fg"><label>사이트 *</label>
+            <select id="f_site" onchange="onSiteChange()">
+              <option value="">선택</option>
+              <option value="크래프톤서초카페점 라운지">라운지</option>
+              <option value="크래프톤서초카페점 카페">카페</option>
+            </select>
+          </div>
+          <div class="fg"><label>구분</label><input type="text" id="f_gubun" readonly placeholder="자동"></div>
+          <div class="fg"><label>분류 *</label>
+            <select id="f_cat" onchange="onCatChange()"><option value="">선택</option></select>
+          </div>
+          <div class="fg"><label>품목 * (검색 가능)</label>
+            <div class="item-search-wrap">
+              <input type="text" id="f_item_search" class="item-search-input"
+                placeholder="품목명 입력 또는 선택..."
+                oninput="filterItems(this.value)"
+                onfocus="openDropdown()"
+                onblur="closeDropdown()"
+                autocomplete="off"
+                lang="ko"
+                style="ime-mode:active;">
+              <input type="hidden" id="f_item_code_key">
+              <div class="item-dropdown" id="itemDropdown"></div>
+            </div>
+          </div>
+          <div class="fg"><label>상품코드</label><input type="text" id="f_code" readonly placeholder="자동"></div>
+          <div class="fg"><label>단위</label><input type="text" id="f_unit" readonly placeholder="자동"></div>
+          <div class="fg"><label>총 입고량 *</label><input type="number" id="f_qty" min="1" placeholder="0" oninput="calcAmt()"></div>
+          <div class="fg"><label>공급단가</label><input type="number" id="f_price" placeholder="자동" oninput="calcAmt()"></div>
+          <div class="fg"><label>총 입고금액</label><input type="text" id="f_amt" readonly placeholder="자동계산"></div>
+        </div>
+        <div class="form-row">
+          <span style="font-size:11px;color:#aaa">사이트→분류→품목 선택 또는 품목 직접 검색</span>
+          <span style="flex:1"></span>
+          <button class="btn btn-secondary" onclick="resetForm()">↺ 초기화</button>
+          <button class="btn btn-primary" onclick="addRow()">✚ 추가</button>
+        </div>
       </div>
-      <div class="cal-body" id="cal-body"></div>
+
+      <div class="tbl-card">
+        <div class="tbl-header">
+          <h3 id="tblTitle">구매 내역</h3>
+          <div class="tbl-header-right">
+            <span class="tbl-cnt" id="rowCnt">0건</span>
+            <button class="btn btn-excel btn-sm" onclick="exportXLSX()">📊 Excel</button>
+          </div>
+        </div>
+  
+      <!-- 필터 바 -->
+      <div class="filter-bar" id="filterBar">
+        <label>입고일</label>
+        <input type="date" class="filter-input" id="flt_dateFrom" style="width:120px" onchange="applyFilter()" placeholder="시작">
+        <span style="font-size:11px;color:#aaa">~</span>
+        <input type="date" class="filter-input" id="flt_dateTo"   style="width:120px" onchange="applyFilter()" placeholder="종료">
+        <div class="filter-divider"></div>
+        <label>사이트</label>
+        <select class="filter-select" id="flt_site" onchange="applyFilter()">
+          <option value="">전체</option>
+          <option value="크래프톤서초카페점 라운지">라운지</option>
+          <option value="크래프톤서초카페점 카페">카페</option>
+        </select>
+        <div class="filter-divider"></div>
+        <label>분류</label>
+        <select class="filter-select" id="flt_cat" onchange="applyFilter()">
+          <option value="">전체</option>
+          <option value="식재">식재</option>
+          <option value="웰니스">웰니스</option>
+          <option value="서초주류">서초주류</option>
+          <option value="펍">펍</option>
+          <option value="네스프레소">네스프레소</option>
+          <option value="콜라보">콜라보</option>
+        </select>
+        <div class="filter-divider"></div>
+        <label>품목</label>
+        <input type="text" class="filter-input" id="flt_item" placeholder="품목명 검색" oninput="applyFilter()">
+        <button class="filter-reset" onclick="resetFilter()">✕ 초기화</button>
+        <span class="filter-cnt" id="filterCnt" style="display:none"></span>
+      </div>
+      <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:36px">순번</th>
+                <th style="width:100px">입고일</th>
+                <th style="min-width:170px" class="left">사이트</th>
+                <th style="width:60px">구분</th>
+                <th style="width:72px">분류</th>
+                <th style="width:90px">상품코드</th>
+                <th style="min-width:200px" class="left">품목</th>
+                <th style="width:44px">단위</th>
+                <th style="width:72px" class="right">총 입고량</th>
+                <th style="width:88px" class="right">공급단가</th>
+                <th style="width:100px" class="right">총 입고금액</th>
+                <th style="width:26px" class="center">지점</th>
+                <th style="width:56px">구분1</th>
+                <th style="width:70px">구분2</th>
+                <th style="width:26px" class="center">거래<br>내역서</th>
+                <th style="width:26px" class="center">세금<br>계산서</th>
+                <th style="width:26px" class="center">품의<br>작성</th>
+                <th style="width:26px" class="center">결재<br>완료</th>
+                <th style="width:26px" class="center">출고<br>처리</th>
+                <th style="width:36px">삭제</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+          <div id="emptyState" class="empty">
+            <div class="ico">📋</div>
+            <p>이번 달 구매 내역이 없습니다.<br>위 폼에서 추가해주세요.</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
+<!-- ══ 마스터 관리 페이지 ══ -->
+<div class="app-page" id="appMaster" style="height:calc(100vh - 54px - 40px)">
+  <div class="master-toolbar">
+    <span style="font-size:13px;font-weight:700;color:#1a3a5c">🗂️ 품목 마스터 관리</span>
+    <span id="masterCntBadge" style="font-size:11px;color:#2563eb;background:#eff6ff;padding:2px 9px;border-radius:10px;font-weight:600;border:1px solid #bfdbfe"></span>
+    <span style="flex:1"></span>
+    <button class="btn btn-secondary" style="font-size:11px" onclick="exportMasterJSON()">📥 JSON 내보내기</button>
+    <button class="btn btn-secondary" style="font-size:11px" onclick="importMasterJSON()">📤 JSON 가져오기</button>
+  </div>
+
+  <div class="master-scroll">
+    <!-- 신규 등록 폼 -->
+    <div class="mf-card">
+      <div class="mf-card-title">➕ 품목 신규 등록</div>
+      <div class="mf-grid">
+        <div class="fg">
+          <label>사이트 *</label>
+          <select id="mf_site" onchange="onMfSiteChange()">
+            <option value="">선택</option>
+            <option value="크래프톤서초카페점 라운지">라운지</option>
+            <option value="크래프톤서초카페점 카페">카페</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>구분</label>
+          <input type="text" id="mf_gubun" readonly placeholder="자동">
+        </div>
+        <div class="fg">
+          <label>분류 *</label>
+          <select id="mf_cat">
+            <option value="">선택</option>
+            <option value="식재">식재</option>
+            <option value="웰니스">웰니스</option>
+            <option value="서초주류">서초주류</option>
+            <option value="펍">펍</option>
+            <option value="네스프레소">네스프레소</option>
+            <option value="콜라보">콜라보</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>상품코드</label>
+          <input type="text" id="mf_code" placeholder="없으면 공란">
+        </div>
+        <div class="fg">
+          <label>품목명 *</label>
+          <input type="text" id="mf_item" placeholder="품목명 입력">
+        </div>
+        <div class="fg">
+          <label>단위</label>
+          <input type="text" id="mf_unit" placeholder="EA">
+        </div>
+        <div class="fg">
+          <label>공급단가</label>
+          <input type="number" id="mf_price" placeholder="0" step="0.01">
+        </div>
+      </div>
+      <div class="mf-remark">
+        <div class="fg">
+          <label>📌 현지구매 사전품의 / 비고</label>
+          <input type="text" id="mf_remark" placeholder="사전품의 내용, 구매 조건, 메모 등">
+        </div>
+        <button class="btn btn-primary" onclick="addMasterItem()" style="flex-shrink:0;height:32px">✚ 등록</button>
+        <button class="btn btn-secondary" onclick="resetMasterForm()" style="flex-shrink:0;height:32px">↺</button>
+      </div>
+    </div>
+
+    <!-- 마스터 테이블 -->
+    <div class="mt-card">
+      <div class="mt-header">
+        <h3>품목 목록</h3>
+        <input type="text" class="mt-search" placeholder="🔍 품목명 또는 코드 검색"
+          oninput="renderMasterTable(this.value)">
+      </div>
+      <div class="mt-body">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:36px">No</th>
+              <th style="width:80px">분류</th>
+              <th style="width:100px">상품코드</th>
+              <th style="min-width:200px">품목명</th>
+              <th style="width:55px">단위</th>
+              <th style="width:95px">공급단가</th>
+              <th style="min-width:200px">📌 사전품의 / 비고</th>
+              <th style="width:88px">작업</th>
+            </tr>
+          </thead>
+          <tbody id="masterTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
 <script>
-/* =====================================================
-   STATE
-   ===================================================== */
-var tasks    = [];   // {_key, id, title, cat, pri, status, owner, dateStart, dateEnd, note, steps, order}
-var fbLoaded = false; // Firebase에서 데이터를 한 번이라도 받은 후에만 renderList 허용
-var meta     = {
-  cats:   [{name:"운영",bg:"#ECFDF5",tc:"#065F46"},{name:"발주",bg:"#FFFBEB",tc:"#92400E"},
-            {name:"시설",bg:"#EEF2FF",tc:"#3730A3"},{name:"이벤트",bg:"#FFF1F2",tc:"#9F1239"},
-            {name:"기타",bg:"#F4F4F5",tc:"#3F3F46"}],
-  pris:   [{name:"긴급",bg:"#FEF2F2",tc:"#B91C1C"},{name:"중요",bg:"#FFFBEB",tc:"#92400E"},
-            {name:"일반",bg:"#EFF6FF",tc:"#1D4ED8"}],
-  owners: ["정만석","바리스타팀","김기사","시설팀"]
+// ══ 마스터 데이터 ════════════════════════════════════════════════════════════
+const MASTER = [{"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "135435", "item": "엠즈베이커스_프로마쥬클래식(6EA)", "unit": "EA", "price": 2950}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "287026", "item": "엠즈베이커스_밀크롤(6EA)", "unit": "EA", "price": 2200}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "489319", "item": "네이처티 우베 파우더 800g", "unit": "EA", "price": 13091}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "AW00128", "item": "모모스커피_콜드브루 원액 디카페인(1000ml)", "unit": "EA", "price": 21818}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "AW00387", "item": "커피리브레_콜롬비아 엘 타블론 디카페인 500g", "unit": "EA", "price": 21818}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "AW00403", "item": "모모스커피_코스타리카 모모스컬렉션 디카페인 500g", "unit": "EA", "price": 17100}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "AW00405", "item": "모모스_코스타리카 모모스셀렉션 디카페인 1kg", "unit": "EA", "price": 30600}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "AW00406", "item": "180커피로스터스_콜롬비아 엘 레나세르 디카페인_500g", "unit": "EA", "price": 28582}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "AW00428", "item": "180커피로스터스_디카페인 블렌드 커피 율 500g", "unit": "EA", "price": 15273}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "H000011", "item": "광양매실청", "unit": "EA", "price": 285000}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "M100010", "item": "엠즈베이커스_미니바스크치즈케이크(6EA)", "unit": "EA", "price": 2300}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "M100011", "item": "엠즈베이커스_초코밀크롤(6EA)", "unit": "EA", "price": 2400}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "M100012", "item": "엠즈베이커스_오트롤(6EA)", "unit": "EA", "price": 2583}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "M100014", "item": "파미유_말렌카 위드 코코아(1BOX)", "unit": "EA", "price": 19650}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "M100015", "item": "파미유_말렌카 위드 월넛(1BOX)", "unit": "EA", "price": 19650}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "M100016", "item": "파미유_말렌카 위드 레몬(1BOX)", "unit": "EA", "price": 19650}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "M100017", "item": "파미유_말렌카 위드 살구(1BOX)", "unit": "EA", "price": 17850}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "M100019", "item": "파미유_말렌카 위드 시나몬(1BOX)", "unit": "EA", "price": 17850}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0035", "item": "모닌 월넛브라우니 시럽", "unit": "EA", "price": 14909}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0036", "item": "아사이베리 파우더", "unit": "EA", "price": 17273}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0038", "item": "비비고 김스낵", "unit": "EA", "price": 1836}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0042", "item": "타바론_루이보스밀크티 베이스", "unit": "EA", "price": 20000}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0043", "item": "맥파이앤타이거_감잎차(100EA)", "unit": "EA", "price": 76000}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0044", "item": "맥파이앤타이거_쑥차(100EA)", "unit": "EA", "price": 76000}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0045", "item": "타바론_후루츠드림", "unit": "EA", "price": 30000}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0048", "item": "마이노말 저당 저칼로리 얼그레이 시럽", "unit": "EA", "price": 7682}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0049", "item": "킨디 코코넛칩 40g", "unit": "EA", "price": 1936}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0053", "item": "서비푸드 리얼 닭주스 플러스 18개입", "unit": "EA", "price": 41455}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0055", "item": "바닐라빈파우더", "unit": "EA", "price": 75091}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100019", "item": "TWG_카모마일(200EA)", "unit": "BOX", "price": 210000}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100020", "item": "TWG_프렌치얼그레이(200EA)", "unit": "BOX", "price": 210000}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100051", "item": "TWG_그랜드웨딩(200EA)", "unit": "BOX", "price": 210000}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100052", "item": "TWG_루이보스 자스민(200EA)", "unit": "BOX", "price": 210000}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100053", "item": "오테라_배그쿠키", "unit": "EA", "price": 1500}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100055", "item": "TWG_크림카라멜(200EA)", "unit": "BOX", "price": 210000}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100058", "item": "TWG_그나와 민트(200EA)", "unit": "BOX", "price": 210000}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100060", "item": "트렌디저트_밀크빙수 240ml(1Box 18ea)", "unit": "EA", "price": 1500}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100096", "item": "파미유_P떠먹는티라미수(8p)", "unit": "EA", "price": 3700}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100097", "item": "파미유_떠먹는 오레오케익", "unit": "EA", "price": 3700}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100110", "item": "파미유_떠먹는 우유케익", "unit": "EA", "price": 29600}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100111", "item": "파미유_떠먹는 고구마케익", "unit": "EA", "price": 2700}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100125", "item": "홀블렌딩_식물성 단백질 쉐이크 블랙빈", "unit": "EA", "price": 22727}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100126", "item": "홀블렌딩_식물성 단백질 쉐이크 쑥", "unit": "EA", "price": 21818}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100145", "item": "알트하우스_레드 후룻 프레쉬 15티백", "unit": "EA", "price": 15000}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100154", "item": "티어스_쌍화차 오리진 패밀리팩(1kg)", "unit": "EA", "price": 40909}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100179", "item": "트렌디저트_초코빙수 240ml(1Box 18ea)", "unit": "EA", "price": 1500}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "OT0024", "item": "비브리브_꼬박꼬밥 고단저당 스윗콘맛(7EA)", "unit": "EA", "price": 2071}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "OT0025", "item": "비브리브_애사비젤리(14EA)", "unit": "BOX", "price": 7000}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "OT0030", "item": "비브리브_꼬박꼬밥 말차맛(7EA)", "unit": "EA", "price": 2071}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "OT0033", "item": "맥파이앤타이거_호지차(100EA)", "unit": "BOX", "price": 380}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "OT0034", "item": "마이노멀_땅콩버터 크런치(10EA)", "unit": "PACK", "price": 5409}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "OT0041", "item": "비브리브_꼬박꼬밥 자색고구마맛(7EA)", "unit": "PACK", "price": 2071}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "OT0052", "item": "헤븐리바이트 푸룬앤월넛_8개입", "unit": "EA", "price": 2300}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "TS100173", "item": "레미레미_땅콩버터 크런치(10EA)", "unit": "EA", "price": 8500}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "TS100174", "item": "비브리브_레몬즙(14EA)", "unit": "EA", "price": 6800}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "TS100175", "item": "이야이야_엑스트라버진 올리브오일 스틱형(15EA)", "unit": "EA", "price": 20200}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "TS100176", "item": "이야이야_엑스트라버진 올리브오일 스틱형(16EA)", "unit": "PACK", "price": 20200}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00003", "item": "아사히", "unit": "EA", "price": 2175}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00004", "item": "기린이치방캔", "unit": "EA", "price": 1725}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00006", "item": "에딩거 바이스비어", "unit": "EA", "price": 3108}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00007", "item": "크로넨버그 블랑 1664", "unit": "EA", "price": 2208}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00009", "item": "제주위트에일캔", "unit": "EA", "price": 1696}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00047", "item": "탱커레이 진", "unit": "EA", "price": 30100}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00068", "item": "기네스", "unit": "EA", "price": 3142}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "식재", "code": "W00077", "item": "제주누보", "unit": "EA", "price": 1936}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00101", "item": "짐빔하이볼 레몬", "unit": "EA", "price": 2104}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00127", "item": "빅웨이브캔", "unit": "EA", "price": 3108}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00128", "item": "카발란하이볼위스키소다캔", "unit": "EA", "price": 3683}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00129", "item": "카스", "unit": "EA", "price": 1558}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00131", "item": "속초맥주 자니 라거", "unit": "EA", "price": 4733}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00132", "item": "에비스", "unit": "EA", "price": 2854}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00134", "item": "페냐솔 틴토 팩와인 3L", "unit": "EA", "price": 18000}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00136", "item": "필스너우르켈", "unit": "EA", "price": 3625}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00011", "item": "헤쿨라 모나스트렐", "unit": "EA", "price": 13800}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00013", "item": "러시안잭 쇼비뇽블랑", "unit": "EA", "price": 19600}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00019", "item": "미도리", "unit": "EA", "price": 32100}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00036", "item": "디카이퍼 피치트리", "unit": "EA", "price": 23000}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00043", "item": "지평막걸리", "unit": "EA", "price": 3300}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00046", "item": "스미노프 보드카", "unit": "EA", "price": 24000}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00051", "item": "제임슨", "unit": "EA", "price": 32200}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00075", "item": "콰페이리치", "unit": "EA", "price": 31500}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00078", "item": "라 스피네타 모스카토 다스티", "unit": "EA", "price": 29400}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00085", "item": "짐빔 위스키", "unit": "EA", "price": 27400}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00109", "item": "바카디 카르타블랑카", "unit": "EA", "price": 20800}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00110", "item": "잭 다니엘 애플", "unit": "EA", "price": 43500}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00113", "item": "생제르맹", "unit": "EA", "price": 59300}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00117", "item": "우드브릿지 쇼비뇽블랑", "unit": "EA", "price": 17300}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00126", "item": "타베르네로 보띠아 이탈리아(피스코)", "unit": "EA", "price": 34500}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00133", "item": "디카이퍼 크림드카시스", "unit": "EA", "price": 18200}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "넛두리 킹아일랜드 구운코코넛칩 500g", "unit": "EA", "price": 12718}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "라빠르쉐 스틱설탕", "unit": "EA", "price": 55736}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "빈브라더스_에콰도르 라 호세피나 파카마라 200g", "unit": "EA", "price": 21818}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "빈브라더스_에티오피아 하로와추 200g", "unit": "EA", "price": 18182}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "조식용 감동란", "unit": "EA", "price": 2727}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "콜롬보 시럽", "unit": "EA", "price": 22273}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "타바론_후루츠드림 50T", "unit": "EA", "price": 30000}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "통참깨", "unit": "EA", "price": 3555}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "티어스_시나몬프레소 패밀리팩(900g)", "unit": "EA", "price": 45455}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "한국야쿠르트 장집중케어MPRO4(130ml)", "unit": "EA", "price": 2000}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "한국야쿠르트 장피부듀얼케어MPRO4(130ml)", "unit": "EA", "price": 2000}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "향미사_볼리비아 핀카 이사벨 나랑할 게이샤 내추럴 100g", "unit": "EA", "price": 25455}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "향미사_코스타리카 산 이시드로 라브라도르 까사 베르데 티피카 허니 200g", "unit": "EA", "price": 22727}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "홀블렌딩_식물성 단백질 쉐이크 카카오", "unit": "EA", "price": 21818}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "화이트리에_딸기버터잼", "unit": "EA", "price": 5600}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "화이트리에_딸기장미잼", "unit": "EA", "price": 5600}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "화이트리에_블루베리버터잼", "unit": "EA", "price": 5600}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "화이트리에_애플시나몬잼", "unit": "EA", "price": 5600}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "화이트리에_얼그레이잼", "unit": "EA", "price": 6300}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "화이트리에_커팅식빵", "unit": "EA", "price": 4200}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "화이트리에_통식빵", "unit": "EA", "price": 4200}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "화이트리에_페이장브르통 마담로익 네이처 크림치즈", "unit": "EA", "price": 8257}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "", "item": "영랑호", "unit": "EA", "price": 113600}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "", "item": "디카이퍼 트리플색", "unit": "EA", "price": 23000}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "", "item": "마른안주 3종", "unit": "EA", "price": 3636}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "", "item": "스텔라생(20L)", "unit": "EA", "price": 109000}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "", "item": "크랜베리주스 3L", "unit": "EA", "price": 5894}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "", "item": "호가든생(20L)", "unit": "EA", "price": 96500}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "네스프레소", "code": "", "item": "네스프레소", "unit": "EA", "price": 2703000}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "콜라보", "code": "", "item": "아베베 베이커리", "unit": "EA", "price": 3720545}];
+
+const MONTHS = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+const CK_LABELS = ['거래내역서','세금계산서','품의작성','결재완료','출고처리'];
+const CK_KEYS   = ['d1','d2','d3','d4','d5'];
+let CM = new Date().getMonth();
+
+// ══ 로컬스토리지 ════════════════════════════════════════════════════════════
+function sk(m){ return `kc_2026_${m}`; }
+function ld(m){ try{ return JSON.parse(localStorage.getItem(sk(m))||'[]'); }catch{ return []; } }
+function sv(m,d){ localStorage.setItem(sk(m),JSON.stringify(d)); }
+function gc(){ return ld(CM); }
+function sc2(d){ sv(CM,d); }
+
+// ══ 마스터 스토리지 ══════════════════════════════════════════════════════════
+const MSK = 'kc_master_v2';
+function loadMasterData(){
+  try{
+    const s=localStorage.getItem(MSK);
+    if(s) return JSON.parse(s);
+  }catch(e){}
+  return MASTER.map(m=>({...m, remark:m.remark||''}));
+}
+function saveMasterData(){
+  localStorage.setItem(MSK, JSON.stringify(masterData));
+}
+let masterData = loadMasterData();
+
+
+// ══ 필터 ════════════════════════════════════════════════════════════════════
+let activeFilter = { dateFrom:'', dateTo:'', site:'', cat:'', item:'' };
+
+function applyFilter() {
+  activeFilter = {
+    dateFrom: document.getElementById('flt_dateFrom')?.value || '',
+    dateTo:   document.getElementById('flt_dateTo')?.value   || '',
+    site:     document.getElementById('flt_site')?.value     || '',
+    cat:      document.getElementById('flt_cat')?.value      || '',
+    item:     (document.getElementById('flt_item')?.value    || '').toLowerCase().trim(),
+  };
+  renderTable();
+}
+
+function resetFilter() {
+  ['flt_dateFrom','flt_dateTo','flt_item'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = '';
+  });
+  ['flt_site','flt_cat'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = '';
+  });
+  activeFilter = { dateFrom:'', dateTo:'', site:'', cat:'', item:'' };
+  renderTable();
+}
+
+function getFilteredData() {
+  let data = gc();
+  const f = activeFilter;
+  if (f.dateFrom) data = data.filter(r => r.date >= f.dateFrom);
+  if (f.dateTo)   data = data.filter(r => r.date <= f.dateTo);
+  if (f.site)     data = data.filter(r => r.site === f.site);
+  if (f.cat)      data = data.filter(r => r.cat  === f.cat);
+  if (f.item)     data = data.filter(r => r.item.toLowerCase().includes(f.item));
+  return data;
+}
+
+
+// ── 합계 행 업데이트 ──
+function updateFooter() {
+  const data  = getFilteredData();
+  const all   = gc();
+  const total = data.reduce((s,r) => s + r.amount, 0);
+  const isFiltered = Object.values(activeFilter).some(v=>v!=='');
+  const cntTxt = isFiltered
+    ? `${data.length}건 (전체 ${all.length}건)`
+    : `${data.length}건`;
+
+  // 기존 합계 행 제거 후 새로 추가
+  const existing = document.getElementById('sumRow');
+  if (existing) existing.remove();
+
+  const tbody = document.getElementById('tbody');
+  if (!tbody) return;
+
+  // 컬럼 수: 순번+날짜+사이트+구분+분류+코드+품목+단위+수량+단가+금액+지점+구분1+구분2+체크5+삭제 = 20
+  const tr = document.createElement('tr');
+  tr.id = 'sumRow';
+  tr.className = 'sum-row';
+  tr.innerHTML = `
+    <td class="sum-cnt" colspan="8">${cntTxt}</td>
+    <td colspan="2" class="sum-label">총 입고금액 합계</td>
+    <td class="sum-value">₩ ${Math.round(total).toLocaleString('ko-KR')}</td>
+    <td colspan="9"></td>
+  `;
+  tbody.appendChild(tr);
+}
+
+// ══ 페이지 전환 ══════════════════════════════════════════════════════════════
+function switchPage(page){
+  const iP = page==='purchase';
+  document.getElementById('appPurchase').classList.toggle('active', iP);
+  document.getElementById('appMaster').classList.toggle('active', !iP);
+  document.getElementById('ptbPurchase').classList.toggle('active', iP);
+  document.getElementById('ptbMaster').classList.toggle('active', !iP);
+  if(!iP) renderMasterTable();
+}
+
+// ══ 월 탭 ════════════════════════════════════════════════════════════════════
+function renderTabs(){
+  document.getElementById('monthTabs').innerHTML=MONTHS.map((m,i)=>{
+    const d=ld(i), inc=d.filter(r=>CK_KEYS.some(k=>!r[k])).length;
+    const b=inc>0?`<span class="badge">${inc}</span>`:'';
+    return `<button class="month-tab ${i===CM?'active':''}" onclick="switchMonth(${i})">${m}${b}</button>`;
+  }).join('');
+}
+function switchMonth(idx){
+  CM=idx; renderTabs(); renderTable(); updateSidebar();
+  document.getElementById('tblTitle').textContent=MONTHS[idx]+' 구매 내역';
+}
+
+// ══ 현지구매 입력 드롭다운 ═══════════════════════════════════════════════════
+const CAT_STYLE={
+  '식재':   'background:#e6f7ee;color:#15803d',
+  '서초주류':'background:#fef9c3;color:#854d0e',
+  '펍':     'background:#fee2e2;color:#b91c1c',
+  '웰니스': 'background:#e0f2fe;color:#0369a1',
+  '네스프레소':'background:#f3e8ff;color:#6b21a8',
+  '콜라보': 'background:#fff7ed;color:#c2410c',
 };
 
-var statusFilter = "all";
-var catFilter    = "all";
-var openKeys     = {};   // _key → true/false (펼침 상태)
-var editKeys     = {};   // _key → true/false (수정 상태)
-var addPanelOpen = false;
-var currentTab   = "list";
-var calYear, calMonth;
-var stepCnt = 0;
-var WD = ["일","월","화","수","목","금","토"];
-
-/* today */
-var TODAY = new Date(); TODAY.setHours(0,0,0,0);
-calYear  = TODAY.getFullYear();
-calMonth = TODAY.getMonth();
-
-/* =====================================================
-   HELPERS
-   ===================================================== */
-function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
-function toast(m){ var el=document.getElementById("toast"); el.textContent=m; el.classList.add("show"); setTimeout(function(){ el.classList.remove("show"); }, 2600); }
-function catInfo(n){ return meta.cats.find(function(c){return c.name===n;})||{bg:"#F4F4F5",tc:"#3F3F46"}; }
-function priIdx(n){ var i=meta.pris.findIndex(function(p){return p.name===n;}); return i<0?99:i; }
-function priInfo(n){ return meta.pris.find(function(p){return p.name===n;})||{bg:"#F4F4F5",tc:"#3F3F46"}; }
-function progPct(steps){ if(!steps||!steps.length) return 0; return Math.round(steps.filter(function(s){return s.done;}).length/steps.length*100); }
-function dday(t){
-  var due = t.dateEnd||t.dateStart;
-  if(!due) return null;
-  var d=new Date(due); d.setHours(0,0,0,0);
-  return Math.round((d-TODAY)/864e5);
-}
-function ddayBadge(n, sta){
-  if(sta==="완료") return "<span class='dday' style='background:var(--ok-bg);color:var(--ok-t)'>완료</span>";
-  if(n===null) return "";
-  if(n<0)  return "<span class='dday' style='background:var(--err-bg);color:var(--err-t)'>D+"+(Math.abs(n))+" 초과</span>";
-  if(n===0) return "<span class='dday' style='background:var(--err-bg);color:var(--err-t)'>D-Day</span>";
-  if(n<=3)  return "<span class='dday' style='background:var(--wrn-bg);color:var(--wrn-t)'>D-"+n+"</span>";
-  return "<span class='dday' style='background:#F4F4F5;color:#52525B'>D-"+n+"</span>";
-}
-function dateRng(t){
-  var s=t.dateStart, e=t.dateEnd;
-  if(!s&&!e) return "기간 없음";
-  if(s&&e&&s!==e) return s.replace(/-/g,"/")+' ~ '+e.replace(/-/g,"/");
-  return (s||e).replace(/-/g,"/");
+function buildDropdown(filtered){
+  const dd=document.getElementById('itemDropdown');
+  if(!filtered.length){ dd.innerHTML='<div class="no-result">검색 결과 없음</div>'; return; }
+  dd.innerHTML=filtered.map(m=>{
+    const key=m.code||'__'+m.item;
+    return `<div class="item-option" onmousedown="selectItem('${key.replace(/'/g,"\\'")}')">
+      <span class="opt-name" title="${m.item}">${m.item}</span>
+    </div>`;
+  }).join('');
 }
 
-/* =====================================================
-   SIDEBAR COUNTS & CAT LIST
-   ===================================================== */
-function updateSidebar(){
-  document.getElementById("cnt-all").textContent     = tasks.length;
-  ["진행중","대기","지연","완료"].forEach(function(s){
-    var el=document.getElementById("cnt-"+s);
-    if(el) el.textContent = tasks.filter(function(t){return t.status===s;}).length;
-  });
-  /* status filter buttons */
-  document.querySelectorAll("[data-sf]").forEach(function(b){
-    b.classList.toggle("on", b.dataset.sf===statusFilter);
-  });
-  /* cat list */
-  var html = "<button class='sb-btn"+(catFilter==="all"?" cat-on":"")+"' onclick=\"setCatFilter('all')\"><span class='sb-l'>전체</span></button>";
-  meta.cats.forEach(function(c){
-    html += "<button class='sb-btn"+(catFilter===c.name?" cat-on":"")+"' onclick=\"setCatFilter('"+esc(c.name)+"')\">"
-          + "<span class='sb-l'><span class='sb-dot' style='background:"+c.tc+"'></span>"+esc(c.name)+"</span></button>";
-  });
-  document.getElementById("cat-list").innerHTML = html;
-}
-function setStatusFilter(f){ statusFilter=f; renderList(); }
-function setCatFilter(f){ catFilter=f; renderList(); }
-
-/* =====================================================
-   FILTERED + SORTED LIST
-   ===================================================== */
-function getFiltered(){
-  var sq  = (document.getElementById("srch")||{value:""}).value.toLowerCase();
-  var fo  = (document.getElementById("fown")||{value:""}).value;
-  var fs  = (document.getElementById("fsort")||{value:"manual"}).value;
-  var list = tasks.filter(function(t){
-    if(statusFilter!=="all" && t.status!==statusFilter) return false;
-    if(catFilter!=="all"    && t.cat!==catFilter)       return false;
-    if(fo && t.owner!==fo)  return false;
-    if(sq && !(t.title||"").toLowerCase().includes(sq)) return false;
-    return true;
-  });
-  if(fs==="dday") list = list.slice().sort(function(a,b){
-    return ((a.dateEnd||a.dateStart||"9999") < (b.dateEnd||b.dateStart||"9999"))?-1:1;
-  });
-  else if(fs==="pri") list = list.slice().sort(function(a,b){ return priIdx(a.pri)-priIdx(b.pri); });
-  else if(fs==="sta"){
-    var STO={지연:0,진행중:1,대기:2,완료:3};
-    list = list.slice().sort(function(a,b){ return (STO[a.status]||9)-(STO[b.status]||9); });
+function filterItems(query){
+  const site=document.getElementById('f_site').value;
+  const cat =document.getElementById('f_cat').value;
+  let pool=masterData;
+  if(site) pool=pool.filter(m=>m.site===site);
+  if(cat)  pool=pool.filter(m=>m.cat===cat);
+  if(query.trim()){
+    const q=query.trim().toLowerCase();
+    pool=pool.filter(m=>m.item.toLowerCase().includes(q)||(m.code&&m.code.toLowerCase().includes(q)));
   }
-  return list;
+  buildDropdown([...pool].sort((a,b)=>a.item.localeCompare(b.item)));
+  document.getElementById('itemDropdown').classList.add('open');
+}
+function openDropdown(){ filterItems(document.getElementById('f_item_search').value); }
+function closeDropdown(){ setTimeout(()=>document.getElementById('itemDropdown').classList.remove('open'),150); }
+
+function selectItem(key){
+  const m=key.startsWith('__')?masterData.find(x=>x.item===key.slice(2)):masterData.find(x=>x.code===key);
+  if(!m) return;
+  document.getElementById('f_item_search').value=m.item;
+  document.getElementById('f_item_code_key').value=key;
+  document.getElementById('itemDropdown').classList.remove('open');
+  document.getElementById('f_site').value=m.site;
+  document.getElementById('f_gubun').value=m.gubun||(m.site.includes('라운지')?'라운지':'카페');
+  const cats=[...new Set(masterData.filter(x=>x.site===m.site).map(x=>x.cat))].sort();
+  const catEl=document.getElementById('f_cat');
+  catEl.innerHTML='<option value="">선택</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+  catEl.value=m.cat;
+  document.getElementById('f_code').value=m.code||'';
+  document.getElementById('f_unit').value=m.unit;
+  document.getElementById('f_price').value=m.price;
+  calcAmt();
 }
 
-/* =====================================================
-   RENDER LIST
-   ===================================================== */
-function renderList(){
-  if(!fbLoaded) return; // Firebase 데이터 로드 전엔 렌더링하지 않음
-  updateSidebar();
-  /* owner dropdown */
-  var fown = document.getElementById("fown");
-  if(fown){
-    var cur = fown.value;
-    var owners = [];
-    tasks.forEach(function(t){ if(t.owner && owners.indexOf(t.owner)<0) owners.push(t.owner); });
-    meta.owners.forEach(function(o){ if(owners.indexOf(o)<0) owners.push(o); });
-    fown.innerHTML = "<option value=''>전체 담당자</option>" +
-      owners.map(function(o){ return "<option"+(o===cur?" selected":"")+">"+esc(o)+"</option>"; }).join("");
+function onSiteChange(){
+  const site=document.getElementById('f_site').value;
+  document.getElementById('f_gubun').value=site.includes('라운지')?'라운지':site.includes('카페')?'카페':'';
+  const cats=[...new Set(masterData.filter(m=>!site||m.site===site).map(m=>m.cat))].sort();
+  document.getElementById('f_cat').innerHTML='<option value="">선택</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+  document.getElementById('f_item_search').value='';
+  document.getElementById('f_item_code_key').value='';
+  clearAuto();
+}
+function onCatChange(){
+  document.getElementById('f_item_search').value='';
+  document.getElementById('f_item_code_key').value='';
+  clearAuto();
+}
+function clearAuto(){ ['f_code','f_unit','f_price','f_amt'].forEach(id=>document.getElementById(id).value=''); }
+function calcAmt(){
+  const q=parseFloat(document.getElementById('f_qty').value)||0;
+  const p=parseFloat(document.getElementById('f_price').value)||0;
+  document.getElementById('f_amt').value=q*p>0?Math.round(q*p).toLocaleString('ko-KR'):'';
+}
+
+// ══ 현지구매 추가 ════════════════════════════════════════════════════════════
+function addRow(){
+  const date=document.getElementById('f_date').value;
+  const site=document.getElementById('f_site').value;
+  const cat =document.getElementById('f_cat').value;
+  const code=document.getElementById('f_code').value;
+  const item=document.getElementById('f_item_search').value.trim();
+  const unit=document.getElementById('f_unit').value;
+  const qty =parseFloat(document.getElementById('f_qty').value)||0;
+  const price=parseFloat(document.getElementById('f_price').value)||0;
+  const gubun=document.getElementById('f_gubun').value;
+  if(!date||!site||!cat||!item||qty<=0){ toast('입고일, 사이트, 분류, 품목, 수량을 입력하세요.','err'); return; }
+  const d=gc();
+  d.push({id:Date.now(),date,site,gubun,cat,code,item,unit,qty,price,amount:Math.round(qty*price),d1:false,d2:false,d3:false,d4:false,d5:false});
+  sc2(d); renderTable(); updateSidebar(); renderTabs(); resetForm();
+  toast('추가되었습니다.','ok');
+}
+function resetForm(){
+  ['f_site','f_cat','f_code','f_unit','f_qty','f_price','f_amt','f_gubun'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f_item_search').value='';
+  document.getElementById('f_item_code_key').value='';
+  // 날짜는 유지 (마지막 입력 날짜 그대로)
+  // 최초 로드 시만 오늘 날짜로 (날짜가 비어있을 때만)
+  if (!document.getElementById('f_date').value) {
+    document.getElementById('f_date').value = new Date().toISOString().split('T')[0];
   }
+  const cats=[...new Set(masterData.map(m=>m.cat))].sort();
+  document.getElementById('f_cat').innerHTML='<option value="">선택</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+}
 
-  var isManual = (document.getElementById("fsort")||{value:"manual"}).value === "manual";
-  document.getElementById("drag-hint").classList.toggle("show", isManual);
-  var tl = document.getElementById("task-list");
-  tl.classList.toggle("sort-mode", isManual);
+// ══ 체크 / 삭제 ══════════════════════════════════════════════════════════════
+function toggleCk(id,key){ const d=gc(),r=d.find(x=>x.id===id); if(!r) return; r[key]=!r[key]; sc2(d); renderTable(); updateSidebar(); renderTabs(); }
+function delRow(id){ if(!confirm('삭제하시겠습니까?')) return; sc2(gc().filter(r=>r.id!==id)); renderTable(); updateSidebar(); renderTabs(); toast('삭제되었습니다.','err'); }
+function clearMonth(){ if(!confirm(`${MONTHS[CM]} 데이터를 모두 삭제?`)) return; sc2([]); renderTable(); updateSidebar(); renderTabs(); toast(`${MONTHS[CM]} 초기화`,'err'); }
 
-  var list = getFiltered();
-
-  /* add panel state */
-  var ap = document.getElementById("add-panel");
-  if(ap){ if(addPanelOpen) ap.classList.add("open"); else ap.classList.remove("open"); }
-
-  if(!list.length){
-    tl.innerHTML = "<div class='empty-msg'>해당하는 업무가 없습니다.</div>";
+// ══ 테이블 렌더 ══════════════════════════════════════════════════════════════
+function renderTable(){
+  const all=gc();
+  const data=getFilteredData();
+  document.getElementById('rowCnt').textContent=data.length+'건';
+  // 필터 카운트 표시
+  const cntEl=document.getElementById('filterCnt');
+  const isFiltered=Object.values(activeFilter).some(v=>v!=='');
+  if(cntEl){
+    if(isFiltered && data.length < all.length){
+      cntEl.textContent=`${data.length} / ${all.length}건 표시중`;
+      cntEl.style.display='';
+    } else { cntEl.style.display='none'; }
+  }
+  const tbody=document.getElementById('tbody');
+  if(data.length===0){
+    tbody.innerHTML='';
+    document.getElementById('emptyState').classList.remove('hidden');
+    updateFooter();
+    document.getElementById('emptyState').querySelector('p').innerHTML=
+      isFiltered?'필터 조건에 맞는 내역이 없습니다.<br><button class="btn btn-secondary" style="margin-top:8px;font-size:11px" onclick="resetFilter()">필터 초기화</button>'
+               :'이번 달 구매 내역이 없습니다.<br>위 폼에서 추가해주세요.';
     return;
   }
+  document.getElementById('emptyState').classList.add('hidden');
+  const CAT_SORT = {'네스프레소':0,'펍':1,'서초주류':2,'웰니스':3,'식재':4,'콜라보':5};
+  const SITE_SORT = {'크래프톤서초카페점 라운지':0,'크래프톤서초카페점 카페':1};
+  // 브랜드 추출: '_' 앞부분, 없으면 품목 전체
+  const getBrand = item => item.includes('_') ? item.split('_')[0] : item;
 
-  tl.innerHTML = list.map(function(t){ return renderCard(t, isManual); }).join("");
+  const sorted=[...data].sort((a,b)=>{
+    const catA = CAT_SORT[a.cat] ?? 9;
+    const catB = CAT_SORT[b.cat] ?? 9;
+    if (catA !== catB) return catA - catB;
 
-  /* bind events */
-  list.forEach(function(t){
-    var key = t._key;
-    var card = document.getElementById("card-"+key);
-    if(!card) return;
-
-    /* drag */
-    if(isManual){
-      card.setAttribute("draggable","true");
-      card.addEventListener("dragstart", function(e){
-        window._dragKey = key;
-        setTimeout(function(){ card.classList.add("dragging"); }, 0);
-        e.dataTransfer.effectAllowed = "move";
-      });
-      card.addEventListener("dragend", function(){
-        card.classList.remove("dragging");
-        document.querySelectorAll(".tcard").forEach(function(c){ c.classList.remove("drag-over-top","drag-over-bot"); });
-        window._dragKey = null;
-      });
-      card.addEventListener("dragover", function(e){
-        e.preventDefault();
-        if(window._dragKey === key) return;
-        document.querySelectorAll(".tcard").forEach(function(c){ c.classList.remove("drag-over-top","drag-over-bot"); });
-        var rect = card.getBoundingClientRect();
-        var isTop = e.clientY < rect.top + rect.height/2;
-        card.classList.add(isTop ? "drag-over-top" : "drag-over-bot");
-        window._dragPos = isTop ? "top" : "bot";
-        window._dragOverKey = key;
-      });
-      card.addEventListener("dragleave", function(){
-        card.classList.remove("drag-over-top","drag-over-bot");
-      });
-      card.addEventListener("drop", function(e){
-        e.preventDefault();
-        card.classList.remove("drag-over-top","drag-over-bot");
-        var fromKey = window._dragKey;
-        var toKey   = window._dragOverKey;
-        if(!fromKey || fromKey===toKey) return;
-        var fi = tasks.findIndex(function(x){ return x._key===fromKey; });
-        var ti = tasks.findIndex(function(x){ return x._key===toKey; });
-        if(fi<0||ti<0) return;
-        var moved = tasks.splice(fi,1)[0];
-        var ni    = tasks.findIndex(function(x){ return x._key===toKey; });
-        tasks.splice(window._dragPos==="bot"?ni+1:ni, 0, moved);
-        /* save order to Firebase */
-        var updates = {};
-        tasks.forEach(function(t,i){ if(t._key) updates["tasks/"+t._key+"/order"]=i; });
-        if(window.DB) DB.ref().update(updates);
-        renderList();
-      });
+    // 카페 > 식재: 브랜드순 → 날짜순 → 품목순
+    if (a.cat === '식재' && a.site === '크래프톤서초카페점 카페' &&
+        b.cat === '식재' && b.site === '크래프톤서초카페점 카페') {
+      const brandC = getBrand(a.item).localeCompare(getBrand(b.item), 'ko');
+      if (brandC !== 0) return brandC;
+      const dateC = a.date.localeCompare(b.date);
+      if (dateC !== 0) return dateC;
+      return a.item.localeCompare(b.item, 'ko');
     }
 
-    /* step checkboxes */
-    if(openKeys[key] && !editKeys[key] && t.steps){
-      t.steps.forEach(function(s,si){
-        var chk = document.getElementById("step-"+key+"-"+si);
-        if(chk) chk.addEventListener("change", function(){
-          s.done = chk.checked;
-          if(window.DB && key) DB.ref("tasks/"+key).update({steps: t.steps});
-          renderList();
-        });
-      });
-    }
+    // 나머지: 날짜순 → 사이트순(라운지→카페)
+    const dateC = a.date.localeCompare(b.date);
+    if (dateC !== 0) return dateC;
+    const siteA = SITE_SORT[a.site] ?? 9;
+    const siteB = SITE_SORT[b.site] ?? 9;
+    return siteA - siteB;
   });
-
-  if(currentTab==="cal") renderCal();
+  tbody.innerHTML=sorted.map((r,i)=>{
+    const allDone=CK_KEYS.every(k=>r[k]);
+    const checks=CK_KEYS.map(k=>`<td class="center"><button class="chk-btn ${r[k]?'on':'off'}" onclick="toggleCk(${r.id},'${k}')">${r[k]?'✓':'·'}</button></td>`).join('');
+    const catCls='cat cat-'+r.cat.replace(/\s/g,'');
+    return `<tr class="${allDone?'done':''}">
+      <td class="center" style="color:#aaa;font-size:11px">${i+1}</td>
+      <td class="center" style="font-family:monospace;font-size:11px;cursor:pointer;text-decoration:underline dotted #aaa" title="클릭하여 날짜 수정" onclick="editDate(${r.id}, this)">${r.date}</td>
+      <td style="font-size:11px">${r.site}</td>
+      <td class="center">${r.gubun||''}</td>
+      <td class="center"><span class="${catCls}">${r.cat}</span></td>
+      <td class="code">${r.code||''}</td>
+      <td style="font-size:11px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.item}">${r.item}</td>
+      <td class="center">${r.unit||''}</td>
+      <td class="num" style="cursor:pointer;text-decoration:underline dotted #aaa" title="클릭하여 수량 수정"
+        onclick="editQty(${r.id}, this)">${r.qty.toLocaleString()}</td>
+      <td class="num">${r.price.toLocaleString()}</td>
+      <td class="num" style="font-weight:600">${r.amount.toLocaleString()}</td>
+      <td class="center" style="font-size:11px">서초</td>
+      <td class="center" style="font-size:11px">${r.gubun||''}</td>
+      <td class="center"><span class="${catCls}">${r.cat}</span></td>
+      ${checks}
+      <td class="center"><button class="btn btn-danger btn-sm" onclick="delRow(${r.id})" style="padding:2px 6px">✕</button></td>
+    </tr>`;
+  }).join('');
+  updateFooter();
 }
 
-/* =====================================================
-   RENDER CARD
-   ===================================================== */
-function renderCard(t, isManual){
-  var key  = t._key;
-  var open = !!openKeys[key];
-  var edit = !!editKeys[key];
-  var pct  = progPct(t.steps||[]);
-  var dd   = dday(t);
-  var ci   = catInfo(t.cat);
-  var pi   = priInfo(t.pri);
-  var priCls = priIdx(t.pri)===0?"pri-긴급":priIdx(t.pri)===1?"pri-중요":"";
+// ══ 사이드바 ═════════════════════════════════════════════════════════════════
+function updateSidebar(){
+  const data=gc();
+  const total=data.reduce((s,r)=>s+r.amount,0);
+  const inc=data.filter(r=>CK_KEYS.some(k=>!r[k])).length;
+  document.getElementById('sa').textContent='₩ '+total.toLocaleString('ko-KR');
+  document.getElementById('sc').textContent=data.length;
+  document.getElementById('si').textContent=inc;
+  document.getElementById('checkSummary').innerHTML=CK_LABELS.map((lbl,i)=>{
+    const key=CK_KEYS[i], done=data.filter(r=>r[key]).length;
+    const pct=data.length>0?Math.round(done/data.length*100):0;
+    return `<div><div class="chk-row"><span class="chk-lbl">${lbl}</span><span class="chk-cnt"><span class="d">${done}</span><span class="t"> / ${data.length}</span></span></div><div class="prog"><div class="prog-fill" style="width:${pct}%"></div></div></div>`;
+  }).join('');
+  const merchants={};
+  data.forEach(r=>{ const k=r.item.includes('_')?r.item.split('_')[0]:r.item.substring(0,8); merchants[k]=(merchants[k]||0)+r.amount; });
+  const ms=Object.entries(merchants).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('merchantSummary').innerHTML=ms.length===0?'<div style="color:#aaa;font-size:11px">데이터 없음</div>':ms.map(([n,a])=>`<div class="mchnt-row"><span class="mchnt-name" title="${n}">${n}</span><span class="mchnt-amt">${Math.round(a).toLocaleString()}원</span></div>`).join('');
+}
 
-  var handle = isManual
-    ? "<div class='tc-drag-handle'><span></span><span></span><span></span><span></span></div>"
-    : "";
+// ══ XLSX 내보내기 ════════════════════════════════════════════════════════════
+function exportXLSX(){
+  const data=gc();
+  if(!data.length){ toast('내보낼 데이터가 없습니다.','err'); return; }
+  const CAT_SORT = {'네스프레소':0,'펍':1,'서초주류':2,'웰니스':3,'식재':4,'콜라보':5};
+  const SITE_SORT = {'크래프톤서초카페점 라운지':0,'크래프톤서초카페점 카페':1};
+  // 브랜드 추출: '_' 앞부분, 없으면 품목 전체
+  const getBrand = item => item.includes('_') ? item.split('_')[0] : item;
 
-  var cardTop =
-    "<div class='tc-top' onclick='toggleCard(\""+key+"\")'>" +
-    handle +
-    "<div class='tc-body-wrap'>" +
-      "<div class='tc-row1'>" +
-        "<span class='badge' style='background:"+ci.bg+";color:"+ci.tc+"'>"+esc(t.cat)+"</span>" +
-        "<span class='badge' style='background:"+pi.bg+";color:"+pi.tc+"'>"+esc(t.pri)+"</span>" +
-        "<span class='badge sta-"+t.status+"'>"+t.status+"</span>" +
-        "<span class='tc-title'>"+esc(t.title)+"</span>" +
-        ddayBadge(dd, t.status) +
-      "</div>" +
-      "<div class='tc-row2'>" +
-        "<div class='tc-meta'>" +
-          "<span>👤 "+esc(t.owner||"미지정")+"</span>" +
-          "<span>📅 "+dateRng(t)+"</span>" +
-        "</div>" +
-        "<span class='tc-chevron'>"+(open?"▲":"▼")+"</span>" +
-      "</div>" +
-      ((t.steps&&t.steps.length&&!edit)?"<div class='tc-prog'><div class='tc-prog-bar' style='width:"+pct+"%'></div></div>":"") +
-    "</div></div>";
+  const sorted=[...data].sort((a,b)=>{
+    const catA = CAT_SORT[a.cat] ?? 9;
+    const catB = CAT_SORT[b.cat] ?? 9;
+    if (catA !== catB) return catA - catB;
 
-  /* detail section */
-  var detail = "";
-  if(open && !edit){
-    var stepsHtml = "";
-    if(t.steps && t.steps.length){
-      stepsHtml = "<div class='tc-steps-label'>진행 단계 ("+t.steps.filter(function(s){return s.done;}).length+"/"+t.steps.length+")</div>";
-      t.steps.forEach(function(s,si){
-        stepsHtml += "<div class='tc-step'>" +
-          "<input type='checkbox' id='step-"+key+"-"+si+"'"+(s.done?" checked":"")+"> " +
-          "<label for='step-"+key+"-"+si+"' class='"+(s.done?"done":"")+"'>"+esc(s.lbl)+"</label>" +
-          "</div>";
-      });
+    // 카페 > 식재: 브랜드순 → 날짜순 → 품목순
+    if (a.cat === '식재' && a.site === '크래프톤서초카페점 카페' &&
+        b.cat === '식재' && b.site === '크래프톤서초카페점 카페') {
+      const brandC = getBrand(a.item).localeCompare(getBrand(b.item), 'ko');
+      if (brandC !== 0) return brandC;
+      const dateC = a.date.localeCompare(b.date);
+      if (dateC !== 0) return dateC;
+      return a.item.localeCompare(b.item, 'ko');
     }
-    detail =
-      "<div class='tc-detail open'>" +
-      (t.note?"<div class='tc-memo-box'>"+esc(t.note)+"</div>":"")+
-      stepsHtml +
-      "<div class='tc-actions'>" +
-        "<button class='btn-text' onclick='startEdit(\""+key+"\")'>✏️ 수정</button>" +
-        (t.status!=="완료"?"<button class='btn-text' onclick='chgSta(\""+key+"\",\"완료\")'>✓ 완료</button>":"") +
-        (t.status==="대기"?"<button class='btn-text' onclick='chgSta(\""+key+"\",\"진행중\")'>▶ 진행 시작</button>":"") +
-        (t.status==="진행중"?"<button class='btn-text' onclick='chgSta(\""+key+"\",\"대기\")'>⏸ 대기</button>":"") +
-        (t.status==="지연"?"<button class='btn-text' onclick='chgSta(\""+key+"\",\"진행중\")'>▶ 재개</button>":"") +
-        "<button class='btn-text' onclick='gcalTask(\""+key+"\")'>📅 구글 캘린더</button>" +
-        "<button class='btn-text danger' onclick='delTask(\""+key+"\")'>🗑 삭제</button>" +
-      "</div></div>";
-  }
 
-  /* edit form */
-  var editForm = "";
-  if(edit){
-    var cats  = meta.cats.map(function(c){ return "<option"+(t.cat===c.name?" selected":"")+">"+esc(c.name)+"</option>"; }).join("");
-    var pris  = meta.pris.map(function(p){ return "<option"+(t.pri===p.name?" selected":"")+">"+esc(p.name)+"</option>"; }).join("");
-    var stats = ["대기","진행중","완료","지연"].map(function(s){ return "<option"+(t.status===s?" selected":"")+">"+s+"</option>"; }).join("");
-    var owns  = [].concat(meta.owners).filter(function(o,i,a){return a.indexOf(o)===i;}).concat(t.owner&&meta.owners.indexOf(t.owner)<0?[t.owner]:[]).map(function(o){ return "<option"+(t.owner===o?" selected":"")+">"+esc(o)+"</option>"; }).join("");
-    var stepsEd = (t.steps||[]).map(function(s,si){
-      return "<div class='step-row' id='esr-"+key+"-"+si+"'>" +
-        "<input value=\""+esc(s.lbl)+"\" oninput=\"editStepLbl('"+key+"',"+si+",this.value)\">" +
-        "<button class='step-rm' onclick=\"rmEditStep('"+key+"',"+si+")\">✕</button>" +
-        "</div>";
-    }).join("");
-    editForm =
-      "<div class='tc-edit-form open'>" +
-      "<div class='form-grid'>" +
-        "<div class='fg full'><label>업무명</label><input id='ef-title-"+key+"' value=\""+esc(t.title)+"\"></div>" +
-        "<div class='fg'><label>카테고리</label><select id='ef-cat-"+key+"'>"+cats+"</select></div>" +
-        "<div class='fg'><label>우선순위</label><select id='ef-pri-"+key+"'>"+pris+"</select></div>" +
-        "<div class='fg'><label>상태</label><select id='ef-sta-"+key+"'>"+stats+"</select></div>" +
-        "<div class='fg'><label>담당자</label><select id='ef-own-"+key+"'>"+owns+"</select></div>" +
-        "<div class='fg'><label>시작일</label><input id='ef-ds-"+key+"' type='date' value='"+(t.dateStart||"")+"'></div>" +
-        "<div class='fg'><label>종료일</label><input id='ef-de-"+key+"' type='date' value='"+(t.dateEnd||"")+"'></div>" +
-        "<div class='fg full'><label>메모</label><input id='ef-note-"+key+"' value=\""+esc(t.note||"")+"\"></div>" +
-        "<div class='fg full'><label>진행 단계</label><div id='ef-steps-"+key+"'>"+stepsEd+"</div>" +
-        "<button class='btn-text' style='margin-top:5px;' onclick=\"addEditStep('"+key+"')\">+ 단계 추가</button></div>" +
-      "</div>" +
-      "<div class='form-actions'>" +
-        "<button class='btn-text' onclick='cancelEdit(\""+key+"\")'>취소</button>" +
-        "<button class='btn btn-primary' onclick='saveEdit(\""+key+"\")'>저장</button>" +
-      "</div></div>";
-  }
-
-  return "<div class='tcard "+priCls+"' id='card-"+key+"'>"+cardTop+detail+editForm+"</div>";
+    // 나머지: 날짜순 → 사이트순(라운지→카페)
+    const dateC = a.date.localeCompare(b.date);
+    if (dateC !== 0) return dateC;
+    const siteA = SITE_SORT[a.site] ?? 9;
+    const siteB = SITE_SORT[b.site] ?? 9;
+    return siteA - siteB;
+  });
+  const monthName=MONTHS[CM];
+  const wb=XLSX.utils.book_new();
+  const border={top:{style:'thin',color:{rgb:'C0C0C0'}},bottom:{style:'thin',color:{rgb:'C0C0C0'}},left:{style:'thin',color:{rgb:'C0C0C0'}},right:{style:'thin',color:{rgb:'C0C0C0'}}};
+  const hdrStyle={font:{bold:true,sz:10,name:'맑은 고딕'},fill:{fgColor:{rgb:'F0F4F8'}},alignment:{horizontal:'center',vertical:'center',wrapText:true},border};
+  const doneStyle={font:{bold:true,sz:11,name:'맑은 고딕',color:{rgb:'155724'}},fill:{fgColor:{rgb:'D4EDDA'}},alignment:{horizontal:'center',vertical:'center'},border};
+  const pendStyle={font:{bold:true,sz:11,name:'맑은 고딕',color:{rgb:'856404'}},fill:{fgColor:{rgb:'FFF3CD'}},alignment:{horizontal:'center',vertical:'center'},border};
+  const totalStyle={font:{bold:true,sz:10,name:'맑은 고딕'},fill:{fgColor:{rgb:'D9E1F2'}},alignment:{horizontal:'right',vertical:'center'},numFmt:'#,##0',border};
+  const wsData=[['순번','입고일','사이트','구분','분류','상품코드','품목','단위','총 입고량','공급단가','총 입고금액','지점','구분1','구분2','거래\n내역서','세금\n계산서','품의\n작성','결재\n완료','출고\n처리']];
+  sorted.forEach((r,i)=>{
+    wsData.push([i+1,r.date,r.site,r.gubun||'',r.cat,r.code||'',r.item,r.unit||'',r.qty,r.price,r.amount,'서초',r.gubun||'',r.cat,r.d1?'✅':'❌',r.d2?'✅':'❌',r.d3?'✅':'❌',r.d4?'✅':'❌',r.d5?'✅':'❌']);
+  });
+  const total=sorted.reduce((s,r)=>s+r.amount,0);
+  wsData.push(['합계','','','','','','','','','',total,'','','','','','','','']);
+  const ws=XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols']=[{wch:5},{wch:12},{wch:22},{wch:8},{wch:10},{wch:11},{wch:42},{wch:6},{wch:9},{wch:11},{wch:13},{wch:6},{wch:8},{wch:10},{wch:6},{wch:6},{wch:6},{wch:6},{wch:6}];
+  ws['!rows']=[{hpt:28}]; sorted.forEach(()=>ws['!rows'].push({hpt:20})); ws['!rows'].push({hpt:22});
+  const cols='ABCDEFGHIJKLMNOPQRS'.split('');
+  for(let c=0;c<19;c++){ const a=`${cols[c]}1`; if(!ws[a]) ws[a]={v:'',t:'s'}; ws[a].s=hdrStyle; }
+  sorted.forEach((r,i)=>{
+    const row=i+2; const bg=i%2===0?'FFFFFF':'F7F9FC';
+    const sd=(h='left')=>{return {font:{sz:10,name:'맑은 고딕'},fill:{fgColor:{rgb:bg}},alignment:{horizontal:h,vertical:'center'},border};}
+    [[0,'center'],[1,'center'],[2,'left'],[3,'center'],[4,'center'],[5,'center'],[6,'left'],[7,'center'],[11,'center'],[12,'center'],[13,'center']].forEach(([c,h])=>{ const a=`${cols[c]}${row}`; if(!ws[a]) ws[a]={v:'',t:'s'}; ws[a].s=sd(h); });
+    [8,9,10].forEach(c=>{ const a=`${cols[c]}${row}`; if(ws[a]) ws[a].s={...sd('right'),numFmt:'#,##0'}; });
+    [14,15,16,17,18].forEach(c=>{ const a=`${cols[c]}${row}`; const val=wsData[row-1][c]; if(!ws[a]) ws[a]={v:val,t:'s'}; ws[a].s=val==='✅'?doneStyle:pendStyle; });
+  });
+  const tr=sorted.length+2;
+  for(let c=0;c<19;c++){ const a=`${cols[c]}${tr}`; if(!ws[a]) ws[a]={v:'',t:'s'}; ws[a].s=totalStyle; }
+  if(ws[`K${tr}`]) ws[`K${tr}`].t='n';
+  ws['!autofilter']={ref:'A1:S1'};
+  XLSX.utils.book_append_sheet(wb,ws,monthName);
+  XLSX.writeFile(wb,`크래프톤_현지구매_${monthName}.xlsx`);
+  toast(`${monthName} Excel 저장 완료`,'ok');
 }
-
-/* =====================================================
-   CARD ACTIONS
-   ===================================================== */
-function toggleCard(key){
-  openKeys[key] = !openKeys[key];
-  renderList();
+function exportCSV(){
+  const data=gc();
+  if(!data.length){ toast('데이터 없음','err'); return; }
+  const h=['순번','입고일','사이트','구분','분류','상품코드','품목','단위','총입고량','공급단가','총입고금액','지점','구분1','구분2','거래내역서','세금계산서','품의작성','결재완료','출고처리'];
+  const rows=data.map((r,i)=>[i+1,r.date,r.site,r.gubun||'',r.cat,r.code||'',r.item,r.unit||'',r.qty,r.price,r.amount,'서초',r.gubun||'',r.cat,r.d1?'✅':'❌',r.d2?'✅':'❌',r.d3?'✅':'❌',r.d4?'✅':'❌',r.d5?'✅':'❌']);
+  const csv='\uFEFF'+[h,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+  const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),download:`현지구매_${MONTHS[CM]}.csv`});
+  a.click(); toast('CSV 저장 완료','ok');
 }
-function startEdit(key){
-  editKeys = {};
-  editKeys[key] = true;
-  openKeys[key] = true;
-  renderList();
+function backupAll(){
+  const all={}; MONTHS.forEach((_,i)=>{all[i]=ld(i);});
+  const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([JSON.stringify(all,null,2)],{type:'application/json'})),download:`현지구매_전체백업_${new Date().toISOString().split('T')[0]}.json`});
+  a.click(); toast('전체 백업 완료','ok');
 }
-function cancelEdit(key){
-  editKeys[key] = false;
-  renderList();
-}
-function saveEdit(key){
-  var title = (document.getElementById("ef-title-"+key)||{value:""}).value.trim();
-  if(!title){ toast("업무명을 입력해주세요."); return; }
-  var patch = {
-    title:     title,
-    cat:       document.getElementById("ef-cat-"+key).value,
-    pri:       document.getElementById("ef-pri-"+key).value,
-    status:    document.getElementById("ef-sta-"+key).value,
-    owner:     document.getElementById("ef-own-"+key).value||"미지정",
-    dateStart: document.getElementById("ef-ds-"+key).value,
-    dateEnd:   document.getElementById("ef-de-"+key).value,
-    note:      document.getElementById("ef-note-"+key).value.trim()
+function importData(){
+  const inp=Object.assign(document.createElement('input'),{type:'file',accept:'.json'});
+  inp.onchange=e=>{
+    const r=new FileReader();
+    r.onload=ev=>{
+      try{
+        const all=JSON.parse(ev.target.result);
+        Object.keys(all).forEach(m=>localStorage.setItem(sk(m),JSON.stringify(all[m])));
+        renderTable(); updateSidebar(); renderTabs(); toast('가져오기 완료','ok');
+      }catch{ toast('파일 형식 오류','err'); }
+    };
+    r.readAsText(e.target.files[0]);
   };
-  /* steps from DOM */
-  var stepInputs = document.querySelectorAll("#ef-steps-"+key+" input");
-  var t = tasks.find(function(x){ return x._key===key; });
-  var oldSteps = t ? (t.steps||[]) : [];
-  var newSteps = [];
-  stepInputs.forEach(function(inp, i){
-    newSteps.push({ lbl: inp.value.trim(), done: oldSteps[i] ? oldSteps[i].done : false });
-  });
-  patch.steps = newSteps;
-  if(window.DB) DB.ref("tasks/"+key).update(patch).catch(function(e){ toast("저장 실패: "+e.message); });
-  editKeys[key] = false;
-  toast("저장됐어요!");
-}
-function editStepLbl(key, si, val){
-  var t = tasks.find(function(x){ return x._key===key; });
-  if(t && t.steps && t.steps[si]) t.steps[si].lbl = val;
-}
-function addEditStep(key){
-  var c = document.getElementById("ef-steps-"+key);
-  if(!c) return;
-  var t = tasks.find(function(x){ return x._key===key; });
-  var si = t && t.steps ? t.steps.length : 0;
-  var d = document.createElement("div");
-  d.className = "step-row"; d.id = "esr-"+key+"-"+si;
-  d.innerHTML = "<input placeholder='단계 이름' oninput=\"editStepLbl('"+key+"',"+si+",this.value)\"><button class='step-rm' onclick=\"rmEditStep('"+key+"',"+si+")\">✕</button>";
-  c.appendChild(d);
-  if(t){ if(!t.steps) t.steps=[]; t.steps.push({lbl:"",done:false}); }
-  d.querySelector("input").focus();
-}
-function rmEditStep(key, si){
-  var el = document.getElementById("esr-"+key+"-"+si);
-  if(el) el.remove();
-  var t = tasks.find(function(x){ return x._key===key; });
-  if(t && t.steps) t.steps.splice(si,1);
-}
-function chgSta(key, sta){
-  var t = tasks.find(function(x){ return x._key===key; });
-  if(!t) return;
-  t.status = sta;
-  var patch = {status: sta};
-  if(sta==="완료"){ t.steps.forEach(function(s){ s.done=true; }); patch.steps = t.steps; }
-  if(window.DB) DB.ref("tasks/"+key).update(patch).catch(function(e){ toast("저장 실패: "+e.message); });
-  toast(t.title+" → "+sta);
-  renderList();
-}
-function delTask(key){
-  if(!confirm("삭제할까요?")) return;
-  if(window.DB) DB.ref("tasks/"+key).remove();
-  /* onValue will update tasks */
+  inp.click();
 }
 
-/* =====================================================
-   ADD TASK
-   ===================================================== */
-function toggleAddPanel(){
-  addPanelOpen = !addPanelOpen;
-  if(addPanelOpen){
-    var ac=document.getElementById("a-cat"); if(ac) ac.innerHTML=meta.cats.map(function(c){return "<option>"+esc(c.name)+"</option>";}).join("");
-    var ap2=document.getElementById("a-pri"); if(ap2) ap2.innerHTML=meta.pris.map(function(p){return "<option>"+esc(p.name)+"</option>";}).join("");
-    var ao=document.getElementById("a-own"); if(ao) ao.innerHTML=meta.owners.map(function(o){return "<option>"+esc(o)+"</option>";}).join("");
-    var today2=new Date(); var y=today2.getFullYear(),m=String(today2.getMonth()+1).padStart(2,"0"),d=String(today2.getDate()).padStart(2,"0");
-    var td=y+"-"+m+"-"+d;
-    var ds=document.getElementById("a-ds"); if(ds) ds.value=td;
-    var de=document.getElementById("a-de"); if(de) de.value=td;
-    document.getElementById("a-steps").innerHTML="";
-    stepCnt=0; addStepInput("a-steps");
-    setTimeout(function(){ var el=document.getElementById("a-title"); if(el) el.focus(); }, 50);
-  }
-  var ap=document.getElementById("add-panel");
-  if(ap){ if(addPanelOpen) ap.classList.add("open"); else ap.classList.remove("open"); }
+// ══ 마스터 관리 ══════════════════════════════════════════════════════════════
+const CAT_ORDER = ['식재','웰니스','서초주류','펍','네스프레소','콜라보'];
+
+function onMfSiteChange(){
+  const site=document.getElementById('mf_site').value;
+  document.getElementById('mf_gubun').value=site.includes('라운지')?'라운지':site.includes('카페')?'카페':'';
 }
-function addStepInput(containerId){
-  stepCnt++;
-  var c = document.getElementById(containerId);
-  if(!c) return;
-  var d = document.createElement("div"); d.className="step-row"; d.id="sr"+stepCnt;
-  d.innerHTML = "<input class='step-inp' placeholder='단계 이름'><button class='step-rm' onclick=\"document.getElementById('sr"+stepCnt+"').remove()\">✕</button>";
-  c.appendChild(d);
-  d.querySelector("input").focus();
+
+function addMasterItem(){
+  const site  =document.getElementById('mf_site').value.trim();
+  const cat   =document.getElementById('mf_cat').value.trim();
+  const item  =document.getElementById('mf_item').value.trim();
+  const code  =document.getElementById('mf_code').value.trim();
+  const unit  =document.getElementById('mf_unit').value.trim()||'EA';
+  const price =parseFloat(document.getElementById('mf_price').value)||0;
+  const remark=document.getElementById('mf_remark').value.trim();
+  const gubun =document.getElementById('mf_gubun').value;
+  if(!site||!cat||!item){ toast('사이트, 분류, 품목명은 필수입니다.','err'); return; }
+  if(masterData.find(m=>m.item===item&&m.cat===cat)){ toast('이미 등록된 품목입니다.','err'); return; }
+  masterData.push({site,gubun,cat,code,item,unit,price,remark});
+  saveMasterData(); renderMasterTable(); resetMasterForm();
+  toast(`"${item}" 등록 완료`,'ok');
 }
-function submitTask(){
-  var title = (document.getElementById("a-title")||{value:""}).value.trim();
-  if(!title){ toast("업무명을 입력해주세요."); return; }
-  var steps = Array.from(document.querySelectorAll("#a-steps .step-inp"))
-    .map(function(i){ return i.value.trim(); })
-    .filter(Boolean)
-    .map(function(lbl){ return {lbl:lbl, done:false}; });
-  var task = {
-    id:        Date.now(),   /* 고유 숫자 ID */
-    title:     title,
-    cat:       document.getElementById("a-cat").value,
-    pri:       document.getElementById("a-pri").value,
-    status:    document.getElementById("a-sta").value,
-    owner:     document.getElementById("a-own").value||"미지정",
-    dateStart: document.getElementById("a-ds").value,
-    dateEnd:   document.getElementById("a-de").value,
-    note:      document.getElementById("a-note").value.trim(),
-    steps:     steps,
-    order:     Date.now()   /* 최신이 뒤로 가지만 onValue sort로 처리 */
+function resetMasterForm(){
+  ['mf_site','mf_cat','mf_code','mf_item','mf_unit','mf_price','mf_remark','mf_gubun']
+    .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+}
+
+function renderMasterTable(query=''){
+  const q=(query||'').toLowerCase().trim();
+  let data=[...masterData];
+  if(q) data=data.filter(m=>m.item.toLowerCase().includes(q)||(m.code&&m.code.toLowerCase().includes(q)));
+  data.sort((a,b)=>{
+    const ci=CAT_ORDER.indexOf(a.cat)-CAT_ORDER.indexOf(b.cat);
+    return ci!==0?ci:(a.code||'zzz').localeCompare(b.code||'zzz');
+  });
+  const badge=document.getElementById('masterCntBadge');
+  if(badge) badge.textContent=masterData.length+'개';
+  const tbody=document.getElementById('masterTbody');
+  if(!tbody) return;
+  tbody.innerHTML=data.map((m,i)=>{
+    const origIdx=masterData.indexOf(m);
+    return `<tr id="mrow_${origIdx}">
+      <td style="text-align:center;color:#aaa;font-size:11px">${i+1}</td>
+      <td><span class="mcat mcat-${m.cat}">${m.cat}</span></td>
+      <td style="font-family:monospace;font-size:11px;text-align:center;color:${m.code?'#444':'#e53e3e'}">${m.code||'미등록'}</td>
+      <td style="font-weight:500">${m.item}</td>
+      <td style="text-align:center;color:#666">${m.unit||''}</td>
+      <td style="text-align:right;font-family:monospace;font-weight:600">${m.price?(Number.isInteger(m.price)?m.price.toLocaleString():m.price.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:4}))+'원':'—'}</td>
+      <td>${m.remark?`<span class="remark-txt" title="${m.remark}">${m.remark}</span>`:`<span class="remark-empty">—</span>`}</td>
+      <td style="text-align:center">
+        <div style="display:flex;gap:4px;justify-content:center">
+          <button class="btn btn-secondary" style="padding:3px 8px;font-size:11px" onclick="editMasterRow(${origIdx})">✏️</button>
+          <button class="btn btn-danger" style="padding:3px 8px;font-size:11px" onclick="deleteMasterItem(${origIdx})">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function editMasterRow(idx){
+  const m=masterData[idx];
+  const row=document.getElementById('mrow_'+idx);
+  if(!row) return;
+  row.classList.add('editing');
+  const catOpts=CAT_ORDER.map(c=>`<option value="${c}" ${c===m.cat?'selected':''}>${c}</option>`).join('');
+  row.innerHTML=`
+    <td style="text-align:center;font-size:13px">✏️</td>
+    <td><select class="edit-sel" id="ei_cat_${idx}">${catOpts}</select></td>
+    <td><input class="edit-input" id="ei_code_${idx}" value="${m.code||''}" placeholder="코드" style="width:88px"></td>
+    <td><input class="edit-input" id="ei_item_${idx}" value="${m.item}" style="min-width:160px"></td>
+    <td><input class="edit-input" id="ei_unit_${idx}" value="${m.unit||''}" style="width:45px"></td>
+    <td><input class="edit-input" id="ei_price_${idx}" type="number" step="0.01" value="${m.price||0}" style="width:80px"></td>
+    <td><input class="edit-input" id="ei_remark_${idx}" value="${m.remark||''}" placeholder="사전품의 / 비고" style="min-width:160px"></td>
+    <td>
+      <div style="display:flex;gap:3px;justify-content:center">
+        <button class="btn btn-primary" style="padding:3px 8px;font-size:11px" onclick="saveMasterRow(${idx})">💾</button>
+        <button class="btn btn-secondary" style="padding:3px 8px;font-size:11px" onclick="renderMasterTable()">✕</button>
+      </div>
+    </td>`;
+}
+
+function saveMasterRow(idx){
+  const cat   =document.getElementById(`ei_cat_${idx}`).value;
+  const code  =document.getElementById(`ei_code_${idx}`).value.trim();
+  const item  =document.getElementById(`ei_item_${idx}`).value.trim();
+  const unit  =document.getElementById(`ei_unit_${idx}`).value.trim();
+  const price =parseFloat(document.getElementById(`ei_price_${idx}`).value)||0;
+  const remark=document.getElementById(`ei_remark_${idx}`).value.trim();
+  if(!item){ toast('품목명을 입력하세요.','err'); return; }
+  const LOUNGE=['네스프레소','서초주류','웰니스'];
+  const site =LOUNGE.includes(cat)?'크래프톤서초카페점 라운지':'크래프톤서초카페점 카페';
+  const gubun=LOUNGE.includes(cat)?'라운지':'카페';
+  masterData[idx]={site,gubun,cat,code,item,unit,price,remark};
+  saveMasterData(); renderMasterTable(); toast('수정 완료','ok');
+}
+
+function deleteMasterItem(idx){
+  if(!confirm(`"${masterData[idx].item}"을(를) 삭제하시겠습니까?`)) return;
+  masterData.splice(idx,1);
+  saveMasterData(); renderMasterTable(); toast('삭제되었습니다.','err');
+}
+
+function exportMasterJSON(){
+  const a=Object.assign(document.createElement('a'),{
+    href:URL.createObjectURL(new Blob([JSON.stringify(masterData,null,2)],{type:'application/json'})),
+    download:`마스터_${new Date().toISOString().split('T')[0]}.json`
+  });
+  a.click(); toast('마스터 JSON 내보내기 완료','ok');
+}
+function importMasterJSON(){
+  const inp=Object.assign(document.createElement('input'),{type:'file',accept:'.json'});
+  inp.onchange=e=>{
+    const r=new FileReader();
+    r.onload=ev=>{
+      try{
+        const d=JSON.parse(ev.target.result);
+        if(!Array.isArray(d)) throw new Error();
+        masterData=d.map(m=>{return {...m,remark:m.remark||''};  });
+        saveMasterData(); renderMasterTable(); toast(`${masterData.length}개 항목 가져오기 완료`,'ok');
+      }catch{ toast('파일 형식 오류','err'); }
+    };
+    r.readAsText(e.target.files[0]);
   };
-  if(window.DB){
-    DB.ref("tasks").push(task).catch(function(e){ toast("저장 실패: "+e.message); });
-  }
-  document.getElementById("a-title").value = "";
-  document.getElementById("a-note").value  = "";
-  document.getElementById("a-steps").innerHTML = "";
-  addPanelOpen = false;
-  var ap=document.getElementById("add-panel"); if(ap) ap.classList.remove("open");
-  toast("업무가 등록됐어요!");
+  inp.click();
 }
 
-/* =====================================================
-   GOOGLE CALENDAR
-   ===================================================== */
-function gcalFmt(ds){ return ds?ds.replace(/-/g,""):""; }
-function gcalOpen(title, start, end, detail){
-  if(!start){ toast("기간을 설정해주세요."); return; }
-  var s=start, e=end||start;
-  var eNext=e; try{ var dd2=new Date(e); dd2.setDate(dd2.getDate()+1); eNext=dd2.toISOString().split("T")[0]; }catch(ex){}
-  var url="https://calendar.google.com/calendar/render?action=TEMPLATE"
-    +"&text="+encodeURIComponent("[카페] "+title)
-    +"&dates="+gcalFmt(s)+"/"+gcalFmt(eNext)
-    +"&details="+encodeURIComponent(detail);
-  window.open(url,"_blank");
-}
-function gcalTask(key){
-  var t=tasks.find(function(x){ return x._key===key; });
-  if(!t) return;
-  var det="카테고리: "+t.cat+"\n담당자: "+(t.owner||"미지정")+"\n우선순위: "+t.pri+(t.note?"\n\n메모: "+t.note:"")+(t.steps&&t.steps.length?"\n\n진행 단계:\n"+t.steps.map(function(s,i){return (s.done?"✓":"○")+" "+(i+1)+". "+s.lbl;}).join("\n"):"");
-  gcalOpen(t.title, t.dateStart, t.dateEnd, det);
-}
-function gcalFromForm(){
-  var title=(document.getElementById("a-title")||{value:""}).value.trim();
-  if(!title){ toast("업무명을 입력해주세요."); return; }
-  gcalOpen(title, document.getElementById("a-ds").value, document.getElementById("a-de").value, "카테고리: "+document.getElementById("a-cat").value+"\n담당자: "+document.getElementById("a-own").value);
+// ══ 날짜 인라인 편집 ════════════════════════════════════════════════════════
+function editDate(id, cell) {
+  const data = gc();
+  const row  = data.find(r => r.id === id);
+  if (!row) return;
+  const origVal = row.date;
+  cell.innerHTML = `<input type="date" value="${origVal}"
+    style="border:1.5px solid #1a3a5c;border-radius:4px;padding:2px 5px;
+           font-size:11px;font-family:monospace;width:130px;"
+    id="dateInput_${id}"
+    onchange="saveDate(${id}, this)"
+    onblur="saveDate(${id}, this)"
+    onkeydown="if(event.key==='Escape') renderTable()">`;
+  const input = document.getElementById('dateInput_' + id);
+  input.focus();
+  try { input.showPicker(); } catch(e) {}
 }
 
-/* =====================================================
-   CALENDAR VIEW
-   ===================================================== */
-function switchTab(tab){
-  currentTab = tab;
-  document.querySelectorAll(".tab").forEach(function(b){ b.classList.toggle("on", b.dataset.tab===tab); });
-  document.querySelectorAll(".view").forEach(function(v){ v.classList.toggle("on", v.id==="view-"+tab); });
-  if(tab==="cal") renderCal();
-}
-function calPrev(){ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCal(); }
-function calNext(){ calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCal(); }
-function calToday(){ calYear=TODAY.getFullYear(); calMonth=TODAY.getMonth(); renderCal(); }
-function renderCal(){
-  var MN=["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
-  document.getElementById("cal-title").textContent = calYear+"년 "+MN[calMonth];
-  var first=new Date(calYear,calMonth,1);
-  var last=new Date(calYear,calMonth+1,0);
-  var prevLast=new Date(calYear,calMonth,0).getDate();
-  var cells=[];
-  for(var i=first.getDay()-1;i>=0;i--) cells.push({d:prevLast-i,cur:false,dt:new Date(calYear,calMonth-1,prevLast-i)});
-  for(var d=1;d<=last.getDate();d++) cells.push({d:d,cur:true,dt:new Date(calYear,calMonth,d)});
-  var n=1; while(cells.length%7!==0) cells.push({d:n++,cur:false,dt:new Date(calYear,calMonth+1,n-1)});
-  var todayStr = TODAY.toISOString().split("T")[0];
-  document.getElementById("cal-body").innerHTML = cells.map(function(cell){
-    var ds = cell.dt.toISOString().split("T")[0];
-    var isToday = ds===todayStr;
-    var dayTasks = tasks.filter(function(t){
-      var s=t.dateStart||t.dateEnd, e=t.dateEnd||t.dateStart;
-      return s && e && ds>=s && ds<=e;
-    });
-    var evHtml = dayTasks.slice(0,3).map(function(t){
-      var ci=catInfo(t.cat);
-      return "<div class='cal-ev' style='background:"+ci.bg+";color:"+ci.tc+";' onclick='jumpToTask(\""+t._key+"\")' title='"+esc(t.title)+"'>"+esc(t.title)+"</div>";
-    }).join("") + (dayTasks.length>3?"<div class='cal-more'>+"+( dayTasks.length-3)+"개</div>":"");
-    var cls = "cal-cell"+(cell.cur?"":  " other")+(isToday?" today":"");
-    return "<div class='"+cls+"'><div class='cal-dn'>"+cell.d+"</div>"+evHtml+"</div>";
-  }).join("");
-}
-function jumpToTask(key){
-  switchTab("list");
-  statusFilter="all"; catFilter="all";
-  openKeys={};openKeys[key]=true;
-  renderList();
-  setTimeout(function(){ var el=document.getElementById("card-"+key); if(el) el.scrollIntoView({behavior:"smooth",block:"center"}); }, 150);
+function saveDate(id, input) {
+  const newDate = input.value;
+  if (!newDate) { renderTable(); return; }
+  const data = gc();
+  const row  = data.find(r => r.id === id);
+  if (!row || newDate === row.date) { renderTable(); return; }
+  row.date = newDate;
+  sc2(data);
+  renderTable();
+  updateSidebar();
+  toast(`날짜가 ${newDate} 로 수정되었습니다.`, 'ok');
 }
 
-/* =====================================================
-   SETTINGS
-   ===================================================== */
-var PALETTES=[
-  {bg:"#F0FDF4",tc:"#166534"},{bg:"#FFFBEB",tc:"#92400E"},{bg:"#EEF2FF",tc:"#3730A3"},
-  {bg:"#FFF1F2",tc:"#9F1239"},{bg:"#EFF6FF",tc:"#1D4ED8"},{bg:"#F4F4F5",tc:"#3F3F46"},
-  {bg:"#FEF2F2",tc:"#B91C1C"},{bg:"#E0F2FE",tc:"#0C4A6E"},{bg:"#FDF4FF",tc:"#7E22CE"},
-  {bg:"#FFF7ED",tc:"#9A3412"},{bg:"#ECFDF5",tc:"#065F46"},{bg:"#F8FAFC",tc:"#334155"},
-];
-var pickedPal = PALETTES[0];
-function openSettings(){ renderSettings(); document.getElementById("ov-bg").classList.add("open"); }
-function closeSettings(){ document.getElementById("ov-bg").classList.remove("open"); }
-function renderSettings(){
-  var pillsHtml = PALETTES.map(function(p,i){
-    return "<div class='csw"+(p===pickedPal?" sel":"")+"' style='background:"+p.bg+";border-color:"+(p===pickedPal?p.tc:"transparent")+";' onclick='pickPal("+i+")'></div>";
-  }).join("");
-  var catsHtml = meta.cats.map(function(c,i){
-    return "<div class='set-row'><div class='set-swatch' style='background:"+c.tc+"'></div><div class='set-name'>"+esc(c.name)+"</div>" +
-      "<div class='set-mv-wrap'><button class='set-mv' onclick='mvCat("+i+",-1)'>▲</button><button class='set-mv' onclick='mvCat("+i+",1)'>▼</button></div>" +
-      "<button class='set-del' onclick='delCat("+i+")'>✕</button></div>";
-  }).join("");
-  var prisHtml = meta.pris.map(function(p,i){
-    return "<div class='set-row'><div class='set-swatch' style='background:"+p.tc+"'></div><div class='set-name'>"+esc(p.name)+"</div>" +
-      "<div class='set-mv-wrap'><button class='set-mv' onclick='mvPri("+i+",-1)'>▲</button><button class='set-mv' onclick='mvPri("+i+",1)'>▼</button></div>" +
-      "<button class='set-del' onclick='delPri("+i+")'>✕</button></div>";
-  }).join("");
-  var ownsHtml = meta.owners.map(function(o,i){
-    return "<div class='set-row'><div class='set-swatch' style='background:#A1A1AA'></div><div class='set-name'>"+esc(o)+"</div>" +
-      "<button class='set-del' onclick='delOwn("+i+")'>✕</button></div>";
-  }).join("");
-  document.getElementById("set-body").innerHTML =
-    "<div><div class='set-col-title'>카테고리</div>"+catsHtml+"<div class='color-swatches'>"+pillsHtml+"</div>"+
-    "<div class='set-add'><input class='set-inp' id='inp-cat' placeholder='카테고리 이름'><button class='set-add-btn' onclick='addCat()'>추가</button></div></div>"+
-    "<div><div class='set-col-title'>우선순위 (위=높음)</div>"+prisHtml+"<div class='color-swatches'>"+pillsHtml+"</div>"+
-    "<div class='set-add'><input class='set-inp' id='inp-pri' placeholder='우선순위 이름'><button class='set-add-btn' onclick='addPri()'>추가</button></div></div>"+
-    "<div><div class='set-col-title'>담당자</div>"+ownsHtml+
-    "<div class='set-add'><input class='set-inp' id='inp-own' placeholder='담당자 이름'><button class='set-add-btn' onclick='addOwn()'>추가</button></div></div>";
+// ══ 수량 인라인 편집 ════════════════════════════════════════════════════════
+function editQty(id, cell) {
+  const data = gc();
+  const row  = data.find(r => r.id === id);
+  if (!row) return;
+
+  const origVal = row.qty;
+  cell.innerHTML = `<input type="number" min="1" value="${origVal}"
+    style="width:60px;text-align:right;border:1.5px solid #1a3a5c;border-radius:4px;
+           padding:2px 5px;font-size:12px;font-family:monospace;"
+    id="qtyInput_${id}"
+    onblur="saveQty(${id}, this)"
+    onkeydown="if(event.key==='Enter') this.blur(); if(event.key==='Escape') cancelQty(${id},${origVal})">`;
+
+  const input = document.getElementById('qtyInput_' + id);
+  input.focus();
+  input.select();
 }
-function pickPal(i){ pickedPal=PALETTES[i]; renderSettings(); }
-function saveMeta(){ if(window.DB) DB.ref("meta").set(meta); renderList(); }
-function addCat(){ var v=(document.getElementById("inp-cat")||{value:""}).value.trim(); if(!v||meta.cats.find(function(c){return c.name===v;})){toast("이름을 확인해주세요.");return;} meta.cats.push({name:v,bg:pickedPal.bg,tc:pickedPal.tc}); saveMeta(); document.getElementById("inp-cat").value=""; renderSettings(); }
-function delCat(i){ if(!confirm("삭제?"))return; meta.cats.splice(i,1); saveMeta(); renderSettings(); }
-function mvCat(i,d){ var a=meta.cats,n=i+d; if(n<0||n>=a.length)return; var tmp=a[i];a[i]=a[n];a[n]=tmp; saveMeta(); renderSettings(); }
-function addPri(){ var v=(document.getElementById("inp-pri")||{value:""}).value.trim(); if(!v||meta.pris.find(function(p){return p.name===v;})){toast("이름을 확인해주세요.");return;} meta.pris.push({name:v,bg:pickedPal.bg,tc:pickedPal.tc}); saveMeta(); document.getElementById("inp-pri").value=""; renderSettings(); }
-function delPri(i){ if(!confirm("삭제?"))return; meta.pris.splice(i,1); saveMeta(); renderSettings(); }
-function mvPri(i,d){ var a=meta.pris,n=i+d; if(n<0||n>=a.length)return; var tmp=a[i];a[i]=a[n];a[n]=tmp; saveMeta(); renderSettings(); }
-function addOwn(){ var v=(document.getElementById("inp-own")||{value:""}).value.trim(); if(!v||meta.owners.indexOf(v)>=0){toast("이름을 확인해주세요.");return;} meta.owners.push(v); saveMeta(); document.getElementById("inp-own").value=""; renderSettings(); }
-function delOwn(i){ if(!confirm("삭제?"))return; meta.owners.splice(i,1); saveMeta(); renderSettings(); }
+
+function saveQty(id, input) {
+  const newQty = parseInt(input.value) || 0;
+  if (newQty <= 0) { cancelQty(id, parseInt(input.defaultValue)); return; }
+  const data = gc();
+  const row  = data.find(r => r.id === id);
+  if (!row) return;
+  if (newQty === row.qty) { renderTable(); return; }
+  row.qty    = newQty;
+  row.amount = newQty * row.price;
+  sc2(data);
+  renderTable();
+  updateSidebar();
+  toast(`수량 ${newQty.toLocaleString()} 으로 수정되었습니다.`, 'ok');
+}
+
+function cancelQty(id, origVal) {
+  renderTable();
+}
+
+// ══ 토스트 ═══════════════════════════════════════════════════════════════════
+function toast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=(type==='ok'?'✓  ':'✗  ')+msg;
+  t.className=`toast ${type} show`;
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ══ 초기화 ═══════════════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', ()=>{
+  masterData = loadMasterData();
+
+  // ── 5월 전체 구매내역 주입 ──
+  (function(){
+    const KEY = 'kc_2026_4';
+    localStorage.setItem(KEY, JSON.stringify([{"id": 1778900000100, "date": "2026-05-04", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "네스프레소", "code": "", "item": "네스프레소", "unit": "EA", "qty": 1, "price": 2720000, "amount": 2720000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000101, "date": "2026-04-22", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "", "item": "우성_디카이퍼 트리플색", "unit": "EA", "qty": 1, "price": 23000, "amount": 23000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000102, "date": "2026-04-22", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00036", "item": "우성_디카이퍼 피치트리", "unit": "EA", "qty": 2, "price": 23000, "amount": 46000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000103, "date": "2026-04-28", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00117", "item": "우성_우드브릿지 쇼비뇽블랑", "unit": "EA", "qty": 6, "price": 17300, "amount": 103800, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000104, "date": "2026-05-11", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00110", "item": "우성_잭 다니엘 애플", "unit": "EA", "qty": 2, "price": 43500, "amount": 87000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000105, "date": "2026-05-15", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00019", "item": "우성_미도리", "unit": "EA", "qty": 2, "price": 32100, "amount": 64200, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000106, "date": "2026-05-15", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00078", "item": "우성_라 스피네타 모스카토 다스티", "unit": "EA", "qty": 6, "price": 29400, "amount": 176400, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000107, "date": "2026-05-15", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00110", "item": "우성_잭 다니엘 애플", "unit": "EA", "qty": 1, "price": 43500, "amount": 43500, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000108, "date": "2026-04-28", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00004", "item": "우성_기린이치방캔", "unit": "EA", "qty": 24, "price": 1725, "amount": 41400, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000109, "date": "2026-04-28", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00127", "item": "우성_빅웨이브캔", "unit": "EA", "qty": 24, "price": 3108, "amount": 74600, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000110, "date": "2026-04-28", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00003", "item": "우성_아사히", "unit": "EA", "qty": 24, "price": 2175, "amount": 52200, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000111, "date": "2026-04-28", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00129", "item": "우성_카스", "unit": "EA", "qty": 24, "price": 1558, "amount": 37400, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000112, "date": "2026-04-28", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00132", "item": "우성_에비스캔", "unit": "EA", "qty": 24, "price": 2854, "amount": 68500, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000113, "date": "2026-05-06", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00127", "item": "우성_빅웨이브캔", "unit": "EA", "qty": 24, "price": 3108, "amount": 74600, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000114, "date": "2026-05-06", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00009", "item": "우성_제주위트에일캔", "unit": "EA", "qty": 24, "price": 1696, "amount": 40700, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000115, "date": "2026-05-06", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00101", "item": "우성_짐빔하이볼 레몬", "unit": "EA", "qty": 24, "price": 2104, "amount": 50500, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000116, "date": "2026-05-06", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00129", "item": "우성_카스", "unit": "EA", "qty": 48, "price": 1558, "amount": 74800, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000117, "date": "2026-05-06", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00132", "item": "우성_에비스캔", "unit": "EA", "qty": 48, "price": 2854, "amount": 137000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000118, "date": "2026-05-11", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00004", "item": "우성_기린이치방캔", "unit": "EA", "qty": 24, "price": 1725, "amount": 41400, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000119, "date": "2026-05-11", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00007", "item": "우성_크로넨버그 블랑 1664", "unit": "EA", "qty": 24, "price": 2208, "amount": 53000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000120, "date": "2026-05-11", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00127", "item": "우성_빅웨이브캔", "unit": "EA", "qty": 24, "price": 3108, "amount": 74600, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000121, "date": "2026-05-11", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00003", "item": "우성_아사히", "unit": "EA", "qty": 24, "price": 2175, "amount": 52200, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000122, "date": "2026-05-11", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00101", "item": "우성_짐빔하이볼 레몬", "unit": "EA", "qty": 24, "price": 2104, "amount": 50500, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000123, "date": "2026-05-15", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00068", "item": "우성_기네스", "unit": "EA", "qty": 48, "price": 3142, "amount": 150800, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000124, "date": "2026-05-15", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00004", "item": "우성_기린이치방캔", "unit": "EA", "qty": 48, "price": 1725, "amount": 82800, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000125, "date": "2026-05-15", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00007", "item": "우성_크로넨버그 블랑 1664", "unit": "EA", "qty": 24, "price": 2208, "amount": 53000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000126, "date": "2026-05-15", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00127", "item": "우성_빅웨이브캔", "unit": "EA", "qty": 24, "price": 3108, "amount": 74600, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000127, "date": "2026-05-15", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00003", "item": "우성_아사히", "unit": "EA", "qty": 24, "price": 2175, "amount": 52200, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000128, "date": "2026-05-15", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00101", "item": "우성_짐빔하이볼 레몬", "unit": "EA", "qty": 24, "price": 2104, "amount": 50500, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000129, "date": "2026-05-15", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00129", "item": "우성_카스", "unit": "EA", "qty": 24, "price": 1558, "amount": 37400, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000130, "date": "2026-05-15", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00132", "item": "우성_에비스캔", "unit": "EA", "qty": 48, "price": 2854, "amount": 137000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000131, "date": "2026-05-15", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00136", "item": "우성_필스너우르켈", "unit": "EA", "qty": 48, "price": 3625, "amount": 174000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000132, "date": "2026-05-01", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "TS100174", "item": "비브리브_레몬즙(14EA)", "unit": "EA", "qty": 56, "price": 6800, "amount": 380800, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000133, "date": "2026-05-01", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "OT0030", "item": "비브리브_꼬박꼬밥 말차맛(7EA)", "unit": "EA", "qty": 70, "price": 2071, "amount": 145000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000134, "date": "2026-05-06", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "TS100174", "item": "비브리브_레몬즙(14EA)", "unit": "EA", "qty": 28, "price": 6800, "amount": 190400, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000135, "date": "2026-05-01", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "TS100175", "item": "이야이야_엑스트라버진 올리브오일 스틱형(15EA)", "unit": "EA", "qty": 40, "price": 20200, "amount": 808000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000136, "date": "2026-05-15", "site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "TS100175", "item": "이야이야_엑스트라버진 올리브오일 스틱형(15EA)", "unit": "EA", "qty": 40, "price": 20200, "amount": 808000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000137, "date": "2026-05-06", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "W00077", "item": "엠케이펍_제주누보", "unit": "EA", "qty": 24, "price": 1936, "amount": 46464, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000138, "date": "2026-05-12", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100051", "item": "TWG_그랜드웨딩(200EA)", "unit": "BOX", "qty": 1, "price": 210000, "amount": 210000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000139, "date": "2026-05-12", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100052", "item": "TWG_루이보스 자스민(200EA)", "unit": "BOX", "qty": 1, "price": 210000, "amount": 210000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000140, "date": "2026-05-12", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100058", "item": "TWG_그나와 민트(200EA)", "unit": "BOX", "qty": 1, "price": 210000, "amount": 210000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000141, "date": "2026-05-12", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100020", "item": "TWG_프렌치얼그레이(200EA)", "unit": "BOX", "qty": 2, "price": 210000, "amount": 420000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000142, "date": "2026-05-12", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100019", "item": "TWG_카모마일(200EA)", "unit": "BOX", "qty": 1, "price": 210000, "amount": 210000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000143, "date": "2026-05-12", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0045", "item": "타바론_후르츠드림", "unit": "EA", "qty": 2, "price": 30000, "amount": 60000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000144, "date": "2026-05-13", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100125", "item": "홀블렌딩_식물성 단백질 쉐이크 블랙빈", "unit": "EA", "qty": 8, "price": 22727, "amount": 181818, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000145, "date": "2026-05-13", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "홀블렌딩_식물성 단백질 쉐이크 카카오", "unit": "EA", "qty": 4, "price": 21818, "amount": 87273, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000146, "date": "2026-05-13", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "H000011", "item": "광양매실청", "unit": "EA", "qty": 1, "price": 285000, "amount": 285000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000147, "date": "2026-05-15", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100111", "item": "파미유_떠먹는 고구마케익(6p)", "unit": "EA", "qty": 24, "price": 2700, "amount": 64800, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000148, "date": "2026-05-15", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100097", "item": "파미유_떠먹는 오레오케익(8p)", "unit": "EA", "qty": 24, "price": 3700, "amount": 88800, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000149, "date": "2026-05-15", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "M100010", "item": "엠즈베이커스_미니바스크치즈케이크(6EA)", "unit": "EA", "qty": 24, "price": 2300, "amount": 55200, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000150, "date": "2026-05-15", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "135435", "item": "엠즈베이커스_프로마쥬클래식(6EA)", "unit": "EA", "qty": 24, "price": 2950, "amount": 70800, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000151, "date": "2026-05-09", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "AW00128", "item": "모모스커피_콜드브루 원액 디카페인(1000ml)", "unit": "EA", "qty": 10, "price": 21818, "amount": 218182, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000152, "date": "2026-05-19", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "AW00128", "item": "모모스커피_콜드브루 원액 디카페인(1000ml)", "unit": "EA", "qty": 10, "price": 21818, "amount": 218182, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000153, "date": "2026-05-04", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_블렌드 1kg", "unit": "EA", "qty": 2, "price": 28000, "amount": 56000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000154, "date": "2026-05-04", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_다크 브라질 1kg", "unit": "EA", "qty": 1, "price": 27000, "amount": 27000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000155, "date": "2026-05-04", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_고고구 에티오피아 1kg", "unit": "EA", "qty": 1, "price": 47300, "amount": 47300, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000156, "date": "2026-05-04", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_시티오 베르젬 그란데 브라질 1kg", "unit": "EA", "qty": 1, "price": 40700, "amount": 40700, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000157, "date": "2026-05-04", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_블렌드 1kg", "unit": "EA", "qty": 1, "price": 28000, "amount": 28000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000158, "date": "2026-05-04", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_다크 브라질 1kg", "unit": "EA", "qty": 1, "price": 27000, "amount": 27000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000159, "date": "2026-05-04", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_고고구 에티오피아 1kg", "unit": "EA", "qty": 1, "price": 47300, "amount": 47300, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000160, "date": "2026-05-04", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_시티오 베르젬 그란데 브라질 1kg", "unit": "EA", "qty": 1, "price": 40700, "amount": 40700, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000161, "date": "2026-05-04", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_블렌드 1kg", "unit": "EA", "qty": 30, "price": 28000, "amount": 840000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000162, "date": "2026-05-04", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_다크 브라질 1kg", "unit": "EA", "qty": 3, "price": 27000, "amount": 81000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000163, "date": "2026-05-04", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_고고구 에티오피아 1kg", "unit": "EA", "qty": 6, "price": 47300, "amount": 283800, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000164, "date": "2026-05-04", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_시티오 베르젬 그란데 브라질 1kg", "unit": "EA", "qty": 6, "price": 40700, "amount": 244200, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000165, "date": "2026-05-06", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_블렌드 1kg", "unit": "EA", "qty": 45, "price": 28000, "amount": 1260000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000166, "date": "2026-05-06", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_다크 브라질 1kg", "unit": "EA", "qty": 4, "price": 27000, "amount": 108000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000167, "date": "2026-05-06", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_고고구 에티오피아 1kg", "unit": "EA", "qty": 6, "price": 47300, "amount": 283800, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000168, "date": "2026-05-06", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_시티오 베르젬 그란데 브라질 1kg", "unit": "EA", "qty": 4, "price": 40700, "amount": 162800, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000169, "date": "2026-05-07", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_블렌드 1kg", "unit": "EA", "qty": 25, "price": 28000, "amount": 700000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000170, "date": "2026-05-18", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_블렌드 1kg", "unit": "EA", "qty": 20, "price": 28000, "amount": 560000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000171, "date": "2026-05-18", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_다크 브라질 1kg", "unit": "EA", "qty": 2, "price": 27000, "amount": 54000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000172, "date": "2026-05-18", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_라 라하 멕시코", "unit": "EA", "qty": 6, "price": 41818, "amount": 250909, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}, {"id": 1778900000173, "date": "2026-05-18", "site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_핀카 단토 라이트 허니 코스타리카", "unit": "EA", "qty": 6, "price": 60000, "amount": 360000, "d1": false, "d2": false, "d3": false, "d4": false, "d5": false}]));
+  })();
+
+  resetForm();
+  renderTabs();
+  switchMonth(CM);
+});
 </script>
-
-<!-- Firebase -->
-<script>
-(function(){
-  function pill(ok,msg){
-    var el=document.getElementById("fb-pill");if(!el)return;
-    el.textContent=msg;
-    el.style.background=ok?"#F0FDF4":"#FEF2F2";
-    el.style.color=ok?"#166534":"#B91C1C";
-    el.style.borderColor=ok?"#BBF7D0":"#FECACA";
-  }
-  firebase.initializeApp({
-    apiKey:"AIzaSyAjIPF7CMOi3lJlMNrBnGSQY1OE9PJeNwE",
-    authDomain:"krafton-cafe.firebaseapp.com",
-    databaseURL:"https://krafton-cafe-default-rtdb.firebaseio.com",
-    projectId:"krafton-cafe",
-    storageBucket:"krafton-cafe.firebasestorage.app",
-    messagingSenderId:"317328174234",
-    appId:"1:317328174234:web:de2450f55ec0364edf0323"
-  });
-  window.DB = firebase.database();
-
-  /* tasks 리스너 */
-  DB.ref("tasks").on("value", function(snap){
-    var val = snap.val();
-    tasks = val
-      ? Object.entries(val).map(function(kv){
-          var t = Object.assign({}, kv[1]);
-          t._key = kv[0];
-          if(!Array.isArray(t.steps)) t.steps = [];
-          return t;
-        }).sort(function(a,b){ return (a.order||0)-(b.order||0); })
-      : [];
-    fbLoaded = true; // 이제부터 renderList 허용
-    renderList();
-    pill(true, "🟢 실시간 연결됨");
-  }, function(err){ pill(false,"🔴 오류: "+err.message); });
-
-  /* meta 리스너 */
-  DB.ref("meta").on("value", function(snap){
-    var val = snap.val();
-    if(val && val.cats && val.pris && val.owners){
-      meta = val;
-      renderList();
-    }
-  });
-
-  /* 날짜 */
-  var now = new Date();
-  var el = document.getElementById("sb-date");
-  if(el) el.textContent = now.getFullYear()+"년 "+(now.getMonth()+1)+"월 "+now.getDate()+"일 ("+WD[now.getDay()]+")";
-})();
-</script>
-
-
-</body></html>
+</body>
+</html>
