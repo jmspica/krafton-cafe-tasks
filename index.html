@@ -1411,20 +1411,7 @@ function toast(msg,type='ok'){
 }
 
 // ══ 초기화 ═══════════════════════════════════════════════════════════════════
-window.addEventListener('DOMContentLoaded', async ()=>{
-  showLoading(true);
-  await loadMasterData();
-  await loadMonthData(CM);
-  // 나머지 월 배지용 백그라운드 로드
-  Promise.all(MONTHS.map((_,i) => i !== CM ? loadMonthData(i) : Promise.resolve()));
-  showLoading(false);
-  resetForm();
-  renderTabs();
-  renderTable();
-  updateSidebar();
-  document.getElementById('tblTitle').textContent = MONTHS[CM] + ' 구매 내역';
-  setupRealtimeSync();
-});
+
 </script>
 <script type="module">
 // ── Firebase SDK ──────────────────────────────────────────────────────────────
@@ -1496,7 +1483,9 @@ async function loadMonthData(month) {
     const snap = await get(ref(db, `purchase/${YEAR}/${month}`));
     if (snap.exists()) {
       const val = snap.val();
-      localCache[month] = Array.isArray(val) ? val : Object.values(val);
+      const arr = Array.isArray(val) ? val : Object.values(val);
+      // undefined/null 항목 필터링
+      localCache[month] = arr.filter(r => r && r.id && r.item);
     } else {
       localCache[month] = [];
     }
@@ -1508,11 +1497,13 @@ async function loadMonthData(month) {
 }
 
 async function saveMonthData(month, data) {
-  localCache[month] = data;
+  // undefined/null 항목 제거 후 저장
+  const clean = (data || []).filter(r => r && r.id && r.item);
+  localCache[month] = clean;
   try {
     const obj = {};
-    data.forEach((r, i) => { obj[i] = r; });
-    await set(ref(db, `purchase/${YEAR}/${month}`), data.length > 0 ? obj : null);
+    clean.forEach((r, i) => { obj[i] = r; });
+    await set(ref(db, `purchase/${YEAR}/${month}`), clean.length > 0 ? obj : null);
   } catch(e) { console.error('구매 저장 실패:', e); }
 }
 
@@ -2102,6 +2093,27 @@ window.editMasterRow=editMasterRow; window.saveMasterRow=saveMasterRow;
 window.deleteMasterItem=deleteMasterItem;
 window.exportMasterJSON=exportMasterJSON; window.importMasterJSON=importMasterJSON;
 window.setupRealtimeSync=setupRealtimeSync;
+
+// ══ 초기화 ══════════════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', async () => {
+  showLoading(true);
+  try {
+    await loadMasterData();
+    await loadMonthData(CM);
+    // 나머지 월 배지용 백그라운드 로드
+    Promise.all(MONTHS.map((_, i) => i !== CM ? loadMonthData(i) : Promise.resolve()));
+  } catch(e) {
+    console.error('초기화 오류:', e);
+  }
+  showLoading(false);
+  resetForm();
+  renderTabs();
+  renderTable();
+  updateSidebar();
+  document.getElementById('tblTitle').textContent = MONTHS[CM] + ' 구매 내역';
+  setupRealtimeSync();
+});
+
 </script>
 </body>
 </html>
