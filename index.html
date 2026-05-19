@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>☕ 크래프톤 서초카페 현지구매 관리대장</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -344,6 +344,108 @@ tbody td.code{font-family:monospace;font-size:11px;color:#666;text-align:center}
   font-size:11px; color:#888; font-family:monospace; text-align:left;
 }
 
+
+/* ══ 모바일 반응형 (768px 이하) ══════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* 헤더 */
+  .header { height:48px; padding:0 12px; }
+  .header-logo .title { font-size:13px; }
+  .header-logo .sub { display:none; }
+  .header-actions { gap:5px; }
+  .header-actions .btn { display:none; }
+  /* 모바일에서 헤더 액션은 Excel만 표시 */
+  .header-actions .btn-excel { display:inline-flex !important; padding:5px 10px; font-size:11px; }
+
+  /* 페이지 탭 */
+  .page-tab-bar { height:36px; padding:0 8px; }
+  .page-tab-btn { padding:6px 14px; font-size:11px; }
+
+  /* 월 탭 */
+  .month-tabs { padding:0 8px; }
+  .month-tab { padding:8px 10px; font-size:11px; }
+
+  /* 메인 레이아웃 - 사이드바 숨김 */
+  .main { flex-direction:column; height:auto !important; }
+  .sidebar { display:none; }
+  .content { padding:10px 12px; overflow:visible; }
+
+  /* 앱 페이지 높이 자동 */
+  .app-page { height:auto !important; min-height:100vh; }
+  #appPurchase { height:auto !important; }
+
+  /* 입력 폼 */
+  .form-card { padding:12px; }
+  .form-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap:8px;
+  }
+  .form-grid .fg:nth-child(1) { grid-column: 1 / -1; } /* 입고일 전체 폭 */
+  .form-grid .fg:nth-child(2) { grid-column: 1 / -1; } /* 사이트 전체 폭 */
+  .form-grid .fg:nth-child(5) { grid-column: 1 / -1; } /* 품목 전체 폭 */
+  .form-row { justify-content:flex-end; }
+
+  /* 필터 바 */
+  .filter-bar { padding:8px; gap:6px; flex-wrap:wrap; }
+  .filter-bar label { font-size:10px; }
+  .filter-input { width:100px !important; font-size:11px; }
+  .filter-select { min-width:70px; font-size:11px; }
+  .filter-divider { display:none; }
+
+  /* 테이블 → 카드형 */
+  .tbl-card { border-radius:8px; }
+  .tbl-header { padding:10px 12px; }
+  .tbl-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+
+  table { font-size:11px; min-width:900px; }
+  thead th { padding:6px 8px; font-size:10px; }
+  tbody td { padding:6px 8px; }
+
+  /* 마스터 관리 */
+  .master-scroll { padding:10px 12px; }
+  .mf-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap:8px;
+  }
+  .mf-grid .fg:nth-child(1) { grid-column:1/-1; }
+  .mf-grid .fg:nth-child(5) { grid-column:1/-1; }
+  .mt-body { max-height:none; }
+  .mt-body table { min-width:700px; }
+
+  /* 모바일 하단 요약 바 */
+  .mobile-summary {
+    display:flex !important;
+    position:fixed; bottom:0; left:0; right:0; z-index:50;
+    background:#1a3a5c; color:#fff;
+    padding:8px 16px; gap:16px; align-items:center;
+    box-shadow:0 -2px 10px rgba(0,0,0,.2);
+  }
+  .mobile-summary .ms-item { display:flex; flex-direction:column; align-items:center; }
+  .mobile-summary .ms-label { font-size:9px; color:rgba(255,255,255,.7); }
+  .mobile-summary .ms-value { font-size:13px; font-weight:700; font-family:monospace; }
+  .mobile-summary .ms-total { flex:1; text-align:right; }
+  .mobile-summary .ms-total .ms-value { font-size:14px; color:#7dd3fc; }
+
+  /* 하단 바 공간 확보 */
+  .content { padding-bottom:70px; }
+  .master-scroll { padding-bottom:70px; }
+
+  /* 합계 행 모바일 */
+  .sum-row td { font-size:11px; padding:6px 8px; }
+  .sum-row .sum-value { font-size:12px; }
+}
+
+/* 모바일 하단 요약 바 - 기본적으로 숨김 (PC에서) */
+.mobile-summary { display:none; }
+
+/* 터치 피드백 */
+@media (max-width: 768px) {
+  .month-tab:active { background:rgba(26,58,92,.1); }
+  .item-option:active { background:#dbeafe; }
+  .btn:active { opacity:.8; transform:scale(.97); }
+  .chk-btn { width:28px; height:28px; } /* 터치 영역 확대 */
+}
+
 </style>
 
 <!-- 추가 CSS -->
@@ -507,6 +609,108 @@ tbody td.code{font-family:monospace;font-size:11px;color:#666;text-align:center}
 }
 .sum-row .sum-cnt {
   font-size:11px; color:#888; font-family:monospace; text-align:left;
+}
+
+
+/* ══ 모바일 반응형 (768px 이하) ══════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* 헤더 */
+  .header { height:48px; padding:0 12px; }
+  .header-logo .title { font-size:13px; }
+  .header-logo .sub { display:none; }
+  .header-actions { gap:5px; }
+  .header-actions .btn { display:none; }
+  /* 모바일에서 헤더 액션은 Excel만 표시 */
+  .header-actions .btn-excel { display:inline-flex !important; padding:5px 10px; font-size:11px; }
+
+  /* 페이지 탭 */
+  .page-tab-bar { height:36px; padding:0 8px; }
+  .page-tab-btn { padding:6px 14px; font-size:11px; }
+
+  /* 월 탭 */
+  .month-tabs { padding:0 8px; }
+  .month-tab { padding:8px 10px; font-size:11px; }
+
+  /* 메인 레이아웃 - 사이드바 숨김 */
+  .main { flex-direction:column; height:auto !important; }
+  .sidebar { display:none; }
+  .content { padding:10px 12px; overflow:visible; }
+
+  /* 앱 페이지 높이 자동 */
+  .app-page { height:auto !important; min-height:100vh; }
+  #appPurchase { height:auto !important; }
+
+  /* 입력 폼 */
+  .form-card { padding:12px; }
+  .form-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap:8px;
+  }
+  .form-grid .fg:nth-child(1) { grid-column: 1 / -1; } /* 입고일 전체 폭 */
+  .form-grid .fg:nth-child(2) { grid-column: 1 / -1; } /* 사이트 전체 폭 */
+  .form-grid .fg:nth-child(5) { grid-column: 1 / -1; } /* 품목 전체 폭 */
+  .form-row { justify-content:flex-end; }
+
+  /* 필터 바 */
+  .filter-bar { padding:8px; gap:6px; flex-wrap:wrap; }
+  .filter-bar label { font-size:10px; }
+  .filter-input { width:100px !important; font-size:11px; }
+  .filter-select { min-width:70px; font-size:11px; }
+  .filter-divider { display:none; }
+
+  /* 테이블 → 카드형 */
+  .tbl-card { border-radius:8px; }
+  .tbl-header { padding:10px 12px; }
+  .tbl-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+
+  table { font-size:11px; min-width:900px; }
+  thead th { padding:6px 8px; font-size:10px; }
+  tbody td { padding:6px 8px; }
+
+  /* 마스터 관리 */
+  .master-scroll { padding:10px 12px; }
+  .mf-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap:8px;
+  }
+  .mf-grid .fg:nth-child(1) { grid-column:1/-1; }
+  .mf-grid .fg:nth-child(5) { grid-column:1/-1; }
+  .mt-body { max-height:none; }
+  .mt-body table { min-width:700px; }
+
+  /* 모바일 하단 요약 바 */
+  .mobile-summary {
+    display:flex !important;
+    position:fixed; bottom:0; left:0; right:0; z-index:50;
+    background:#1a3a5c; color:#fff;
+    padding:8px 16px; gap:16px; align-items:center;
+    box-shadow:0 -2px 10px rgba(0,0,0,.2);
+  }
+  .mobile-summary .ms-item { display:flex; flex-direction:column; align-items:center; }
+  .mobile-summary .ms-label { font-size:9px; color:rgba(255,255,255,.7); }
+  .mobile-summary .ms-value { font-size:13px; font-weight:700; font-family:monospace; }
+  .mobile-summary .ms-total { flex:1; text-align:right; }
+  .mobile-summary .ms-total .ms-value { font-size:14px; color:#7dd3fc; }
+
+  /* 하단 바 공간 확보 */
+  .content { padding-bottom:70px; }
+  .master-scroll { padding-bottom:70px; }
+
+  /* 합계 행 모바일 */
+  .sum-row td { font-size:11px; padding:6px 8px; }
+  .sum-row .sum-value { font-size:12px; }
+}
+
+/* 모바일 하단 요약 바 - 기본적으로 숨김 (PC에서) */
+.mobile-summary { display:none; }
+
+/* 터치 피드백 */
+@media (max-width: 768px) {
+  .month-tab:active { background:rgba(26,58,92,.1); }
+  .item-option:active { background:#dbeafe; }
+  .btn:active { opacity:.8; transform:scale(.97); }
+  .chk-btn { width:28px; height:28px; } /* 터치 영역 확대 */
 }
 
 </style>
@@ -779,6 +983,23 @@ tbody td.code{font-family:monospace;font-size:11px;color:#666;text-align:center}
         </table>
       </div>
     </div>
+  </div>
+</div>
+
+
+<!-- 모바일 하단 요약 바 -->
+<div class="mobile-summary" id="mobileSummary">
+  <div class="ms-item">
+    <span class="ms-label">건수</span>
+    <span class="ms-value" id="ms_cnt">0</span>
+  </div>
+  <div class="ms-item">
+    <span class="ms-label">미처리</span>
+    <span class="ms-value" id="ms_inc" style="color:#fca5a5">0</span>
+  </div>
+  <div class="ms-total ms-item">
+    <span class="ms-label">총 구매금액</span>
+    <span class="ms-value" id="ms_total">₩ 0</span>
   </div>
 </div>
 
@@ -1211,6 +1432,14 @@ function updateSidebar(){
   const ms=Object.entries(merchants).sort((a,b)=>b[1]-a[1]);
   document.getElementById('merchantSummary').innerHTML=ms.length===0?'<div style="color:#aaa;font-size:11px">데이터 없음</div>':
     ms.map(([n,a])=>`<div class="mchnt-row"><span class="mchnt-name" title="${n}">${n}</span><span class="mchnt-amt">${Math.round(a).toLocaleString()}원</span></div>`).join('');
+
+  // 모바일 하단 요약 바 업데이트
+  const msCnt   = document.getElementById('ms_cnt');
+  const msInc   = document.getElementById('ms_inc');
+  const msTotal = document.getElementById('ms_total');
+  if(msCnt)   msCnt.textContent   = data.length;
+  if(msInc)   msInc.textContent   = inc;
+  if(msTotal) msTotal.textContent = '₩ ' + total.toLocaleString('ko-KR');
 }
 
 // ══ Excel 내보내기 ══
@@ -1243,7 +1472,7 @@ function exportXLSX(){
   });
   // 합계행 수식
   const sumCell=`K${sorted.length+2}`;
-  ws[sumCell]={t:'n',f:`SUM(K2:K${DR+1})`,v:sorted.reduce((s,r)=>s+r.amount,0),s:ws[sumCell]?.s};
+  ws[sumCell]={t:'n',f:`SUM(K2:K${sorted.length+1})`,v:sorted.reduce((s,r)=>s+r.amount,0),s:ws[sumCell]?.s};
   ws['!cols']=[{wch:5},{wch:12},{wch:22},{wch:8},{wch:10},{wch:11},{wch:42},{wch:6},{wch:9},{wch:11},{wch:13},{wch:6},{wch:8},{wch:10},{wch:6},{wch:6},{wch:6},{wch:6},{wch:6}];
   ws['!rows']=[{hpt:28}];sorted.forEach(()=>ws['!rows'].push({hpt:20}));ws['!rows'].push({hpt:22});
   const cols='ABCDEFGHIJKLMNOPQRS'.split('');
@@ -1497,6 +1726,17 @@ window.addEventListener('DOMContentLoaded', async () => {
   updateSidebar();
   document.getElementById('tblTitle').textContent = MONTHS[CM] + ' 구매 내역';
   setupRealtimeSync();
+
+  // 모바일: 하단 요약 바 표시
+  const mobileSummary = document.getElementById('mobileSummary');
+  if(mobileSummary && window.innerWidth <= 768) {
+    mobileSummary.style.display = 'flex';
+  }
+  window.addEventListener('resize', ()=>{
+    if(mobileSummary) {
+      mobileSummary.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
+    }
+  });
 });
 
 </script>
