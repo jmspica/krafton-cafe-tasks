@@ -1417,9 +1417,9 @@ function renderTable(){
       <td class="num" style="cursor:pointer;text-decoration:underline dotted #aaa" title="클릭하여 수량 수정" onclick="editQty(${r.id},this)">${r.qty.toLocaleString()}</td>
       <td class="num" style="cursor:pointer;text-decoration:underline dotted #aaa" title="클릭하여 단가 수정" onclick="editPrice(${r.id},this)">${Number.isInteger(r.price)?r.price.toLocaleString():r.price.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:4})}</td>
       <td class="num" style="font-weight:600">${r.amount.toLocaleString()}</td>
-      <td class="center" style="font-size:11px">서초</td>
-      <td class="center" style="font-size:11px">${r.gubun||''}</td>
-      <td class="center"><span class="${catCls}">${r.cat}</span></td>
+      <td class="center" style="font-size:13px">서초</td>
+      <td class="center" style="font-size:13px">${r.gubun||''}</td>
+      <td class="center" style="font-size:13px"><span class="${catCls}">${r.cat}</span></td>
       ${checks}
       <td class="center"><button class="btn btn-danger btn-sm" onclick="delRow(${r.id})" style="padding:2px 6px">✕</button></td>
     </tr>`;
