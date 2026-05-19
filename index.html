@@ -1228,7 +1228,7 @@ function exportXLSX(){
   const wsData=[['순번','입고일','사이트','구분','분류','상품코드','품목','단위','총 입고량','공급단가','총 입고금액','지점','구분1','구분2','거래\n내역서','세금\n계산서','품의\n작성','결재\n완료','출고\n처리']];
   sorted.forEach((r,i)=>{wsData.push([i+1,"'"+r.date,r.site,r.gubun||'',r.cat,r.code||'',r.item,r.unit||'',r.qty,r.price,r.amount,'서초',r.gubun||'',r.cat,r.d1?'✅':'❌',r.d2?'✅':'❌',r.d3?'✅':'❌',r.d4?'✅':'❌',r.d5?'✅':'❌']);});
   const total=sorted.reduce((s,r)=>s+r.amount,0);
-  const DR=sorted.length; wsData.push(['합계','','','','','','','','','',total,'','','','','','','','']);
+  wsData.push(['합계','','','','','','','','','',total,'','','','','','','','']);
   const ws=XLSX.utils.aoa_to_sheet(wsData);
   // 날짜 셀: 텍스트로 강제 (앞에 ' 이미 포함됨)
   // 금액 수식 셀 직접 설정
@@ -1242,8 +1242,7 @@ function exportXLSX(){
     ws[amtCell]={t:'n',f:`J${row}*I${row}`,v:r.amount,s:ws[amtCell]?.s};
   });
   // 합계행 수식
-  const DR=sorted.length;
-  const sumCell=`K${DR+2}`;
+  const sumCell=`K${sorted.length+2}`;
   ws[sumCell]={t:'n',f:`SUM(K2:K${DR+1})`,v:sorted.reduce((s,r)=>s+r.amount,0),s:ws[sumCell]?.s};
   ws['!cols']=[{wch:5},{wch:12},{wch:22},{wch:8},{wch:10},{wch:11},{wch:42},{wch:6},{wch:9},{wch:11},{wch:13},{wch:6},{wch:8},{wch:10},{wch:6},{wch:6},{wch:6},{wch:6},{wch:6}];
   ws['!rows']=[{hpt:28}];sorted.forEach(()=>ws['!rows'].push({hpt:20}));ws['!rows'].push({hpt:22});
