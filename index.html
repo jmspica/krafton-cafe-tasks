@@ -1283,6 +1283,34 @@ function editQty(id,cell){
     id="qtyInput_${id}" onblur="saveQty(${id},this)" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape')renderTable()">`;
   const inp=document.getElementById('qtyInput_'+id);inp.focus();inp.select();
 }
+
+// ══ 공급단가 인라인 편집 ════════════════════════════════════════════════════
+function editPrice(id, cell) {
+  const data = gc(), row = data.find(r => r.id === id);
+  if (!row) return;
+  const origVal = row.price;
+  cell.innerHTML = `<input type="number" min="0" step="0.01" value="${origVal}"
+    style="width:90px;text-align:right;border:1.5px solid #1a3a5c;border-radius:4px;
+           padding:2px 5px;font-size:12px;font-family:monospace;"
+    id="priceInput_${id}"
+    onblur="savePrice(${id},this)"
+    onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape')renderTable()">`;
+  const inp = document.getElementById('priceInput_' + id);
+  inp.focus(); inp.select();
+}
+
+async function savePrice(id, input) {
+  const newPrice = parseFloat(input.value);
+  if (isNaN(newPrice) || newPrice < 0) { renderTable(); return; }
+  const data = gc(), row = data.find(r => r.id === id);
+  if (!row || newPrice === row.price) { renderTable(); return; }
+  row.price  = newPrice;
+  row.amount = Math.round(row.qty * newPrice);
+  await sc2(data);
+  renderTable(); updateSidebar();
+  toast(`단가 ${newPrice.toLocaleString()}원으로 수정 (금액 자동 재계산)`, 'ok');
+}
+
 async function saveQty(id,input){
   const nq=parseInt(input.value)||0;if(nq<=0){renderTable();return;}
   const data=gc(),row=data.find(r=>r.id===id);if(!row)return;
@@ -1387,7 +1415,7 @@ function renderTable(){
       <td style="font-size:11px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.item}">${r.item}</td>
       <td class="center">${r.unit||''}</td>
       <td class="num" style="cursor:pointer;text-decoration:underline dotted #aaa" title="클릭하여 수량 수정" onclick="editQty(${r.id},this)">${r.qty.toLocaleString()}</td>
-      <td class="num">${Number.isInteger(r.price)?r.price.toLocaleString():r.price.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:4})}</td>
+      <td class="num" style="cursor:pointer;text-decoration:underline dotted #aaa" title="클릭하여 단가 수정" onclick="editPrice(${r.id},this)">${Number.isInteger(r.price)?r.price.toLocaleString():r.price.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:4})}</td>
       <td class="num" style="font-weight:600">${r.amount.toLocaleString()}</td>
       <td class="center" style="font-size:11px">서초</td>
       <td class="center" style="font-size:11px">${r.gubun||''}</td>
@@ -1697,6 +1725,7 @@ window.closeDropdown=closeDropdown; window.selectItem=selectItem;
 window.addRow=addRow; window.resetForm=resetForm;
 window.toggleCk=toggleCk; window.delRow=delRow; window.clearMonth=clearMonth;
 window.editQty=editQty; window.saveQty=saveQty;
+window.editPrice=editPrice; window.savePrice=savePrice;
 window.editDate=editDate; window.saveDate=saveDate;
 window.applyFilter=applyFilter; window.resetFilter=resetFilter;
 window.exportXLSX=exportXLSX; window.exportCSV=exportCSV;
