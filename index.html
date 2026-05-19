@@ -83,10 +83,10 @@ body{font-family:'Noto Sans KR',sans-serif;background:#f5f5f5;color:#222;font-si
 .tbl-wrap{overflow-x:auto}
 
 /* ── 테이블 스타일 (이미지와 동일) ── */
-table{width:100%;border-collapse:collapse;font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
 thead tr{background:#f0f4f8}
 thead th{
-  padding:8px 10px;text-align:center;font-size:11px;font-weight:700;
+  padding:9px 12px;text-align:center;font-size:12px;font-weight:700;
   color:#333;border:1px solid #d0d7de;white-space:nowrap;
   background:#f0f4f8;position:sticky;top:0;
 }
@@ -95,11 +95,11 @@ thead th.right{text-align:right}
 tbody tr{border-bottom:1px solid #e8ecf0}
 tbody tr:hover{background:#f8fbff}
 tbody tr.done{opacity:.6}
-tbody td{padding:7px 10px;border:1px solid #e8ecf0;font-size:12px;vertical-align:middle}
+tbody td{padding:8px 12px;border:1px solid #e8ecf0;font-size:13px;vertical-align:middle}
 tbody td.center{text-align:center}
 tbody td.right{text-align:right;font-family:monospace}
 tbody td.num{text-align:right;font-family:monospace;color:#1a3a5c}
-tbody td.code{font-family:monospace;font-size:11px;color:#666;text-align:center}
+tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
 
 /* 분류 배지 */
 .cat{display:inline-block;padding:1px 7px;border-radius:3px;font-size:10px;font-weight:700}
@@ -1389,7 +1389,7 @@ function renderTable(){
   const sorted=[...data].sort((a,b)=>{
     const catA=CAT_SORT[a.cat]??9,catB=CAT_SORT[b.cat]??9;
     if(catA!==catB) return catA-catB;
-    if(a.cat==='식재'&&a.site==='크래프톤서초카페점 카페'&&b.cat==='식재'&&b.site==='크래프톤서초카페점 카페'){
+    if(a.cat==='식재'&&b.cat==='식재'){
       const bc=getBrand(a.item).localeCompare(getBrand(b.item),'ko');
       if(bc!==0) return bc;
       const dc=a.date.localeCompare(b.date);
@@ -1406,13 +1406,13 @@ function renderTable(){
     const checks=CK_KEYS.map(k=>`<td class="center"><button class="chk-btn ${r[k]?'on':'off'}" onclick="toggleCk(${r.id},'${k}')">${r[k]?'✓':'·'}</button></td>`).join('');
     const catCls='cat cat-'+r.cat.replace(/\s/g,'');
     return `<tr class="${allDone?'done':''}">
-      <td class="center" style="color:#aaa;font-size:11px">${i+1}</td>
-      <td class="center" style="font-family:monospace;font-size:11px;cursor:pointer;text-decoration:underline dotted #aaa" title="클릭하여 날짜 수정" onclick="editDate(${r.id},this)">${r.date}</td>
-      <td style="font-size:11px">${r.site}</td>
+      <td class="center" style="color:#aaa;font-size:12px">${i+1}</td>
+      <td class="center" style="font-family:monospace;font-size:11px;cursor:pointer;text-decoration:underline dotted #aaa" title="클릭하여 날짜 수정" onclick="editDate(${r.id},this)" style="font-size:13px">${r.date}</td>
+      <td style="font-size:13px">${r.site}</td>
       <td class="center">${r.gubun||''}</td>
       <td class="center"><span class="${catCls}">${r.cat}</span></td>
       <td class="code">${r.code||''}</td>
-      <td style="font-size:11px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.item}">${r.item}</td>
+      <td style="font-size:13px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.item}">${r.item}</td>
       <td class="center">${r.unit||''}</td>
       <td class="num" style="cursor:pointer;text-decoration:underline dotted #aaa" title="클릭하여 수량 수정" onclick="editQty(${r.id},this)">${r.qty.toLocaleString()}</td>
       <td class="num" style="cursor:pointer;text-decoration:underline dotted #aaa" title="클릭하여 단가 수정" onclick="editPrice(${r.id},this)">${Number.isInteger(r.price)?r.price.toLocaleString():r.price.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:4})}</td>
@@ -1480,8 +1480,7 @@ function exportXLSX(){
   const sorted=[...data].sort((a,b)=>{
     const catA=CAT_SORT_X[a.cat]??9, catB=CAT_SORT_X[b.cat]??9;
     if(catA!==catB) return catA-catB;
-    if(a.cat==='식재'&&a.site==='크래프톤서초카페점 카페'&&
-       b.cat==='식재'&&b.site==='크래프톤서초카페점 카페'){
+    if(a.cat==='식재'&&b.cat==='식재'){
       const bc=getBrandX(a.item).localeCompare(getBrandX(b.item),'ko');
       if(bc!==0) return bc;
       const dc=a.date.localeCompare(b.date);
@@ -1508,6 +1507,9 @@ function exportXLSX(){
   // 금액 수식 셀 직접 설정
   sorted.forEach((r,i)=>{
     const row=i+2;
+    // 순번 셀: =ROW()-1 수식
+    const seqCell=`A${row}`;
+    ws[seqCell]={t:'n',f:`ROW()-1`,v:i+1};
     // 날짜 셀: 텍스트 타입으로 설정 (자동 날짜 변환 방지)
     const dateCell=`B${row}`;
     if(ws[dateCell]){ws[dateCell].t='s';ws[dateCell].v=r.date;}
@@ -1526,7 +1528,15 @@ function exportXLSX(){
     const row=i+2;const bg=i%2===0?'FFFFFF':'F7F9FC';
     const sd=(h='left')=>{return {font:{sz:10,name:'맑은 고딕'},fill:{fgColor:{rgb:bg}},alignment:{horizontal:h,vertical:'center'},border};}
     [[0,'center'],[1,'center'],[2,'left'],[3,'center'],[4,'center'],[5,'center'],[6,'left'],[7,'center'],[11,'center'],[12,'center'],[13,'center']].forEach(([c,h])=>{const a=`${cols[c]}${row}`;if(!ws[a])ws[a]={v:'',t:'s'};ws[a].s=sd(h);});
-    [8,9,10].forEach(c=>{const a=`${cols[c]}${row}`;if(ws[a])ws[a].s={...sd('right'),numFmt:'#,##0'};});
+    [8,9,10].forEach(c=>{
+      const a=`${cols[c]}${row}`;
+      if(ws[a]){
+        ws[a].s={...sd('right'),numFmt:'#,##0'};  // 표시는 정수
+        ws[a].t='n';
+        // 단가(c=9): 소수점 값 그대로 유지
+        if(c===9) ws[a].v=sorted[i].price;
+      }
+    });
     [14,15,16,17,18].forEach(c=>{const a=`${cols[c]}${row}`;const val=wsData[row-1][c];if(!ws[a])ws[a]={v:val,t:'s'};ws[a].s=val==='✅'?doneStyle:pendStyle;});
   });
   const tr2=sorted.length+2;
