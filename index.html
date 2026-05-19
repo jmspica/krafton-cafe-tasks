@@ -1474,7 +1474,24 @@ function updateSidebar(){
 function exportXLSX(){
   const data=gc();
   if(!data.length){toast('내보낼 데이터가 없습니다.','err');return;}
-  const sorted=[...data].sort((a,b)=>a.date.localeCompare(b.date));
+  const CAT_SORT_X={'네스프레소':0,'펍':1,'서초주류':2,'웰니스':3,'식재':4,'콜라보':5};
+  const SITE_SORT_X={'크래프톤서초카페점 라운지':0,'크래프톤서초카페점 카페':1};
+  const getBrandX=item=>item.includes('_')?item.split('_')[0]:item;
+  const sorted=[...data].sort((a,b)=>{
+    const catA=CAT_SORT_X[a.cat]??9, catB=CAT_SORT_X[b.cat]??9;
+    if(catA!==catB) return catA-catB;
+    if(a.cat==='식재'&&a.site==='크래프톤서초카페점 카페'&&
+       b.cat==='식재'&&b.site==='크래프톤서초카페점 카페'){
+      const bc=getBrandX(a.item).localeCompare(getBrandX(b.item),'ko');
+      if(bc!==0) return bc;
+      const dc=a.date.localeCompare(b.date);
+      if(dc!==0) return dc;
+      return a.item.localeCompare(b.item,'ko');
+    }
+    const dc=a.date.localeCompare(b.date);
+    if(dc!==0) return dc;
+    return (SITE_SORT_X[a.site]??9)-(SITE_SORT_X[b.site]??9);
+  });
   const monthName=MONTHS[CM];
   const wb=XLSX.utils.book_new();
   const border={top:{style:'thin',color:{rgb:'C0C0C0'}},bottom:{style:'thin',color:{rgb:'C0C0C0'}},left:{style:'thin',color:{rgb:'C0C0C0'}},right:{style:'thin',color:{rgb:'C0C0C0'}}};
@@ -1483,7 +1500,7 @@ function exportXLSX(){
   const pendStyle={font:{bold:true,sz:11,name:'맑은 고딕',color:{rgb:'856404'}},fill:{fgColor:{rgb:'FFF3CD'}},alignment:{horizontal:'center',vertical:'center'},border};
   const totalStyle={font:{bold:true,sz:10,name:'맑은 고딕'},fill:{fgColor:{rgb:'D9E1F2'}},alignment:{horizontal:'right',vertical:'center'},numFmt:'#,##0',border};
   const wsData=[['순번','입고일','사이트','구분','분류','상품코드','품목','단위','총 입고량','공급단가','총 입고금액','지점','구분1','구분2','거래\n내역서','세금\n계산서','품의\n작성','결재\n완료','출고\n처리']];
-  sorted.forEach((r,i)=>{wsData.push([i+1,"'"+r.date,r.site,r.gubun||'',r.cat,r.code||'',r.item,r.unit||'',r.qty,r.price,r.amount,'서초',r.gubun||'',r.cat,r.d1?'✅':'❌',r.d2?'✅':'❌',r.d3?'✅':'❌',r.d4?'✅':'❌',r.d5?'✅':'❌']);});
+  sorted.forEach((r,i)=>{wsData.push([i+1,r.date,r.site,r.gubun||'',r.cat,r.code||'',r.item,r.unit||'',r.qty,r.price,r.amount,'서초',r.gubun||'',r.cat,r.d1?'✅':'❌',r.d2?'✅':'❌',r.d3?'✅':'❌',r.d4?'✅':'❌',r.d5?'✅':'❌']);});
   const total=sorted.reduce((s,r)=>s+r.amount,0);
   wsData.push(['합계','','','','','','','','','',total,'','','','','','','','']);
   const ws=XLSX.utils.aoa_to_sheet(wsData);
@@ -1491,9 +1508,9 @@ function exportXLSX(){
   // 금액 수식 셀 직접 설정
   sorted.forEach((r,i)=>{
     const row=i+2;
-    // 날짜 셀 텍스트 타입 강제
+    // 날짜 셀: 텍스트 타입으로 설정 (자동 날짜 변환 방지)
     const dateCell=`B${row}`;
-    if(ws[dateCell]){ws[dateCell].t='s';ws[dateCell].v="'"+r.date;}
+    if(ws[dateCell]){ws[dateCell].t='s';ws[dateCell].v=r.date;}
     // 총입고금액 수식
     const amtCell=`K${row}`;
     ws[amtCell]={t:'n',f:`J${row}*I${row}`,v:r.amount,s:ws[amtCell]?.s};
