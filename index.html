@@ -466,7 +466,7 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
 }
 .ledger-form-grid2 {
   display:grid;
-  grid-template-columns: 1fr 1fr 160px 130px;
+  grid-template-columns: 1fr 1fr 140px 120px 150px;
   gap:8px; margin-bottom:8px; align-items:end;
 }
 .ledger-form-grid .fg, .ledger-form-grid2 .fg {
@@ -525,6 +525,9 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
 /* 가계부 합계 행 */
 .ltbl-sum td { background:#f0f4f8; border-top:2px solid #1a3a5c !important;
   font-weight:700; font-size:13px; padding:9px 10px; }
+.ltbl-subtotal td { background:#fafbfc; border-top:1px solid #d0d7de !important;
+  font-size:12px; padding:6px 10px; }
+.ltbl-section td { border-left:none !important; border-right:none !important; }
 .ltbl-sum .lsum-val { text-align:right; font-family:monospace; color:#1a3a5c; font-size:14px; }
 
 /* 가계부 사이드바 */
@@ -831,7 +834,7 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
 }
 .ledger-form-grid2 {
   display:grid;
-  grid-template-columns: 1fr 1fr 160px 130px;
+  grid-template-columns: 1fr 1fr 140px 120px 150px;
   gap:8px; margin-bottom:8px; align-items:end;
 }
 .ledger-form-grid .fg, .ledger-form-grid2 .fg {
@@ -890,6 +893,9 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
 /* 가계부 합계 행 */
 .ltbl-sum td { background:#f0f4f8; border-top:2px solid #1a3a5c !important;
   font-weight:700; font-size:13px; padding:9px 10px; }
+.ltbl-subtotal td { background:#fafbfc; border-top:1px solid #d0d7de !important;
+  font-size:12px; padding:6px 10px; }
+.ltbl-section td { border-left:none !important; border-right:none !important; }
 .ltbl-sum .lsum-val { text-align:right; font-family:monospace; color:#1a3a5c; font-size:14px; }
 
 /* 가계부 사이드바 */
@@ -1234,7 +1240,7 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
         </div>
       </div>
       <div class="ledger-sb-section">
-        <h3>🏷️ 구분별</h3>
+        <h3>🏷️ 계정명 정리</h3>
         <div id="lsb_breakdown"></div>
       </div>
     </div>
@@ -1304,8 +1310,20 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
               <option value="스포티파이">
               <option value="SKT">
             </datalist></div>
-          <div class="fg"><label>세금계산서 / 법인카드</label>
-            <input type="text" id="lf_doc" placeholder="o / 법인카드(만석) 등"></div>
+          <div class="fg"><label>결제유형 *</label>
+            <select id="lf_paytype" onchange="onLfPaytypeChange()">
+              <option value="">선택</option>
+              <option value="세금계산서">세금계산서</option>
+              <option value="법인카드">법인카드</option>
+            </select></div>
+          <div class="fg"><label>세부내용</label>
+            <input type="text" id="lf_doc" list="docList" placeholder="o / 법인카드(만석) 등" autocomplete="off">
+            <datalist id="docList">
+              <option value="o">
+              <option value="법인카드(만석)">
+              <option value="법인카드(관경)">
+              <option value="법인카드(민주)">
+            </datalist></div>
         </div>
         <div class="ledger-form-row">
           <div class="fg" style="flex:0 0 auto">
@@ -2128,6 +2146,13 @@ function onLfAccountChange() {
   gubunEl.value = account === '식재' ? '식재' : (account ? '비식재' : '');
 }
 
+// ── 결제유형 변경 시 세부내용 placeholder 변경 ──
+function onLfPaytypeChange() {
+  const pt = document.getElementById('lf_paytype').value;
+  const docEl = document.getElementById('lf_doc');
+  docEl.placeholder = pt === '법인카드' ? '법인카드(만석) 등' : pt === '세금계산서' ? 'o' : 'o / 법인카드(만석) 등';
+}
+
 // ── 고정비 매월 자동 생성 ──
 const FIXED_EXPENSES_KEY = 'kc_fixed_expenses_v1';
 
@@ -2138,13 +2163,13 @@ function loadFixedExpenseSettings() {
   } catch(e) {}
   // 기본값
   return {
-    spotify:  { amt: 10900, vat: 1090, total: 11990, day: 2,  vendor:'스포티파이', account:'용역수수료-기타용역', desc:'스포티파이_매장용 BGM 정기결제', doc:'법인카드(만석)' },
-    skt:      { amt: 10000, vat: 1000, total: 11000, day: 12, vendor:'SKT',       account:'통신비',             desc:'단말기 이용료', doc:'법인카드(만석)' },
-    sqi:      { amt: 180000, vat: 18000, total: 198000, vendor:'에스큐아이소프트㈜', account:'전산용역비', desc:'크래프톤 카페 라이선스(SQI)' },
-    cardfee:  { amt: 0,      vat: 0,     total: 0,       vendor:'IFRESH', account:'신용카드수수료', desc:'신용카드 수수료' },
-    tax:      { amt: 121883, vat: 12188, total: 134071, vendor:'IFRESH', account:'세금과공과', desc:'사업소세' },
-    itsvc:    { amt: 105745, vat: 10575, total: 116320, vendor:'IFRESH', account:'전산용역비', desc:'PC' },
-    copier:   { amt: 85000,  vat: 8500,  total: 93500,  vendor:'IFRESH', account:'복사기렌탈', desc:'복사기임대' },
+    spotify:  { amt: 10900, vat: 1090, total: 11990, day: 2,  vendor:'스포티파이', account:'용역수수료-기타용역', desc:'스포티파이_매장용 BGM 정기결제', paytype:'법인카드', doc:'법인카드(만석)' },
+    skt:      { amt: 10000, vat: 1000, total: 11000, day: 12, vendor:'SKT',       account:'통신비',             desc:'단말기 이용료', paytype:'법인카드', doc:'법인카드(만석)' },
+    sqi:      { amt: 180000, vat: 18000, total: 198000, vendor:'에스큐아이소프트㈜', account:'전산용역비', desc:'크래프톤 카페 라이선스(SQI)', paytype:'세금계산서', doc:'' },
+    cardfee:  { amt: 0,      vat: 0,     total: 0,       vendor:'IFRESH', account:'신용카드수수료', desc:'신용카드 수수료', paytype:'세금계산서', doc:'' },
+    tax:      { amt: 121883, vat: 12188, total: 134071, vendor:'IFRESH', account:'세금과공과', desc:'사업소세', paytype:'세금계산서', doc:'' },
+    itsvc:    { amt: 105745, vat: 10575, total: 116320, vendor:'IFRESH', account:'전산용역비', desc:'PC', paytype:'세금계산서', doc:'' },
+    copier:   { amt: 85000,  vat: 8500,  total: 93500,  vendor:'IFRESH', account:'복사기렌탈', desc:'복사기임대', paytype:'세금계산서', doc:'' },
   };
 }
 function saveFixedExpenseSettings(s) {
@@ -2171,7 +2196,7 @@ async function ensureFixedExpenses(month) {
       date: dateStr, jijum:'서초',
       amt: f.amt, vat: f.vat, total: f.total,
       gubun:'비식재', account: f.account, desc: f.desc, vendor: f.vendor,
-      doc: f.doc || '', billing:'', fixedKey: key
+      paytype: f.paytype || '세금계산서', doc: f.doc || '', billing:'', fixedKey: key
     });
     added = true;
   });
@@ -2260,13 +2285,15 @@ async function addLedgerRow() {
   const account = document.getElementById('lf_account').value.trim();
   const desc    = document.getElementById('lf_desc').value.trim();
   const vendor  = document.getElementById('lf_vendor').value.trim();
+  const paytype = document.getElementById('lf_paytype').value;
   const doc     = document.getElementById('lf_doc').value.trim();
   const billing = document.getElementById('lf_billing').value;
 
   if (!amt || !desc) { toast('금액과 적요는 필수입니다.', 'err'); return; }
+  if (!paytype) { toast('결제유형(세금계산서/법인카드)을 선택하세요.', 'err'); return; }
 
   const d = glc();
-  d.push({ id: Date.now(), date, jijum, amt, vat, total, gubun, account, desc, vendor, doc, billing });
+  d.push({ id: Date.now(), date, jijum, amt, vat, total, gubun, account, desc, vendor, paytype, doc, billing });
   await slc(d);
   renderLedgerTable();
   updateLedgerSidebar();
@@ -2276,7 +2303,7 @@ async function addLedgerRow() {
 }
 
 function resetLedgerForm() {
-  ['lf_amt','lf_vat','lf_total','lf_gubun','lf_account','lf_desc','lf_vendor','lf_doc','lf_billing']
+  ['lf_amt','lf_vat','lf_total','lf_gubun','lf_account','lf_desc','lf_vendor','lf_paytype','lf_doc','lf_billing']
     .forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
   if (!document.getElementById('lf_date').value)
     document.getElementById('lf_date').value = new Date().toISOString().split('T')[0];
@@ -2313,25 +2340,26 @@ function renderLedgerTable() {
     cntEl.style.display = isFiltered ? '' : 'none';
   }
 
-  // 정렬: 법인카드 고정비(스포티파이,SKT) 최상단 → 일반 항목 날짜순 → 세금계산서 고정비 하단
+  // 세금계산서 / 법인카드 그룹 분리
+  const taxGroup  = data.filter(r => r.paytype !== '법인카드');
+  const cardGroup = data.filter(r => r.paytype === '법인카드');
+
+  // 각 그룹 내 정렬: 고정비 우선순위 → 날짜순
   const TOP_KEYS = ['spotify','skt'];
   const BOTTOM_KEYS = ['sqi','cardfee','tax','itsvc','copier'];
-  const sortRank = r => {
-    if (TOP_KEYS.includes(r.fixedKey)) return 0;
-    if (BOTTOM_KEYS.includes(r.fixedKey)) return 2;
-    return 1;
-  };
-  const sorted = [...data].sort((a, b) => {
-    const ra = sortRank(a), rb = sortRank(b);
+  const sortGroup = arr => [...arr].sort((a,b) => {
+    const ra = TOP_KEYS.includes(a.fixedKey) ? 0 : BOTTOM_KEYS.includes(a.fixedKey) ? 2 : 1;
+    const rb = TOP_KEYS.includes(b.fixedKey) ? 0 : BOTTOM_KEYS.includes(b.fixedKey) ? 2 : 1;
     if (ra !== rb) return ra - rb;
     if (ra === 0) return TOP_KEYS.indexOf(a.fixedKey) - TOP_KEYS.indexOf(b.fixedKey);
     if (ra === 2) return BOTTOM_KEYS.indexOf(a.fixedKey) - BOTTOM_KEYS.indexOf(b.fixedKey);
     return (a.date||'').localeCompare(b.date||'');
   });
-  const tbody = document.getElementById('ltbody');
-  if (!tbody) return;
 
-  tbody.innerHTML = sorted.map((r, i) => `<tr>
+  const sortedTax  = sortGroup(taxGroup);
+  const sortedCard = sortGroup(cardGroup);
+
+  const rowHtml = (r, i) => `<tr>
     <td class="lcenter" style="color:#aaa;font-size:12px">${i+1}</td>
     <td class="lcenter">${r.jijum||'서초'}</td>
     <td class="lcenter" style="font-family:monospace">${r.date||''}</td>
@@ -2345,16 +2373,51 @@ function renderLedgerTable() {
     <td style="font-size:12px;color:#666">${r.doc||''}</td>
     <td class="lcenter" style="font-size:11px;color:${r.billing==='미청구'?'#dc2626':'#888'}">${r.billing||''}</td>
     <td class="lcenter"><button class="btn btn-danger btn-sm" onclick="delLedgerRow(${r.id})" style="padding:2px 6px">✕</button></td>
-  </tr>`).join('');
+  </tr>`;
 
-  // 합계 행
+  const sectionHeader = (title, count, color) => `<tr class="ltbl-section">
+    <td colspan="13" style="background:${color};font-weight:700;font-size:12px;padding:7px 10px;color:#1a3a5c">
+      ${title} <span style="font-weight:400;color:#888;font-size:11px">(${count}건)</span>
+    </td>
+  </tr>`;
+
+  const subtotalRow = (arr, label) => {
+    const sa = arr.reduce((s,r)=>s+(r.amt||0),0);
+    const sv = arr.reduce((s,r)=>s+(r.vat||0),0);
+    const st = arr.reduce((s,r)=>s+(r.total||0),0);
+    return `<tr class="ltbl-subtotal">
+      <td colspan="3" style="text-align:right;font-weight:700;color:#555;font-size:12px">${label} 소계</td>
+      <td class="lnum" style="font-weight:700">${Math.round(sa).toLocaleString()}</td>
+      <td class="lnum" style="font-weight:700;color:#888">${Math.round(sv).toLocaleString()}</td>
+      <td class="lnum" style="font-weight:700;color:#1a3a5c">${Math.round(st).toLocaleString()}</td>
+      <td colspan="7"></td>
+    </tr>`;
+  };
+
+  const tbody = document.getElementById('ltbody');
+  if (!tbody) return;
+
+  let html = '';
+  // 세금계산서 섹션
+  html += sectionHeader('📄 세금계산서', sortedTax.length, '#eff6ff');
+  html += sortedTax.map(rowHtml).join('');
+  if (sortedTax.length) html += subtotalRow(sortedTax, '세금계산서');
+
+  // 법인카드 섹션
+  html += sectionHeader('💳 법인카드', sortedCard.length, '#fef3c7');
+  html += sortedCard.map(rowHtml).join('');
+  if (sortedCard.length) html += subtotalRow(sortedCard, '법인카드');
+
+  tbody.innerHTML = html;
+
+  // 전체 합계 행
   const sumAmt   = data.reduce((s,r) => s + (r.amt||0), 0);
   const sumVat   = data.reduce((s,r) => s + (r.vat||0), 0);
   const sumTotal = data.reduce((s,r) => s + (r.total||0), 0);
   const sumRow = document.createElement('tr');
   sumRow.className = 'ltbl-sum';
   sumRow.innerHTML = `
-    <td colspan="3" style="text-align:right;font-weight:700;color:#333">${data.length}건 합계</td>
+    <td colspan="3" style="text-align:right;font-weight:700;color:#333">전체 ${data.length}건 합계</td>
     <td class="lsum-val">₩ ${Math.round(sumAmt).toLocaleString()}</td>
     <td class="lsum-val" style="color:#888">₩ ${Math.round(sumVat).toLocaleString()}</td>
     <td class="lsum-val">₩ ${Math.round(sumTotal).toLocaleString()}</td>
@@ -2371,6 +2434,13 @@ async function delLedgerRow(id) {
 }
 
 // ── 사이드바 ──
+// 계정명 정리 고정 순서
+const ACCOUNT_ORDER = [
+  '기타수수료','복사기렌탈','세금과공과','소모품비-주방용품','회의비','식재',
+  '신용카드수수료','수선비-공기구비품','전산용역비','여비교통비','통신비',
+  '도서인쇄비-서식인쇄','용역수수료-기타용역'
+];
+
 function updateLedgerSidebar() {
   const data = glc();
   const sumAmt   = data.reduce((s,r) => s+(r.amt||0), 0);
@@ -2384,89 +2454,120 @@ function updateLedgerSidebar() {
   if(el('lsb_vat'))   el('lsb_vat').textContent   = fmt(sumVat);
   if(el('lsb_total')) el('lsb_total').textContent = fmt(sumTotal);
 
-  // 구분별 합계
+  // 계정명별 합계 (VAT 제외 금액 기준, 지정된 순서로 정렬)
   const breakdown = {};
+  ACCOUNT_ORDER.forEach(k => breakdown[k] = 0); // 0원이어도 항목 표시
   data.forEach(r => {
-    const key = r.gubun || '기타';
-    breakdown[key] = (breakdown[key] || 0) + (r.total || 0);
+    const key = r.account || '기타';
+    breakdown[key] = (breakdown[key] || 0) + (r.amt || 0);
   });
+
   const bd = document.getElementById('lsb_breakdown');
-  if (bd) bd.innerHTML = Object.entries(breakdown)
-    .sort((a,b) => b[1]-a[1])
-    .map(([k,v]) => `<div class="mchnt-row">
-      <span class="mchnt-name"><span class="gbadge-${k}">${k}</span></span>
-      <span class="mchnt-amt">${Math.round(v).toLocaleString()}원</span>
-    </div>`).join('');
+  if (bd) {
+    const entries = ACCOUNT_ORDER.map(k => [k, breakdown[k] || 0]);
+    // 목록에 없는 계정명이 있으면 맨 뒤에 추가
+    Object.keys(breakdown).forEach(k => {
+      if (!ACCOUNT_ORDER.includes(k)) entries.push([k, breakdown[k]]);
+    });
+    const total = entries.reduce((s,[,v]) => s+v, 0);
+
+    bd.innerHTML = entries.map(([k,v]) => `<div class="mchnt-row">
+        <span class="mchnt-name">${k}</span>
+        <span class="mchnt-amt">${v ? Math.round(v).toLocaleString() : '-'}</span>
+      </div>`).join('')
+      + `<div class="mchnt-row" style="border-top:2px solid #1a3a5c;margin-top:4px;padding-top:6px">
+        <span class="mchnt-name" style="font-weight:700;color:#1a3a5c">TOTAL</span>
+        <span class="mchnt-amt" style="font-weight:700;color:#1a3a5c;font-size:12px">${Math.round(total).toLocaleString()}</span>
+      </div>`;
+  }
 }
 
 // ── Excel 내보내기 ──
 function exportLedgerXLSX() {
   const data = getLedgerFiltered();
   if (!data.length) { toast('내보낼 데이터가 없습니다.', 'err'); return; }
+
   const TOP_KEYS_X = ['spotify','skt'];
   const BOTTOM_KEYS_X = ['sqi','cardfee','tax','itsvc','copier'];
-  const sortRankX = r => {
-    if (TOP_KEYS_X.includes(r.fixedKey)) return 0;
-    if (BOTTOM_KEYS_X.includes(r.fixedKey)) return 2;
-    return 1;
-  };
-  const sorted = [...data].sort((a,b) => {
-    const ra=sortRankX(a), rb=sortRankX(b);
-    if (ra!==rb) return ra-rb;
-    if (ra===0) return TOP_KEYS_X.indexOf(a.fixedKey)-TOP_KEYS_X.indexOf(b.fixedKey);
-    if (ra===2) return BOTTOM_KEYS_X.indexOf(a.fixedKey)-BOTTOM_KEYS_X.indexOf(b.fixedKey);
+  const sortGroupX = arr => [...arr].sort((a,b) => {
+    const ra = TOP_KEYS_X.includes(a.fixedKey) ? 0 : BOTTOM_KEYS_X.includes(a.fixedKey) ? 2 : 1;
+    const rb = TOP_KEYS_X.includes(b.fixedKey) ? 0 : BOTTOM_KEYS_X.includes(b.fixedKey) ? 2 : 1;
+    if (ra !== rb) return ra - rb;
+    if (ra === 0) return TOP_KEYS_X.indexOf(a.fixedKey) - TOP_KEYS_X.indexOf(b.fixedKey);
+    if (ra === 2) return BOTTOM_KEYS_X.indexOf(a.fixedKey) - BOTTOM_KEYS_X.indexOf(b.fixedKey);
     return (a.date||'').localeCompare(b.date||'');
   });
+
+  const taxGroup  = sortGroupX(data.filter(r => r.paytype !== '법인카드'));
+  const cardGroup = sortGroupX(data.filter(r => r.paytype === '법인카드'));
+
   const monthName = MONTHS[LCM];
   const wb = XLSX.utils.book_new();
   const border = {top:{style:'thin',color:{rgb:'C0C0C0'}},bottom:{style:'thin',color:{rgb:'C0C0C0'}},left:{style:'thin',color:{rgb:'C0C0C0'}},right:{style:'thin',color:{rgb:'C0C0C0'}}};
   const hdrS = {font:{bold:true,sz:10,name:'맑은 고딕'},fill:{fgColor:{rgb:'F0F4F8'}},alignment:{horizontal:'center',vertical:'center',wrapText:true},border};
+  const sectionS = {font:{bold:true,sz:11,name:'맑은 고딕',color:{rgb:'1A3A5C'}},fill:{fgColor:{rgb:'DBEAFE'}},alignment:{horizontal:'left',vertical:'center'},border};
   const numFmt = '#,##0';
+  const cols = 'ABCDEFGHIJKL'.split('');
 
-  const wsData = [['순번','지점','날짜','금액','부가세','Total','계정명','구분','적요','가맹점명','세금계산서/법인카드','청구여부']];
-  sorted.forEach((r,i) => {
-    wsData.push([i+1, r.jijum||'서초', r.date||'', r.amt||0, r.vat||0, r.total||0,
-      r.account||'', r.gubun||'', r.desc||'', r.vendor||'', r.doc||'', r.billing||'']);
+  const wsData = [];
+  const rowMeta = []; // {type:'header'|'section'|'data'|'total', row}
+
+  // 헤더
+  wsData.push(['지점','날짜','금액','부가세','Total','계정명','구분','적요','가맹점명','세금계산서/법인카드','청구여부','']);
+  rowMeta.push({type:'header'});
+
+  // 세금계산서 섹션
+  wsData.push(['📄 세금계산서','','','','','','','','','','','']);
+  rowMeta.push({type:'section'});
+  taxGroup.forEach(r => {
+    wsData.push([r.jijum||'서초', r.date||'', r.amt||0, r.vat||0, r.total||0,
+      r.account||'', r.gubun||'', r.desc||'', r.vendor||'', r.doc||'', r.billing||'','']);
+    rowMeta.push({type:'data', amt:r.amt||0, vat:r.vat||0, total:r.total||0});
   });
-  // 합계행
-  const n = sorted.length;
-  wsData.push(['합계','','', sorted.reduce((s,r)=>s+(r.amt||0),0),
-    sorted.reduce((s,r)=>s+(r.vat||0),0), sorted.reduce((s,r)=>s+(r.total||0),0),
-    '','','','','','']);
+
+  // 법인카드 섹션
+  wsData.push(['💳 법인카드','','','','','','','','','','','']);
+  rowMeta.push({type:'section'});
+  cardGroup.forEach(r => {
+    wsData.push([r.jijum||'서초', r.date||'', r.amt||0, r.vat||0, r.total||0,
+      r.account||'', r.gubun||'', r.desc||'', r.vendor||'', r.doc||'', r.billing||'','']);
+    rowMeta.push({type:'data', amt:r.amt||0, vat:r.vat||0, total:r.total||0});
+  });
+
+  // 전체 합계
+  const sumAmt   = data.reduce((s,r)=>s+(r.amt||0),0);
+  const sumVat   = data.reduce((s,r)=>s+(r.vat||0),0);
+  const sumTotal = data.reduce((s,r)=>s+(r.total||0),0);
+  wsData.push(['합계','', sumAmt, sumVat, sumTotal, '','','','','','','']);
+  rowMeta.push({type:'total'});
 
   const ws = XLSX.utils.aoa_to_sheet(wsData);
-  ws['!cols'] = [{wch:5},{wch:7},{wch:14},{wch:13},{wch:11},{wch:14},{wch:22},{wch:8},{wch:40},{wch:22},{wch:18},{wch:10}];
+  ws['!cols'] = [{wch:7},{wch:14},{wch:13},{wch:11},{wch:14},{wch:22},{wch:8},{wch:40},{wch:22},{wch:18},{wch:10},{wch:2}];
+  ws['!merges'] = [];
 
-  const cols = 'ABCDEFGHIJKL'.split('');
-  // 헤더 스타일
-  for(let c=0;c<12;c++){const a=`${cols[c]}1`;if(!ws[a])ws[a]={v:'',t:'s'};ws[a].s=hdrS;}
-  // 데이터 스타일
-  sorted.forEach((r,i) => {
-    const row = i+2;
-    const bg = i%2===0?'FFFFFF':'F7F9FC';
-    const sd = (h='left') => ({font:{sz:11,name:'맑은 고딕'},fill:{fgColor:{rgb:bg}},alignment:{horizontal:h,vertical:'center'},border});
-    // 순번 =ROW()-1
-    ws[`A${row}`] = {t:'n', f:`ROW()-1`, v:i+1, s:sd('center')};
-    // 날짜 텍스트
-    const dc=`C${row}`; if(ws[dc]){ws[dc].t='s';ws[dc].v=r.date||'';ws[dc].s=sd('center');}
-    // 숫자 컬럼 (D,E,F = 금액,부가세,Total)
-    ['D','E','F'].forEach(col => {
-      const a=`${col}${row}`;
-      if(!ws[a])ws[a]={t:'n',v:0};
-      ws[a].t='n'; ws[a].s={...sd('right'),numFmt};
-    });
-    // 합계(F) 수식
-    ws[`F${row}`] = {t:'n', f:`D${row}+E${row}`, v:r.total||0, s:{...sd('right'),numFmt}};
-    // 나머지 텍스트
-    [['B','center'],['G','left'],['H','center'],['I','left'],['J','left'],['K','center'],['L','center']]
-      .forEach(([col,h]) => { const a=`${col}${row}`; if(!ws[a])ws[a]={v:'',t:'s'}; ws[a].s=sd(h); });
+  rowMeta.forEach((meta, idx) => {
+    const row = idx + 1; // 1-indexed sheet row
+    if (meta.type === 'header') {
+      for(let c=0;c<11;c++){ const a=`${cols[c]}${row}`; if(!ws[a])ws[a]={v:'',t:'s'}; ws[a].s = hdrS; }
+    } else if (meta.type === 'section') {
+      ws['!merges'].push({s:{r:row-1,c:0}, e:{r:row-1,c:10}});
+      for(let c=0;c<11;c++){ const a=`${cols[c]}${row}`; if(!ws[a])ws[a]={v:c===0?wsData[idx][0]:'',t:'s'}; ws[a].s = sectionS; }
+    } else if (meta.type === 'data') {
+      const bg = '#FFFFFF';
+      const sd = (h='left') => ({font:{sz:11,name:'맑은 고딕'},fill:{fgColor:{rgb:'FFFFFF'}},alignment:{horizontal:h,vertical:'center'},border});
+      // 날짜(B) 텍스트
+      const dc=`B${row}`; if(ws[dc]){ws[dc].t='s';ws[dc].s=sd('center');}
+      // 금액,부가세,Total(C,D,E)
+      ['C','D','E'].forEach(col => { const a=`${col}${row}`; if(!ws[a])ws[a]={t:'n',v:0}; ws[a].t='n'; ws[a].s={...sd('right'),numFmt}; });
+      ws[`E${row}`] = {t:'n', f:`C${row}+D${row}`, v:meta.total, s:{...sd('right'),numFmt}};
+      [['A','center'],['F','left'],['G','center'],['H','left'],['I','left'],['J','center'],['K','center']]
+        .forEach(([col,h]) => { const a=`${col}${row}`; if(!ws[a])ws[a]={v:'',t:'s'}; ws[a].s=sd(h); });
+    } else if (meta.type === 'total') {
+      const totalS = {font:{bold:true,sz:11,name:'맑은 고딕'},fill:{fgColor:{rgb:'D9E1F2'}},alignment:{horizontal:'right',vertical:'center'},numFmt,border};
+      for(let c=0;c<11;c++){ const a=`${cols[c]}${row}`; if(!ws[a])ws[a]={v:'',t:'s'}; ws[a].s = totalS; }
+      ['C','D','E'].forEach(col => { const a=`${col}${row}`; if(ws[a]) ws[a].t='n'; });
+    }
   });
-  // 합계행 스타일
-  const tr = n+2;
-  const totalS = {font:{bold:true,sz:11,name:'맑은 고딕'},fill:{fgColor:{rgb:'D9E1F2'}},alignment:{horizontal:'right',vertical:'center'},numFmt,border};
-  for(let c=0;c<12;c++){const a=`${cols[c]}${tr}`;if(!ws[a])ws[a]={v:'',t:'s'};ws[a].s=totalS;}
-  ['D','E','F'].forEach(col => { const a=`${col}${tr}`; if(ws[a]){ws[a].t='n';ws[a].s=totalS;} });
-  ws['!autofilter'] = {ref:'A1:L1'};
 
   XLSX.utils.book_append_sheet(wb, ws, monthName + ' 가계부');
   XLSX.writeFile(wb, `크래프톤_가계부_${monthName}.xlsx`);
@@ -2515,6 +2616,7 @@ window.delLedgerRow=delLedgerRow; window.renderLedgerTable=renderLedgerTable;
 window.resetLedgerFilter=resetLedgerFilter; window.exportLedgerXLSX=exportLedgerXLSX;
 window.setupLedgerRealtimeSync=setupLedgerRealtimeSync;
 window.onLfAccountChange=onLfAccountChange;
+window.onLfPaytypeChange=onLfPaytypeChange;
 window.ensureFixedExpenses=ensureFixedExpenses;
 
 // ══ 초기화 ══════════════════════════════════════════════════════════════════
