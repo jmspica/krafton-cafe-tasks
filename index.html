@@ -1256,17 +1256,13 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
             <input type="number" id="lf_vat" placeholder="자동계산" oninput="lCalcTotal()"></div>
           <div class="fg"><label>Total (VAT포함)</label>
             <input type="number" id="lf_total" placeholder="자동계산" readonly></div>
-          <div class="fg"><label>구분</label>
-            <select id="lf_gubun">
-              <option value="">선택</option>
-              <option value="식재">식재</option>
-              <option value="비식재">비식재</option>
-            </select>
+          <div class="fg"><label>구분 (자동)</label>
+            <input type="text" id="lf_gubun" readonly placeholder="계정명 선택시 자동" style="background:#f8f9fb;color:#555;font-weight:600">
           </div>
         </div>
         <div class="ledger-form-grid2">
           <div class="fg"><label>계정명</label>
-            <select id="lf_account">
+            <select id="lf_account" onchange="onLfAccountChange()">
               <option value="">선택</option>
               <option value="기타수수료">기타수수료</option>
               <option value="복사기렌탈">복사기렌탈</option>
@@ -1285,7 +1281,29 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
           <div class="fg"><label>적요</label>
             <input type="text" id="lf_desc" placeholder="품목 설명"></div>
           <div class="fg"><label>가맹점명</label>
-            <input type="text" id="lf_vendor" placeholder="거래처명"></div>
+            <input type="text" id="lf_vendor" list="vendorList" placeholder="거래처명 선택 또는 직접입력" autocomplete="off">
+            <datalist id="vendorList">
+              <option value="㈜ 엠티엘컴퍼니">
+              <option value="모모스커피㈜">
+              <option value="주식회사 엠즈베이커스">
+              <option value="주식회사 파미유">
+              <option value="타바론코리아">
+              <option value="맥파이앤타이거">
+              <option value="우성식품">
+              <option value="나드에프앤비">
+              <option value="오테라">
+              <option value="㈜비브리브">
+              <option value="㈜이야이야">
+              <option value="사위컴손">
+              <option value="주식회사 리진">
+              <option value="주식회사 보존">
+              <option value="네슬레코리아 유한책임회사">
+              <option value="(주)우리인터내셔널">
+              <option value="에스큐아이소프트㈜">
+              <option value="IFRESH">
+              <option value="스포티파이">
+              <option value="SKT">
+            </datalist></div>
           <div class="fg"><label>세금계산서 / 법인카드</label>
             <input type="text" id="lf_doc" placeholder="o / 법인카드(만석) 등"></div>
         </div>
@@ -1295,7 +1313,7 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
             <select id="lf_billing" style="border:1px solid #dde3ea;border-radius:5px;padding:6px 9px;font-size:12px;font-family:'Noto Sans KR',sans-serif;background:#fff;min-width:100px">
               <option value="">-</option>
               <option value="미청구">미청구</option>
-              <option value="청구완료">청구완료</option>
+              <option value="청구">청구</option>
             </select>
           </div>
           <span style="flex:1"></span>
@@ -2102,6 +2120,66 @@ function setupRealtimeSync() {
 }
 
 
+
+// ── 계정명 변경 시 구분 자동 연동 ──
+function onLfAccountChange() {
+  const account = document.getElementById('lf_account').value;
+  const gubunEl = document.getElementById('lf_gubun');
+  gubunEl.value = account === '식재' ? '식재' : (account ? '비식재' : '');
+}
+
+// ── 고정비 매월 자동 생성 ──
+const FIXED_EXPENSES_KEY = 'kc_fixed_expenses_v1';
+
+function loadFixedExpenseSettings() {
+  try {
+    const s = localStorage.getItem(FIXED_EXPENSES_KEY);
+    if (s) return JSON.parse(s);
+  } catch(e) {}
+  // 기본값
+  return {
+    spotify:  { amt: 10900, vat: 1090, total: 11990, day: 2,  vendor:'스포티파이', account:'용역수수료-기타용역', desc:'스포티파이_매장용 BGM 정기결제' },
+    skt:      { amt: 10000, vat: 1000, total: 11000, day: 12, vendor:'SKT',       account:'통신비',             desc:'단말기 이용료' },
+    tax:      { amt: 121883, vat: 12188, total: 134071, vendor:'IFRESH', account:'세금과공과', desc:'사업소세' },
+    itsvc:    { amt: 105745, vat: 10575, total: 116320, vendor:'IFRESH', account:'전산용역비', desc:'PC' },
+    copier:   { amt: 85000,  vat: 8500,  total: 93500,  vendor:'IFRESH', account:'복사기렌탈', desc:'복사기임대' },
+  };
+}
+function saveFixedExpenseSettings(s) {
+  localStorage.setItem(FIXED_EXPENSES_KEY, JSON.stringify(s));
+}
+
+// 해당 월에 고정비가 이미 생성됐는지 체크 후 자동 추가
+async function ensureFixedExpenses(month) {
+  const settings = loadFixedExpenseSettings();
+  const data = ledgerCache[month] || [];
+  const monthStr = String(month + 1).padStart(2, '0');
+  const yearMonth = `${LYEAR}-${monthStr}`;
+
+  const fixedKeys = Object.keys(settings);
+  const existing = new Set(data.filter(r => r.fixedKey).map(r => r.fixedKey));
+  let added = false;
+
+  fixedKeys.forEach(key => {
+    if (existing.has(key)) return; // 이미 생성됨
+    const f = settings[key];
+    const dateStr = f.day ? `${yearMonth}-${String(f.day).padStart(2,'0')}` : '';
+    data.push({
+      id: Date.now() + Math.floor(Math.random()*1000),
+      date: dateStr, jijum:'서초',
+      amt: f.amt, vat: f.vat, total: f.total,
+      gubun:'비식재', account: f.account, desc: f.desc, vendor: f.vendor,
+      doc:'', billing:'', fixedKey: key
+    });
+    added = true;
+  });
+
+  if (added) {
+    ledgerCache[month] = data;
+    await saveLedgerData(month, data);
+  }
+}
+
 // ══ 가계부 ════════════════════════════════════════════════════════════════════
 const LYEAR = '2026';
 let LCM = new Date().getMonth(); // 현재 월
@@ -2149,6 +2227,7 @@ async function switchLedgerMonth(idx) {
   LCM = idx;
   showLoading(true);
   await loadLedgerData(idx);
+  await ensureFixedExpenses(idx);
   showLoading(false);
   renderLedgerTabs();
   renderLedgerTable();
@@ -2407,6 +2486,8 @@ window.addLedgerRow=addLedgerRow; window.resetLedgerForm=resetLedgerForm;
 window.delLedgerRow=delLedgerRow; window.renderLedgerTable=renderLedgerTable;
 window.resetLedgerFilter=resetLedgerFilter; window.exportLedgerXLSX=exportLedgerXLSX;
 window.setupLedgerRealtimeSync=setupLedgerRealtimeSync;
+window.onLfAccountChange=onLfAccountChange;
+window.ensureFixedExpenses=ensureFixedExpenses;
 
 // ══ 초기화 ══════════════════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', async () => {
@@ -2427,6 +2508,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('tblTitle').textContent = MONTHS[CM] + ' 구매 내역';
   // 가계부 초기화
   await loadLedgerData(LCM);
+  await ensureFixedExpenses(LCM);
   await Promise.all(MONTHS.map((_,i) => i!==LCM ? loadLedgerData(i) : Promise.resolve()));
   renderLedgerTabs();
   setupLedgerRealtimeSync();
