@@ -1256,12 +1256,14 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
             <input type="date" id="lf_date"></div>
           <div class="fg"><label>지점</label>
             <input type="text" id="lf_jijum" value="서초" placeholder="서초"></div>
-          <div class="fg"><label>금액 *</label>
-            <input type="number" id="lf_amt" placeholder="0" oninput="lCalcVat()"></div>
-          <div class="fg"><label>부가세</label>
-            <input type="number" id="lf_vat" placeholder="자동계산" oninput="lCalcTotal()"></div>
-          <div class="fg"><label>Total (VAT포함)</label>
-            <input type="number" id="lf_total" placeholder="자동계산" readonly></div>
+          <div class="fg"><label>Total (VAT포함) *</label>
+            <input type="number" id="lf_total" placeholder="0" oninput="lCalcFromTotal()"></div>
+          <div class="fg"><label>금액 (자동)</label>
+            <input type="text" id="lf_amt_disp" placeholder="자동계산" readonly style="background:#f8f9fb;color:#555">
+            <input type="hidden" id="lf_amt"></div>
+          <div class="fg"><label>부가세 (자동)</label>
+            <input type="text" id="lf_vat_disp" placeholder="자동계산" readonly style="background:#f8f9fb;color:#555">
+            <input type="hidden" id="lf_vat"></div>
           <div class="fg"><label>구분 (자동)</label>
             <input type="text" id="lf_gubun" readonly placeholder="계정명 선택시 자동" style="background:#f8f9fb;color:#555;font-weight:600">
           </div>
@@ -1318,12 +1320,7 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
             </select></div>
           <div class="fg"><label>세부내용</label>
             <input type="text" id="lf_doc" list="docList" placeholder="o / 법인카드(만석) 등" autocomplete="off">
-            <datalist id="docList">
-              <option value="o">
-              <option value="법인카드(만석)">
-              <option value="법인카드(관경)">
-              <option value="법인카드(민주)">
-            </datalist></div>
+            <datalist id="docList"></datalist></div>
         </div>
         <div class="ledger-form-row">
           <div class="fg" style="flex:0 0 auto">
@@ -2139,11 +2136,71 @@ function setupRealtimeSync() {
 
 
 
+
+// ── 세부내용(doc) 목록 관리 ──
+const DOC_LIST_KEY = 'kc_doc_list_v1';
+const DEFAULT_DOC_LIST = ['o', '법인카드(만석)', '법인카드(관경)', '법인카드(민주)', '법인카드(은유)'];
+
+function loadDocList() {
+  try {
+    const s = localStorage.getItem(DOC_LIST_KEY);
+    if (s) return JSON.parse(s);
+  } catch(e) {}
+  saveDocList(DEFAULT_DOC_LIST);
+  return [...DEFAULT_DOC_LIST];
+}
+function saveDocList(list) {
+  localStorage.setItem(DOC_LIST_KEY, JSON.stringify(list));
+}
+function renderDocList() {
+  const list = loadDocList();
+  const dl = document.getElementById('docList');
+  if (dl) dl.innerHTML = list.map(v => `<option value="${v}">`).join('');
+}
+// 새 세부내용 입력 시 목록에 없으면 자동 추가
+function registerDocValue(val) {
+  if (!val) return;
+  const list = loadDocList();
+  if (!list.includes(val)) {
+    list.push(val);
+    saveDocList(list);
+    renderDocList();
+  }
+}
+
 // ── 계정명 변경 시 구분 자동 연동 ──
 function onLfAccountChange() {
   const account = document.getElementById('lf_account').value;
   const gubunEl = document.getElementById('lf_gubun');
   gubunEl.value = account === '식재' ? '식재' : (account ? '비식재' : '');
+}
+
+
+// ── 가계부 세부내용(doc) 인라인 편집 ──
+function editLedgerDoc(id, cell) {
+  const data = glc(), row = data.find(r => r.id === id);
+  if (!row) return;
+  const origVal = row.doc || '';
+  const list = loadDocList();
+  cell.innerHTML = `<input type="text" value="${origVal}" list="docListEdit_${id}"
+    style="width:140px;border:1.5px solid #1a3a5c;border-radius:4px;padding:2px 5px;font-size:12px;"
+    id="docInput_${id}" autocomplete="off"
+    onblur="saveLedgerDoc(${id},this)"
+    onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape')renderLedgerTable()">
+    <datalist id="docListEdit_${id}">${list.map(v=>`<option value="${v}">`).join('')}</datalist>`;
+  const inp = document.getElementById('docInput_' + id);
+  inp.focus(); inp.select();
+}
+
+async function saveLedgerDoc(id, input) {
+  const newVal = input.value.trim();
+  const data = glc(), row = data.find(r => r.id === id);
+  if (!row || newVal === (row.doc||'')) { renderLedgerTable(); return; }
+  row.doc = newVal;
+  registerDocValue(newVal);
+  await slc(data);
+  renderLedgerTable();
+  toast('세부내용이 수정되었습니다.', 'ok');
 }
 
 // ── 결제유형 변경 시 세부내용 placeholder 변경 ──
@@ -2263,24 +2320,31 @@ async function switchLedgerMonth(idx) {
 }
 
 // ── 입력 폼 ──
-function lCalcVat() {
-  const amt = parseFloat(document.getElementById('lf_amt').value) || 0;
-  const vat = Math.round(amt / 10);
-  document.getElementById('lf_vat').value = vat || '';
-  lCalcTotal();
-}
-function lCalcTotal() {
-  const amt = parseFloat(document.getElementById('lf_amt').value) || 0;
-  const vat = parseFloat(document.getElementById('lf_vat').value) || 0;
-  document.getElementById('lf_total').value = (amt + vat) || '';
+// Total(VAT포함)을 입력하면 금액·부가세를 소수점까지 정확히 역산
+// 금액 = Total / 1.1, 부가세 = Total - 금액  (값은 소수점 보존, 표시만 정수)
+function lCalcFromTotal() {
+  const total = parseFloat(document.getElementById('lf_total').value) || 0;
+  if (total === 0) {
+    document.getElementById('lf_amt').value = '';
+    document.getElementById('lf_vat').value = '';
+    document.getElementById('lf_amt_disp').value = '';
+    document.getElementById('lf_vat_disp').value = '';
+    return;
+  }
+  const amt = total / 1.1;          // 소수점 그대로 유지
+  const vat = total - amt;          // 소수점 그대로 유지
+  document.getElementById('lf_amt').value = amt;
+  document.getElementById('lf_vat').value = vat;
+  document.getElementById('lf_amt_disp').value = Math.round(amt).toLocaleString('ko-KR');
+  document.getElementById('lf_vat_disp').value = Math.round(vat).toLocaleString('ko-KR');
 }
 
 async function addLedgerRow() {
   const date    = document.getElementById('lf_date').value;
   const jijum   = document.getElementById('lf_jijum').value.trim() || '서초';
+  const total   = parseFloat(document.getElementById('lf_total').value) || 0;
   const amt     = parseFloat(document.getElementById('lf_amt').value) || 0;
   const vat     = parseFloat(document.getElementById('lf_vat').value) || 0;
-  const total   = parseFloat(document.getElementById('lf_total').value) || 0;
   const gubun   = document.getElementById('lf_gubun').value;
   const account = document.getElementById('lf_account').value.trim();
   const desc    = document.getElementById('lf_desc').value.trim();
@@ -2289,9 +2353,10 @@ async function addLedgerRow() {
   const doc     = document.getElementById('lf_doc').value.trim();
   const billing = document.getElementById('lf_billing').value;
 
-  if (!amt || !desc) { toast('금액과 적요는 필수입니다.', 'err'); return; }
+  if (!total || !desc) { toast('Total(VAT포함) 금액과 적요는 필수입니다.', 'err'); return; }
   if (!paytype) { toast('결제유형(세금계산서/법인카드)을 선택하세요.', 'err'); return; }
 
+  registerDocValue(doc);
   const d = glc();
   d.push({ id: Date.now(), date, jijum, amt, vat, total, gubun, account, desc, vendor, paytype, doc, billing });
   await slc(d);
@@ -2303,7 +2368,7 @@ async function addLedgerRow() {
 }
 
 function resetLedgerForm() {
-  ['lf_amt','lf_vat','lf_total','lf_gubun','lf_account','lf_desc','lf_vendor','lf_paytype','lf_doc','lf_billing']
+  ['lf_amt','lf_vat','lf_total','lf_amt_disp','lf_vat_disp','lf_gubun','lf_account','lf_desc','lf_vendor','lf_paytype','lf_doc','lf_billing']
     .forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
   if (!document.getElementById('lf_date').value)
     document.getElementById('lf_date').value = new Date().toISOString().split('T')[0];
@@ -2370,7 +2435,7 @@ function renderLedgerTable() {
     <td class="lcenter"><span class="gbadge-${r.gubun||'비식재'}">${r.gubun||''}</span></td>
     <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.desc||''}">${r.desc||''}</td>
     <td>${r.vendor||''}</td>
-    <td style="font-size:12px;color:#666">${r.doc||''}</td>
+    <td style="font-size:12px;color:#666;cursor:pointer;text-decoration:underline dotted #aaa" title="클릭하여 세부내용 수정" onclick="editLedgerDoc(${r.id},this)">${r.doc||'-'}</td>
     <td class="lcenter" style="font-size:11px;color:${r.billing==='미청구'?'#dc2626':'#888'}">${r.billing||''}</td>
     <td class="lcenter"><button class="btn btn-danger btn-sm" onclick="delLedgerRow(${r.id})" style="padding:2px 6px">✕</button></td>
   </tr>`;
@@ -2617,6 +2682,11 @@ window.resetLedgerFilter=resetLedgerFilter; window.exportLedgerXLSX=exportLedger
 window.setupLedgerRealtimeSync=setupLedgerRealtimeSync;
 window.onLfAccountChange=onLfAccountChange;
 window.onLfPaytypeChange=onLfPaytypeChange;
+window.lCalcFromTotal=lCalcFromTotal;
+window.registerDocValue=registerDocValue;
+window.renderDocList=renderDocList;
+window.editLedgerDoc=editLedgerDoc;
+window.saveLedgerDoc=saveLedgerDoc;
 window.ensureFixedExpenses=ensureFixedExpenses;
 
 // ══ 초기화 ══════════════════════════════════════════════════════════════════
@@ -2637,6 +2707,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   updateSidebar();
   document.getElementById('tblTitle').textContent = MONTHS[CM] + ' 구매 내역';
   // 가계부 초기화
+  renderDocList();
   await loadLedgerData(LCM);
   await ensureFixedExpenses(LCM);
   await Promise.all(MONTHS.map((_,i) => i!==LCM ? loadLedgerData(i) : Promise.resolve()));
