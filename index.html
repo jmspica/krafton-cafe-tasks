@@ -102,14 +102,14 @@ tbody td.num{text-align:right;font-family:monospace;color:#1a3a5c}
 tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
 
 /* 분류 배지 */
-.cat{display:inline-block;padding:1px 7px;border-radius:3px;font-size:10px;font-weight:700}
-.cat-식재{background:#e6f7ee;color:#15803d;border:1px solid #bbf7d0}
-.cat-서초주류{background:#fef9c3;color:#854d0e;border:1px solid #fde68a}
-.cat-펍{background:#fee2e2;color:#b91c1c;border:1px solid #fecaca}
-.cat-웰니스{background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd}
-.cat-네스프레소{background:#f3e8ff;color:#6b21a8;border:1px solid #e9d5ff}
-.cat-식재라운지{background:#ecfdf5;color:#065f46}
-.cat-콜라보{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa}
+.cat{display:inline-block;padding:1px 7px;border-radius:3px;font-size:10px;font-weight:700;white-space:nowrap}
+/* 셀 배경색 방식 */
+.cat-cell-식재    { background:#d1fae5 !important; color:#065f46 !important; font-weight:700; font-size:13px; text-align:center; }
+.cat-cell-서초주류 { background:#fef08a !important; color:#713f12 !important; font-weight:700; font-size:13px; text-align:center; }
+.cat-cell-펍      { background:#fecaca !important; color:#991b1b !important; font-weight:700; font-size:13px; text-align:center; }
+.cat-cell-웰니스  { background:#bae6fd !important; color:#0c4a6e !important; font-weight:700; font-size:13px; text-align:center; }
+.cat-cell-네스프레소{ background:#e9d5ff !important; color:#4c1d95 !important; font-weight:700; font-size:13px; text-align:center; }
+.cat-cell-콜라보  { background:#fed7aa !important; color:#7c2d12 !important; font-weight:700; font-size:13px; text-align:center; }
 
 /* 체크 */
 .chk-grp{display:flex;gap:2px;justify-content:center}
@@ -446,6 +446,104 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
   .chk-btn { width:28px; height:28px; } /* 터치 영역 확대 */
 }
 
+
+/* ══ 가계부 탭 ══════════════════════════════════════════════════════════════ */
+.app-page#appLedger { height:calc(100vh - 54px - 40px); flex-direction:column; }
+
+/* 가계부 월 탭 */
+#ledgerMonthTabs { display:flex; overflow-x:auto; background:#fff;
+  border-bottom:1px solid #dde3ea; padding:0 12px; flex-shrink:0; }
+
+/* 가계부 입력 폼 */
+.ledger-form-card { background:#fff; border:1px solid #dde3ea; border-radius:8px;
+  padding:14px 16px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,.05); flex-shrink:0; }
+.ledger-form-title { font-size:12px; font-weight:700; color:#1a3a5c;
+  margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid #eef0f3; }
+.ledger-form-grid {
+  display:grid;
+  grid-template-columns: 130px 100px 120px 120px 130px 100px;
+  gap:8px; margin-bottom:8px; align-items:end;
+}
+.ledger-form-grid2 {
+  display:grid;
+  grid-template-columns: 1fr 1fr 160px 130px;
+  gap:8px; margin-bottom:8px; align-items:end;
+}
+.ledger-form-grid .fg, .ledger-form-grid2 .fg {
+  display:flex; flex-direction:column; gap:4px;
+}
+.ledger-form-grid .fg label, .ledger-form-grid2 .fg label {
+  font-size:10px; font-weight:600; color:#666; text-transform:uppercase;
+}
+.ledger-form-grid .fg input,  .ledger-form-grid .fg select,
+.ledger-form-grid2 .fg input, .ledger-form-grid2 .fg select {
+  border:1px solid #dde3ea; border-radius:5px; color:#222;
+  padding:6px 9px; font-size:12px; font-family:'Noto Sans KR',sans-serif;
+  transition:border .15s; width:100%; background:#fff;
+}
+.ledger-form-grid .fg input:focus,  .ledger-form-grid .fg select:focus,
+.ledger-form-grid2 .fg input:focus, .ledger-form-grid2 .fg select:focus {
+  outline:none; border-color:#1a3a5c; box-shadow:0 0 0 2px rgba(26,58,92,.08);
+}
+.ledger-form-row { display:flex; align-items:center; gap:8px;
+  justify-content:flex-end; margin-top:4px; }
+
+/* 가계부 메인 레이아웃 */
+.ledger-main { flex:1; display:flex; overflow:hidden; }
+.ledger-sidebar {
+  width:180px; flex-shrink:0; background:#fff; border-right:1px solid #dde3ea;
+  padding:16px 12px; overflow-y:auto; display:flex; flex-direction:column; gap:14px;
+}
+.ledger-content { flex:1; padding:16px; overflow-y:auto; background:#f5f5f5; }
+
+/* 가계부 테이블 */
+.ltbl-card { background:#fff; border:1px solid #dde3ea; border-radius:8px;
+  overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.05); }
+.ltbl-header { padding:10px 16px; border-bottom:1px solid #dde3ea;
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+.ltbl-header h3 { font-size:13px; font-weight:700; color:#1a3a5c; }
+.ltbl-wrap { overflow-x:auto; }
+.ltbl-wrap table { width:100%; border-collapse:collapse; font-size:13px; }
+.ltbl-wrap thead th {
+  background:#f0f4f8; color:#333; font-size:11px; font-weight:700;
+  text-transform:uppercase; padding:8px 10px; text-align:left;
+  border:1px solid #d0d7de; white-space:nowrap;
+  position:sticky; top:0; z-index:5;
+}
+.ltbl-wrap tbody tr { border-bottom:1px solid #e8ecf0; transition:background .1s; line-height:1.5; }
+.ltbl-wrap tbody tr:hover { background:#f8fbff; }
+.ltbl-wrap tbody td { padding:8px 10px; border:1px solid #e8ecf0; font-size:13px; vertical-align:middle; }
+.ltbl-wrap tbody td.lnum { text-align:right; font-family:monospace; font-weight:600; }
+.ltbl-wrap tbody td.lcenter { text-align:center; }
+
+/* 구분 배지 */
+.gbadge-식재   { background:#d1fae5; color:#065f46; font-weight:700; font-size:12px;
+  padding:2px 8px; border-radius:3px; white-space:nowrap; }
+.gbadge-비식재 { background:#fee2e2; color:#991b1b; font-weight:700; font-size:12px;
+  padding:2px 8px; border-radius:3px; white-space:nowrap; }
+
+/* 가계부 합계 행 */
+.ltbl-sum td { background:#f0f4f8; border-top:2px solid #1a3a5c !important;
+  font-weight:700; font-size:13px; padding:9px 10px; }
+.ltbl-sum .lsum-val { text-align:right; font-family:monospace; color:#1a3a5c; font-size:14px; }
+
+/* 가계부 사이드바 */
+.ledger-sb-section h3 { font-size:11px; font-weight:700; color:#1a3a5c;
+  margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid #eef0f3;
+  text-transform:uppercase; letter-spacing:.5px; }
+.ledger-stat { display:flex; flex-direction:column; gap:6px; }
+.ledger-stat-card { background:#f8f9fb; border-radius:6px; padding:8px 10px;
+  border:1px solid #eef0f3; }
+.ledger-stat-card .lbl { font-size:10px; color:#888; margin-bottom:2px; }
+.ledger-stat-card .val { font-size:13px; font-weight:700; color:#1a3a5c;
+  font-family:monospace; }
+.ledger-stat-card .val.pos { color:#15803d; }
+.ledger-stat-card .val.neg { color:#dc2626; }
+
+/* 가계부 필터 바 */
+.ledger-filter-bar { background:#f8f9fb; border-bottom:2px solid #dde3ea;
+  padding:8px 16px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; flex-shrink:0; }
+
 </style>
 
 <!-- 추가 CSS -->
@@ -713,6 +811,104 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
   .chk-btn { width:28px; height:28px; } /* 터치 영역 확대 */
 }
 
+
+/* ══ 가계부 탭 ══════════════════════════════════════════════════════════════ */
+.app-page#appLedger { height:calc(100vh - 54px - 40px); flex-direction:column; }
+
+/* 가계부 월 탭 */
+#ledgerMonthTabs { display:flex; overflow-x:auto; background:#fff;
+  border-bottom:1px solid #dde3ea; padding:0 12px; flex-shrink:0; }
+
+/* 가계부 입력 폼 */
+.ledger-form-card { background:#fff; border:1px solid #dde3ea; border-radius:8px;
+  padding:14px 16px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,.05); flex-shrink:0; }
+.ledger-form-title { font-size:12px; font-weight:700; color:#1a3a5c;
+  margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid #eef0f3; }
+.ledger-form-grid {
+  display:grid;
+  grid-template-columns: 130px 100px 120px 120px 130px 100px;
+  gap:8px; margin-bottom:8px; align-items:end;
+}
+.ledger-form-grid2 {
+  display:grid;
+  grid-template-columns: 1fr 1fr 160px 130px;
+  gap:8px; margin-bottom:8px; align-items:end;
+}
+.ledger-form-grid .fg, .ledger-form-grid2 .fg {
+  display:flex; flex-direction:column; gap:4px;
+}
+.ledger-form-grid .fg label, .ledger-form-grid2 .fg label {
+  font-size:10px; font-weight:600; color:#666; text-transform:uppercase;
+}
+.ledger-form-grid .fg input,  .ledger-form-grid .fg select,
+.ledger-form-grid2 .fg input, .ledger-form-grid2 .fg select {
+  border:1px solid #dde3ea; border-radius:5px; color:#222;
+  padding:6px 9px; font-size:12px; font-family:'Noto Sans KR',sans-serif;
+  transition:border .15s; width:100%; background:#fff;
+}
+.ledger-form-grid .fg input:focus,  .ledger-form-grid .fg select:focus,
+.ledger-form-grid2 .fg input:focus, .ledger-form-grid2 .fg select:focus {
+  outline:none; border-color:#1a3a5c; box-shadow:0 0 0 2px rgba(26,58,92,.08);
+}
+.ledger-form-row { display:flex; align-items:center; gap:8px;
+  justify-content:flex-end; margin-top:4px; }
+
+/* 가계부 메인 레이아웃 */
+.ledger-main { flex:1; display:flex; overflow:hidden; }
+.ledger-sidebar {
+  width:180px; flex-shrink:0; background:#fff; border-right:1px solid #dde3ea;
+  padding:16px 12px; overflow-y:auto; display:flex; flex-direction:column; gap:14px;
+}
+.ledger-content { flex:1; padding:16px; overflow-y:auto; background:#f5f5f5; }
+
+/* 가계부 테이블 */
+.ltbl-card { background:#fff; border:1px solid #dde3ea; border-radius:8px;
+  overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.05); }
+.ltbl-header { padding:10px 16px; border-bottom:1px solid #dde3ea;
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+.ltbl-header h3 { font-size:13px; font-weight:700; color:#1a3a5c; }
+.ltbl-wrap { overflow-x:auto; }
+.ltbl-wrap table { width:100%; border-collapse:collapse; font-size:13px; }
+.ltbl-wrap thead th {
+  background:#f0f4f8; color:#333; font-size:11px; font-weight:700;
+  text-transform:uppercase; padding:8px 10px; text-align:left;
+  border:1px solid #d0d7de; white-space:nowrap;
+  position:sticky; top:0; z-index:5;
+}
+.ltbl-wrap tbody tr { border-bottom:1px solid #e8ecf0; transition:background .1s; line-height:1.5; }
+.ltbl-wrap tbody tr:hover { background:#f8fbff; }
+.ltbl-wrap tbody td { padding:8px 10px; border:1px solid #e8ecf0; font-size:13px; vertical-align:middle; }
+.ltbl-wrap tbody td.lnum { text-align:right; font-family:monospace; font-weight:600; }
+.ltbl-wrap tbody td.lcenter { text-align:center; }
+
+/* 구분 배지 */
+.gbadge-식재   { background:#d1fae5; color:#065f46; font-weight:700; font-size:12px;
+  padding:2px 8px; border-radius:3px; white-space:nowrap; }
+.gbadge-비식재 { background:#fee2e2; color:#991b1b; font-weight:700; font-size:12px;
+  padding:2px 8px; border-radius:3px; white-space:nowrap; }
+
+/* 가계부 합계 행 */
+.ltbl-sum td { background:#f0f4f8; border-top:2px solid #1a3a5c !important;
+  font-weight:700; font-size:13px; padding:9px 10px; }
+.ltbl-sum .lsum-val { text-align:right; font-family:monospace; color:#1a3a5c; font-size:14px; }
+
+/* 가계부 사이드바 */
+.ledger-sb-section h3 { font-size:11px; font-weight:700; color:#1a3a5c;
+  margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid #eef0f3;
+  text-transform:uppercase; letter-spacing:.5px; }
+.ledger-stat { display:flex; flex-direction:column; gap:6px; }
+.ledger-stat-card { background:#f8f9fb; border-radius:6px; padding:8px 10px;
+  border:1px solid #eef0f3; }
+.ledger-stat-card .lbl { font-size:10px; color:#888; margin-bottom:2px; }
+.ledger-stat-card .val { font-size:13px; font-weight:700; color:#1a3a5c;
+  font-family:monospace; }
+.ledger-stat-card .val.pos { color:#15803d; }
+.ledger-stat-card .val.neg { color:#dc2626; }
+
+/* 가계부 필터 바 */
+.ledger-filter-bar { background:#f8f9fb; border-bottom:2px solid #dde3ea;
+  padding:8px 16px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; flex-shrink:0; }
+
 </style>
 </head>
 
@@ -740,6 +936,7 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
 <div class="page-tab-bar">
   <button class="page-tab-btn active" id="ptbPurchase" onclick="switchPage('purchase')">📋 현지구매 입력</button>
   <button class="page-tab-btn" id="ptbMaster" onclick="switchPage('master')">🗂️ 마스터 관리</button>
+  <button class="page-tab-btn" id="ptbLedger" onclick="switchPage('ledger')">📒 가계부</button>
 </div>
 
 <!-- ══ 현지구매 입력 페이지 ══ -->
@@ -1003,6 +1200,162 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
   </div>
 </div>
 
+
+<!-- ══ 가계부 페이지 ══ -->
+<div class="app-page" id="appLedger" style="height:calc(100vh - 54px - 40px)">
+
+  <!-- 월 탭 -->
+  <div id="ledgerMonthTabs"></div>
+
+  <!-- 메인 -->
+  <div class="ledger-main">
+
+    <!-- 사이드바 -->
+    <div class="ledger-sidebar">
+      <div class="ledger-sb-section">
+        <h3>📊 월간 현황</h3>
+        <div class="ledger-stat">
+          <div class="ledger-stat-card">
+            <div class="lbl">건수</div>
+            <div class="val" id="lsb_cnt">0</div>
+          </div>
+          <div class="ledger-stat-card">
+            <div class="lbl">공급가액 합계</div>
+            <div class="val pos" id="lsb_amt">₩ 0</div>
+          </div>
+          <div class="ledger-stat-card">
+            <div class="lbl">부가세 합계</div>
+            <div class="val" id="lsb_vat">₩ 0</div>
+          </div>
+          <div class="ledger-stat-card">
+            <div class="lbl">Total (VAT포함)</div>
+            <div class="val neg" id="lsb_total">₩ 0</div>
+          </div>
+        </div>
+      </div>
+      <div class="ledger-sb-section">
+        <h3>🏷️ 구분별</h3>
+        <div id="lsb_breakdown"></div>
+      </div>
+    </div>
+
+    <!-- 콘텐츠 -->
+    <div class="ledger-content">
+
+      <!-- 입력 폼 -->
+      <div class="ledger-form-card">
+        <div class="ledger-form-title">➕ 가계부 내역 입력</div>
+        <div class="ledger-form-grid">
+          <div class="fg"><label>날짜</label>
+            <input type="date" id="lf_date"></div>
+          <div class="fg"><label>지점</label>
+            <input type="text" id="lf_jijum" value="서초" placeholder="서초"></div>
+          <div class="fg"><label>금액 *</label>
+            <input type="number" id="lf_amt" placeholder="0" oninput="lCalcVat()"></div>
+          <div class="fg"><label>부가세</label>
+            <input type="number" id="lf_vat" placeholder="자동계산" oninput="lCalcTotal()"></div>
+          <div class="fg"><label>Total (VAT포함)</label>
+            <input type="number" id="lf_total" placeholder="자동계산" readonly></div>
+          <div class="fg"><label>구분</label>
+            <select id="lf_gubun">
+              <option value="">선택</option>
+              <option value="식재">식재</option>
+              <option value="비식재">비식재</option>
+            </select>
+          </div>
+        </div>
+        <div class="ledger-form-grid2">
+          <div class="fg"><label>계정명</label>
+            <select id="lf_account">
+              <option value="">선택</option>
+              <option value="기타수수료">기타수수료</option>
+              <option value="복사기렌탈">복사기렌탈</option>
+              <option value="세금과공과">세금과공과</option>
+              <option value="소모품비-주방용품">소모품비-주방용품</option>
+              <option value="회의비">회의비</option>
+              <option value="식재">식재</option>
+              <option value="신용카드수수료">신용카드수수료</option>
+              <option value="수선비-공기구비품">수선비-공기구비품</option>
+              <option value="전산용역비">전산용역비</option>
+              <option value="여비교통비">여비교통비</option>
+              <option value="통신비">통신비</option>
+              <option value="도서인쇄비-서식인쇄">도서인쇄비-서식인쇄</option>
+              <option value="용역수수료-기타용역">용역수수료-기타용역</option>
+            </select></div>
+          <div class="fg"><label>적요</label>
+            <input type="text" id="lf_desc" placeholder="품목 설명"></div>
+          <div class="fg"><label>가맹점명</label>
+            <input type="text" id="lf_vendor" placeholder="거래처명"></div>
+          <div class="fg"><label>세금계산서 / 법인카드</label>
+            <input type="text" id="lf_doc" placeholder="o / 법인카드(만석) 등"></div>
+        </div>
+        <div class="ledger-form-row">
+          <div class="fg" style="flex:0 0 auto">
+            <label style="font-size:10px;font-weight:600;color:#666">청구여부</label>
+            <select id="lf_billing" style="border:1px solid #dde3ea;border-radius:5px;padding:6px 9px;font-size:12px;font-family:'Noto Sans KR',sans-serif;background:#fff;min-width:100px">
+              <option value="">-</option>
+              <option value="미청구">미청구</option>
+              <option value="청구완료">청구완료</option>
+            </select>
+          </div>
+          <span style="flex:1"></span>
+          <button class="btn btn-secondary" onclick="resetLedgerForm()">↺ 초기화</button>
+          <button class="btn btn-primary" onclick="addLedgerRow()">✚ 추가</button>
+        </div>
+      </div>
+
+      <!-- 테이블 -->
+      <div class="ltbl-card">
+        <div class="ltbl-header">
+          <h3 id="ltblTitle">가계부 내역</h3>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="tbl-cnt" id="lRowCnt">0건</span>
+            <button class="btn btn-excel btn-sm" onclick="exportLedgerXLSX()">📊 Excel</button>
+          </div>
+        </div>
+        <!-- 필터 바 -->
+        <div class="ledger-filter-bar">
+          <label style="font-size:10px;font-weight:700;color:#666">구분</label>
+          <select class="filter-select" id="lflt_gubun" onchange="renderLedgerTable()">
+            <option value="">전체</option>
+            <option value="식재">식재</option>
+            <option value="비식재">비식재</option>
+          </select>
+          <div class="filter-divider"></div>
+          <label style="font-size:10px;font-weight:700;color:#666">검색</label>
+          <input type="text" class="filter-input" id="lflt_text"
+            placeholder="계정명 / 적요 / 가맹점" oninput="renderLedgerTable()">
+          <button class="filter-reset" onclick="resetLedgerFilter()">✕ 초기화</button>
+          <span class="filter-cnt" id="lFilterCnt" style="display:none"></span>
+        </div>
+        <div class="ltbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:36px">No</th>
+                <th style="width:55px">지점</th>
+                <th style="width:110px">날짜</th>
+                <th style="width:100px" class="right">금액</th>
+                <th style="width:90px" class="right">부가세</th>
+                <th style="width:110px" class="right">Total</th>
+                <th style="min-width:150px">계정명</th>
+                <th style="width:70px">구분</th>
+                <th style="min-width:200px">적요</th>
+                <th style="min-width:150px">가맹점명</th>
+                <th style="width:130px">세금계산서/법인카드</th>
+                <th style="width:80px">청구여부</th>
+                <th style="width:36px">삭제</th>
+              </tr>
+            </thead>
+            <tbody id="ltbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /ledger-content -->
+  </div><!-- /ledger-main -->
+</div><!-- /appLedger -->
+
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -1143,11 +1496,16 @@ function showLoading(on) {
 // ══ 페이지 전환 ══
 function switchPage(page) {
   const iP = page==='purchase';
+  const iM = page==='master';
+  const iL = page==='ledger';
   document.getElementById('appPurchase').classList.toggle('active', iP);
-  document.getElementById('appMaster').classList.toggle('active', !iP);
+  document.getElementById('appMaster').classList.toggle('active', iM);
+  document.getElementById('appLedger').classList.toggle('active', iL);
   document.getElementById('ptbPurchase').classList.toggle('active', iP);
-  document.getElementById('ptbMaster').classList.toggle('active', !iP);
-  if(!iP) renderMasterTable();
+  document.getElementById('ptbMaster').classList.toggle('active', iM);
+  document.getElementById('ptbLedger').classList.toggle('active', iL);
+  if(iM) renderMasterTable();
+  if(iL) { renderLedgerTabs(); renderLedgerTable(); updateLedgerSidebar(); }
 }
 
 // ══ 월 탭 ══
@@ -1410,7 +1768,7 @@ function renderTable(){
       <td class="center" style="font-family:monospace;font-size:11px;cursor:pointer;text-decoration:underline dotted #aaa" title="클릭하여 날짜 수정" onclick="editDate(${r.id},this)" style="font-size:13px">${r.date}</td>
       <td style="font-size:13px">${r.site}</td>
       <td class="center">${r.gubun||''}</td>
-      <td class="center"><span class="${catCls}">${r.cat}</span></td>
+      <td class="cat-cell-${r.cat}">${r.cat}</td>
       <td class="code">${r.code||''}</td>
       <td style="font-size:13px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.item}">${r.item}</td>
       <td class="center">${r.unit||''}</td>
@@ -1419,7 +1777,7 @@ function renderTable(){
       <td class="num" style="font-weight:600">${r.amount.toLocaleString()}</td>
       <td class="center" style="font-size:13px">서초</td>
       <td class="center" style="font-size:13px">${r.gubun||''}</td>
-      <td class="center" style="font-size:13px"><span class="${catCls}">${r.cat}</span></td>
+      <td class="cat-cell-${r.cat}" style="font-size:13px">${r.cat}</td>
       ${checks}
       <td class="center"><button class="btn btn-danger btn-sm" onclick="delRow(${r.id})" style="padding:2px 6px">✕</button></td>
     </tr>`;
@@ -1530,13 +1888,12 @@ function exportXLSX(){
     [[0,'center'],[1,'center'],[2,'left'],[3,'center'],[4,'center'],[5,'center'],[6,'left'],[7,'center'],[11,'center'],[12,'center'],[13,'center']].forEach(([c,h])=>{const a=`${cols[c]}${row}`;if(!ws[a])ws[a]={v:'',t:'s'};ws[a].s=sd(h);});
     [8,9,10].forEach(c=>{
       const a=`${cols[c]}${row}`;
-      if(ws[a]){
-        ws[a].s={...sd('right'),numFmt:'#,##0'};  // 표시는 정수
-        ws[a].t='n';
-        // 단가(c=9): 소수점 값 그대로 유지
-        if(c===9) ws[a].v=sorted[i].price;
-      }
+      if(!ws[a]) ws[a]={t:'n',v:0};
+      ws[a].t='n';
+      ws[a].s={...sd('right'),numFmt:'#,##0'};
     });
+    // 단가(J열): 소수점 원본값 명시적으로 덮어쓰기
+    ws[`J${row}`]={t:'n', v:sorted[i].price, s:{...sd('right'),numFmt:'#,##0'}};
     [14,15,16,17,18].forEach(c=>{const a=`${cols[c]}${row}`;const val=wsData[row-1][c];if(!ws[a])ws[a]={v:val,t:'s'};ws[a].s=val==='✅'?doneStyle:pendStyle;});
   });
   const tr2=sorted.length+2;
@@ -1744,6 +2101,287 @@ function setupRealtimeSync() {
   });
 }
 
+
+// ══ 가계부 ════════════════════════════════════════════════════════════════════
+const LYEAR = '2026';
+let LCM = new Date().getMonth(); // 현재 월
+let ledgerCache = {}; // 월별 캐시
+
+// Firebase 가계부 경로: /ledger/2026/{month}
+async function loadLedgerData(month) {
+  try {
+    const snap = await get(ref(db, `ledger/${LYEAR}/${month}`));
+    if (snap.exists()) {
+      const val = snap.val();
+      ledgerCache[month] = Object.values(val).filter(r => r && r.id);
+    } else {
+      ledgerCache[month] = [];
+    }
+  } catch(e) {
+    console.warn('가계부 로드 실패:', e);
+    ledgerCache[month] = [];
+  }
+  return ledgerCache[month] || [];
+}
+
+async function saveLedgerData(month, data) {
+  const clean = (data || []).filter(r => r && r.id);
+  ledgerCache[month] = clean;
+  try {
+    const obj = {};
+    clean.forEach((r, i) => { obj[i] = r; });
+    await set(ref(db, `ledger/${LYEAR}/${month}`), clean.length > 0 ? obj : null);
+  } catch(e) { console.error('가계부 저장 실패:', e); }
+}
+
+function glc() { return ledgerCache[LCM] || []; }
+async function slc(d) { await saveLedgerData(LCM, d); }
+
+// ── 월 탭 ──
+function renderLedgerTabs() {
+  document.getElementById('ledgerMonthTabs').innerHTML = MONTHS.map((m, i) => {
+    const cnt = (ledgerCache[i] || []).length;
+    return `<button class="month-tab ${i === LCM ? 'active' : ''}" onclick="switchLedgerMonth(${i})">${m}${cnt > 0 ? `<span class="badge">${cnt}</span>` : ''}</button>`;
+  }).join('');
+}
+
+async function switchLedgerMonth(idx) {
+  LCM = idx;
+  showLoading(true);
+  await loadLedgerData(idx);
+  showLoading(false);
+  renderLedgerTabs();
+  renderLedgerTable();
+  updateLedgerSidebar();
+  document.getElementById('ltblTitle').textContent = MONTHS[idx] + ' 가계부 내역';
+}
+
+// ── 입력 폼 ──
+function lCalcVat() {
+  const amt = parseFloat(document.getElementById('lf_amt').value) || 0;
+  const vat = Math.round(amt / 10);
+  document.getElementById('lf_vat').value = vat || '';
+  lCalcTotal();
+}
+function lCalcTotal() {
+  const amt = parseFloat(document.getElementById('lf_amt').value) || 0;
+  const vat = parseFloat(document.getElementById('lf_vat').value) || 0;
+  document.getElementById('lf_total').value = (amt + vat) || '';
+}
+
+async function addLedgerRow() {
+  const date    = document.getElementById('lf_date').value;
+  const jijum   = document.getElementById('lf_jijum').value.trim() || '서초';
+  const amt     = parseFloat(document.getElementById('lf_amt').value) || 0;
+  const vat     = parseFloat(document.getElementById('lf_vat').value) || 0;
+  const total   = parseFloat(document.getElementById('lf_total').value) || 0;
+  const gubun   = document.getElementById('lf_gubun').value;
+  const account = document.getElementById('lf_account').value.trim();
+  const desc    = document.getElementById('lf_desc').value.trim();
+  const vendor  = document.getElementById('lf_vendor').value.trim();
+  const doc     = document.getElementById('lf_doc').value.trim();
+  const billing = document.getElementById('lf_billing').value;
+
+  if (!amt || !desc) { toast('금액과 적요는 필수입니다.', 'err'); return; }
+
+  const d = glc();
+  d.push({ id: Date.now(), date, jijum, amt, vat, total, gubun, account, desc, vendor, doc, billing });
+  await slc(d);
+  renderLedgerTable();
+  updateLedgerSidebar();
+  renderLedgerTabs();
+  resetLedgerForm();
+  toast('추가되었습니다.', 'ok');
+}
+
+function resetLedgerForm() {
+  ['lf_amt','lf_vat','lf_total','lf_gubun','lf_account','lf_desc','lf_vendor','lf_doc','lf_billing']
+    .forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  if (!document.getElementById('lf_date').value)
+    document.getElementById('lf_date').value = new Date().toISOString().split('T')[0];
+}
+
+// ── 필터 ──
+function resetLedgerFilter() {
+  ['lflt_gubun','lflt_text'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  renderLedgerTable();
+}
+function getLedgerFiltered() {
+  let data = glc();
+  const gubun = document.getElementById('lflt_gubun')?.value || '';
+  const text  = (document.getElementById('lflt_text')?.value || '').toLowerCase().trim();
+  if (gubun) data = data.filter(r => r.gubun === gubun);
+  if (text)  data = data.filter(r =>
+    (r.account||'').toLowerCase().includes(text) ||
+    (r.desc||'').toLowerCase().includes(text) ||
+    (r.vendor||'').toLowerCase().includes(text)
+  );
+  return data;
+}
+
+// ── 테이블 렌더 ──
+function renderLedgerTable() {
+  const all  = glc();
+  const data = getLedgerFiltered();
+  const isFiltered = data.length < all.length;
+
+  document.getElementById('lRowCnt').textContent = data.length + '건';
+  const cntEl = document.getElementById('lFilterCnt');
+  if (cntEl) {
+    cntEl.textContent = `${data.length} / ${all.length}건`;
+    cntEl.style.display = isFiltered ? '' : 'none';
+  }
+
+  // 날짜순 정렬
+  const sorted = [...data].sort((a, b) => (a.date||'').localeCompare(b.date||''));
+  const tbody = document.getElementById('ltbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = sorted.map((r, i) => `<tr>
+    <td class="lcenter" style="color:#aaa;font-size:12px">${i+1}</td>
+    <td class="lcenter">${r.jijum||'서초'}</td>
+    <td class="lcenter" style="font-family:monospace">${r.date||''}</td>
+    <td class="lnum">${r.amt ? Math.round(r.amt).toLocaleString() : '-'}</td>
+    <td class="lnum" style="color:#888">${r.vat ? Math.round(r.vat).toLocaleString() : '-'}</td>
+    <td class="lnum" style="font-weight:700;color:#1a3a5c">${r.total ? Math.round(r.total).toLocaleString() : '-'}</td>
+    <td>${r.account||''}</td>
+    <td class="lcenter"><span class="gbadge-${r.gubun||'비식재'}">${r.gubun||''}</span></td>
+    <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.desc||''}">${r.desc||''}</td>
+    <td>${r.vendor||''}</td>
+    <td style="font-size:12px;color:#666">${r.doc||''}</td>
+    <td class="lcenter" style="font-size:11px;color:${r.billing==='미청구'?'#dc2626':'#888'}">${r.billing||''}</td>
+    <td class="lcenter"><button class="btn btn-danger btn-sm" onclick="delLedgerRow(${r.id})" style="padding:2px 6px">✕</button></td>
+  </tr>`).join('');
+
+  // 합계 행
+  const sumAmt   = data.reduce((s,r) => s + (r.amt||0), 0);
+  const sumVat   = data.reduce((s,r) => s + (r.vat||0), 0);
+  const sumTotal = data.reduce((s,r) => s + (r.total||0), 0);
+  const sumRow = document.createElement('tr');
+  sumRow.className = 'ltbl-sum';
+  sumRow.innerHTML = `
+    <td colspan="3" style="text-align:right;font-weight:700;color:#333">${data.length}건 합계</td>
+    <td class="lsum-val">₩ ${Math.round(sumAmt).toLocaleString()}</td>
+    <td class="lsum-val" style="color:#888">₩ ${Math.round(sumVat).toLocaleString()}</td>
+    <td class="lsum-val">₩ ${Math.round(sumTotal).toLocaleString()}</td>
+    <td colspan="7"></td>`;
+  tbody.appendChild(sumRow);
+}
+
+// ── 삭제 ──
+async function delLedgerRow(id) {
+  if (!confirm('삭제하시겠습니까?')) return;
+  await slc(glc().filter(r => r.id !== id));
+  renderLedgerTable(); updateLedgerSidebar(); renderLedgerTabs();
+  toast('삭제되었습니다.', 'err');
+}
+
+// ── 사이드바 ──
+function updateLedgerSidebar() {
+  const data = glc();
+  const sumAmt   = data.reduce((s,r) => s+(r.amt||0), 0);
+  const sumVat   = data.reduce((s,r) => s+(r.vat||0), 0);
+  const sumTotal = data.reduce((s,r) => s+(r.total||0), 0);
+  const fmt = v => '₩ ' + Math.round(v).toLocaleString('ko-KR');
+
+  const el = id => document.getElementById(id);
+  if(el('lsb_cnt'))   el('lsb_cnt').textContent   = data.length + '건';
+  if(el('lsb_amt'))   el('lsb_amt').textContent   = fmt(sumAmt);
+  if(el('lsb_vat'))   el('lsb_vat').textContent   = fmt(sumVat);
+  if(el('lsb_total')) el('lsb_total').textContent = fmt(sumTotal);
+
+  // 구분별 합계
+  const breakdown = {};
+  data.forEach(r => {
+    const key = r.gubun || '기타';
+    breakdown[key] = (breakdown[key] || 0) + (r.total || 0);
+  });
+  const bd = document.getElementById('lsb_breakdown');
+  if (bd) bd.innerHTML = Object.entries(breakdown)
+    .sort((a,b) => b[1]-a[1])
+    .map(([k,v]) => `<div class="mchnt-row">
+      <span class="mchnt-name"><span class="gbadge-${k}">${k}</span></span>
+      <span class="mchnt-amt">${Math.round(v).toLocaleString()}원</span>
+    </div>`).join('');
+}
+
+// ── Excel 내보내기 ──
+function exportLedgerXLSX() {
+  const data = getLedgerFiltered();
+  if (!data.length) { toast('내보낼 데이터가 없습니다.', 'err'); return; }
+  const sorted = [...data].sort((a,b) => (a.date||'').localeCompare(b.date||''));
+  const monthName = MONTHS[LCM];
+  const wb = XLSX.utils.book_new();
+  const border = {top:{style:'thin',color:{rgb:'C0C0C0'}},bottom:{style:'thin',color:{rgb:'C0C0C0'}},left:{style:'thin',color:{rgb:'C0C0C0'}},right:{style:'thin',color:{rgb:'C0C0C0'}}};
+  const hdrS = {font:{bold:true,sz:10,name:'맑은 고딕'},fill:{fgColor:{rgb:'F0F4F8'}},alignment:{horizontal:'center',vertical:'center',wrapText:true},border};
+  const numFmt = '#,##0';
+
+  const wsData = [['순번','지점','날짜','금액','부가세','Total','계정명','구분','적요','가맹점명','세금계산서/법인카드','청구여부']];
+  sorted.forEach((r,i) => {
+    wsData.push([i+1, r.jijum||'서초', r.date||'', r.amt||0, r.vat||0, r.total||0,
+      r.account||'', r.gubun||'', r.desc||'', r.vendor||'', r.doc||'', r.billing||'']);
+  });
+  // 합계행
+  const n = sorted.length;
+  wsData.push(['합계','','', sorted.reduce((s,r)=>s+(r.amt||0),0),
+    sorted.reduce((s,r)=>s+(r.vat||0),0), sorted.reduce((s,r)=>s+(r.total||0),0),
+    '','','','','','']);
+
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols'] = [{wch:5},{wch:7},{wch:14},{wch:13},{wch:11},{wch:14},{wch:22},{wch:8},{wch:40},{wch:22},{wch:18},{wch:10}];
+
+  const cols = 'ABCDEFGHIJKL'.split('');
+  // 헤더 스타일
+  for(let c=0;c<12;c++){const a=`${cols[c]}1`;if(!ws[a])ws[a]={v:'',t:'s'};ws[a].s=hdrS;}
+  // 데이터 스타일
+  sorted.forEach((r,i) => {
+    const row = i+2;
+    const bg = i%2===0?'FFFFFF':'F7F9FC';
+    const sd = (h='left') => ({font:{sz:11,name:'맑은 고딕'},fill:{fgColor:{rgb:bg}},alignment:{horizontal:h,vertical:'center'},border});
+    // 순번 =ROW()-1
+    ws[`A${row}`] = {t:'n', f:`ROW()-1`, v:i+1, s:sd('center')};
+    // 날짜 텍스트
+    const dc=`C${row}`; if(ws[dc]){ws[dc].t='s';ws[dc].v=r.date||'';ws[dc].s=sd('center');}
+    // 숫자 컬럼 (D,E,F = 금액,부가세,Total)
+    ['D','E','F'].forEach(col => {
+      const a=`${col}${row}`;
+      if(!ws[a])ws[a]={t:'n',v:0};
+      ws[a].t='n'; ws[a].s={...sd('right'),numFmt};
+    });
+    // 합계(F) 수식
+    ws[`F${row}`] = {t:'n', f:`D${row}+E${row}`, v:r.total||0, s:{...sd('right'),numFmt}};
+    // 나머지 텍스트
+    [['B','center'],['G','left'],['H','center'],['I','left'],['J','left'],['K','center'],['L','center']]
+      .forEach(([col,h]) => { const a=`${col}${row}`; if(!ws[a])ws[a]={v:'',t:'s'}; ws[a].s=sd(h); });
+  });
+  // 합계행 스타일
+  const tr = n+2;
+  const totalS = {font:{bold:true,sz:11,name:'맑은 고딕'},fill:{fgColor:{rgb:'D9E1F2'}},alignment:{horizontal:'right',vertical:'center'},numFmt,border};
+  for(let c=0;c<12;c++){const a=`${cols[c]}${tr}`;if(!ws[a])ws[a]={v:'',t:'s'};ws[a].s=totalS;}
+  ['D','E','F'].forEach(col => { const a=`${col}${tr}`; if(ws[a]){ws[a].t='n';ws[a].s=totalS;} });
+  ws['!autofilter'] = {ref:'A1:L1'};
+
+  XLSX.utils.book_append_sheet(wb, ws, monthName + ' 가계부');
+  XLSX.writeFile(wb, `크래프톤_가계부_${monthName}.xlsx`);
+  toast(`${monthName} 가계부 Excel 저장 완료`, 'ok');
+}
+
+// ── 실시간 동기화 ──
+function setupLedgerRealtimeSync() {
+  onValue(ref(db, `ledger/${LYEAR}/${LCM}`), (snap) => {
+    const newData = snap.exists()
+      ? Object.values(snap.val()).filter(r => r && r.id)
+      : [];
+    if (JSON.stringify(newData) !== JSON.stringify(ledgerCache[LCM])) {
+      ledgerCache[LCM] = newData;
+      renderLedgerTable();
+      updateLedgerSidebar();
+      renderLedgerTabs();
+    }
+  });
+}
+
+
 // 전역 함수 노출 (HTML onclick에서 호출)
 window.switchPage=switchPage; window.switchMonth=switchMonth;
 window.onSiteChange=onSiteChange; window.onCatChange=onCatChange;
@@ -1763,6 +2401,12 @@ window.editMasterRow=editMasterRow; window.saveMasterRow=saveMasterRow;
 window.deleteMasterItem=deleteMasterItem;
 window.exportMasterJSON=exportMasterJSON; window.importMasterJSON=importMasterJSON;
 window.setupRealtimeSync=setupRealtimeSync;
+window.switchLedgerMonth=switchLedgerMonth;
+window.lCalcVat=lCalcVat; window.lCalcTotal=lCalcTotal;
+window.addLedgerRow=addLedgerRow; window.resetLedgerForm=resetLedgerForm;
+window.delLedgerRow=delLedgerRow; window.renderLedgerTable=renderLedgerTable;
+window.resetLedgerFilter=resetLedgerFilter; window.exportLedgerXLSX=exportLedgerXLSX;
+window.setupLedgerRealtimeSync=setupLedgerRealtimeSync;
 
 // ══ 초기화 ══════════════════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', async () => {
@@ -1781,6 +2425,13 @@ window.addEventListener('DOMContentLoaded', async () => {
   renderTable();
   updateSidebar();
   document.getElementById('tblTitle').textContent = MONTHS[CM] + ' 구매 내역';
+  // 가계부 초기화
+  await loadLedgerData(LCM);
+  await Promise.all(MONTHS.map((_,i) => i!==LCM ? loadLedgerData(i) : Promise.resolve()));
+  renderLedgerTabs();
+  setupLedgerRealtimeSync();
+  resetLedgerForm();
+
   setupRealtimeSync();
 
   // 모바일: 하단 요약 바 표시
