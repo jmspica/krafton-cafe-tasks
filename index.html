@@ -2138,8 +2138,10 @@ function loadFixedExpenseSettings() {
   } catch(e) {}
   // 기본값
   return {
-    spotify:  { amt: 10900, vat: 1090, total: 11990, day: 2,  vendor:'스포티파이', account:'용역수수료-기타용역', desc:'스포티파이_매장용 BGM 정기결제' },
-    skt:      { amt: 10000, vat: 1000, total: 11000, day: 12, vendor:'SKT',       account:'통신비',             desc:'단말기 이용료' },
+    spotify:  { amt: 10900, vat: 1090, total: 11990, day: 2,  vendor:'스포티파이', account:'용역수수료-기타용역', desc:'스포티파이_매장용 BGM 정기결제', doc:'법인카드(만석)' },
+    skt:      { amt: 10000, vat: 1000, total: 11000, day: 12, vendor:'SKT',       account:'통신비',             desc:'단말기 이용료', doc:'법인카드(만석)' },
+    sqi:      { amt: 180000, vat: 18000, total: 198000, vendor:'에스큐아이소프트㈜', account:'전산용역비', desc:'크래프톤 카페 라이선스(SQI)' },
+    cardfee:  { amt: 0,      vat: 0,     total: 0,       vendor:'IFRESH', account:'신용카드수수료', desc:'신용카드 수수료' },
     tax:      { amt: 121883, vat: 12188, total: 134071, vendor:'IFRESH', account:'세금과공과', desc:'사업소세' },
     itsvc:    { amt: 105745, vat: 10575, total: 116320, vendor:'IFRESH', account:'전산용역비', desc:'PC' },
     copier:   { amt: 85000,  vat: 8500,  total: 93500,  vendor:'IFRESH', account:'복사기렌탈', desc:'복사기임대' },
@@ -2169,7 +2171,7 @@ async function ensureFixedExpenses(month) {
       date: dateStr, jijum:'서초',
       amt: f.amt, vat: f.vat, total: f.total,
       gubun:'비식재', account: f.account, desc: f.desc, vendor: f.vendor,
-      doc:'', billing:'', fixedKey: key
+      doc: f.doc || '', billing:'', fixedKey: key
     });
     added = true;
   });
@@ -2311,8 +2313,21 @@ function renderLedgerTable() {
     cntEl.style.display = isFiltered ? '' : 'none';
   }
 
-  // 날짜순 정렬
-  const sorted = [...data].sort((a, b) => (a.date||'').localeCompare(b.date||''));
+  // 정렬: 법인카드 고정비(스포티파이,SKT) 최상단 → 일반 항목 날짜순 → 세금계산서 고정비 하단
+  const TOP_KEYS = ['spotify','skt'];
+  const BOTTOM_KEYS = ['sqi','cardfee','tax','itsvc','copier'];
+  const sortRank = r => {
+    if (TOP_KEYS.includes(r.fixedKey)) return 0;
+    if (BOTTOM_KEYS.includes(r.fixedKey)) return 2;
+    return 1;
+  };
+  const sorted = [...data].sort((a, b) => {
+    const ra = sortRank(a), rb = sortRank(b);
+    if (ra !== rb) return ra - rb;
+    if (ra === 0) return TOP_KEYS.indexOf(a.fixedKey) - TOP_KEYS.indexOf(b.fixedKey);
+    if (ra === 2) return BOTTOM_KEYS.indexOf(a.fixedKey) - BOTTOM_KEYS.indexOf(b.fixedKey);
+    return (a.date||'').localeCompare(b.date||'');
+  });
   const tbody = document.getElementById('ltbody');
   if (!tbody) return;
 
@@ -2388,7 +2403,20 @@ function updateLedgerSidebar() {
 function exportLedgerXLSX() {
   const data = getLedgerFiltered();
   if (!data.length) { toast('내보낼 데이터가 없습니다.', 'err'); return; }
-  const sorted = [...data].sort((a,b) => (a.date||'').localeCompare(b.date||''));
+  const TOP_KEYS_X = ['spotify','skt'];
+  const BOTTOM_KEYS_X = ['sqi','cardfee','tax','itsvc','copier'];
+  const sortRankX = r => {
+    if (TOP_KEYS_X.includes(r.fixedKey)) return 0;
+    if (BOTTOM_KEYS_X.includes(r.fixedKey)) return 2;
+    return 1;
+  };
+  const sorted = [...data].sort((a,b) => {
+    const ra=sortRankX(a), rb=sortRankX(b);
+    if (ra!==rb) return ra-rb;
+    if (ra===0) return TOP_KEYS_X.indexOf(a.fixedKey)-TOP_KEYS_X.indexOf(b.fixedKey);
+    if (ra===2) return BOTTOM_KEYS_X.indexOf(a.fixedKey)-BOTTOM_KEYS_X.indexOf(b.fixedKey);
+    return (a.date||'').localeCompare(b.date||'');
+  });
   const monthName = MONTHS[LCM];
   const wb = XLSX.utils.book_new();
   const border = {top:{style:'thin',color:{rgb:'C0C0C0'}},bottom:{style:'thin',color:{rgb:'C0C0C0'}},left:{style:'thin',color:{rgb:'C0C0C0'}},right:{style:'thin',color:{rgb:'C0C0C0'}}};
