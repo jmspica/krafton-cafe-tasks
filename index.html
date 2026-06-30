@@ -2090,21 +2090,6 @@ function toast(msg,type='ok'){
   setTimeout(()=>t.classList.remove('show'),2800);
 }
 
-// ══ 초기화 ══
-window.addEventListener('DOMContentLoaded', async ()=>{
-  showLoading(true);
-  await loadMasterData();
-  await loadMonthData(CM);
-  // 모든 월 탭 배지용 로드
-  await Promise.all(MONTHS.map((_,i)=>i!==CM?loadMonthData(i):Promise.resolve()));
-  showLoading(false);
-  resetForm();
-  renderTabs();
-  renderTable();
-  updateSidebar();
-  document.getElementById('tblTitle').textContent=MONTHS[CM]+' 구매 내역';
-});
-
 // ── 실시간 동기화 리스너 ──────────────────────────────────────────────────
 function setupRealtimeSync() {
   // 마스터 실시간 동기화
