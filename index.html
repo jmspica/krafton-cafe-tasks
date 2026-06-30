@@ -2677,41 +2677,55 @@ window.ensureFixedExpenses=ensureFixedExpenses;
 // ══ 초기화 ══════════════════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', async () => {
   showLoading(true);
+
+  // 1) 현지구매 데이터 로드 (실패해도 다음 단계 진행)
   try {
     await loadMasterData();
     await loadMonthData(CM);
-    // 나머지 월 배지용 백그라운드 로드
     Promise.all(MONTHS.map((_, i) => i !== CM ? loadMonthData(i) : Promise.resolve()));
   } catch(e) {
-    console.error('초기화 오류:', e);
+    console.error('구매 데이터 초기화 오류:', e);
   }
-  showLoading(false);
-  resetForm();
-  renderTabs();
-  renderTable();
-  updateSidebar();
-  document.getElementById('tblTitle').textContent = MONTHS[CM] + ' 구매 내역';
-  // 가계부 초기화
-  renderDocList();
-  await loadLedgerData(LCM);
-  await ensureFixedExpenses(LCM);
-  await Promise.all(MONTHS.map((_,i) => i!==LCM ? loadLedgerData(i) : Promise.resolve()));
-  renderLedgerTabs();
-  setupLedgerRealtimeSync();
-  resetLedgerForm();
 
-  setupRealtimeSync();
+  try {
+    resetForm();
+    renderTabs();
+    renderTable();
+    updateSidebar();
+    document.getElementById('tblTitle').textContent = MONTHS[CM] + ' 구매 내역';
+  } catch(e) {
+    console.error('구매 화면 렌더 오류:', e);
+  }
+
+  // 2) 가계부 데이터 로드 (실패해도 구매 탭은 살아있도록 별도 try)
+  try {
+    renderDocList();
+    await loadLedgerData(LCM);
+    await ensureFixedExpenses(LCM);
+    Promise.all(MONTHS.map((_,i) => i!==LCM ? loadLedgerData(i) : Promise.resolve()));
+    renderLedgerTabs();
+    setupLedgerRealtimeSync();
+    resetLedgerForm();
+  } catch(e) {
+    console.error('가계부 초기화 오류:', e);
+  }
+
+  showLoading(false);
+
+  try { setupRealtimeSync(); } catch(e) { console.error('실시간 동기화 오류:', e); }
 
   // 모바일: 하단 요약 바 표시
-  const mobileSummary = document.getElementById('mobileSummary');
-  if(mobileSummary && window.innerWidth <= 768) {
-    mobileSummary.style.display = 'flex';
-  }
-  window.addEventListener('resize', ()=>{
-    if(mobileSummary) {
-      mobileSummary.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
+  try {
+    const mobileSummary = document.getElementById('mobileSummary');
+    if(mobileSummary && window.innerWidth <= 768) {
+      mobileSummary.style.display = 'flex';
     }
-  });
+    window.addEventListener('resize', ()=>{
+      if(mobileSummary) {
+        mobileSummary.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
+      }
+    });
+  } catch(e) { console.error('모바일 UI 오류:', e); }
 });
 
 </script>
