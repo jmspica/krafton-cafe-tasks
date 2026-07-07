@@ -547,6 +547,34 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
 .ledger-filter-bar { background:#f8f9fb; border-bottom:2px solid #dde3ea;
   padding:8px 16px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; flex-shrink:0; }
 
+
+/* ── 메모 위젯 ── */
+.memo-widget { display:flex; flex-direction:column; gap:6px; }
+.memo-widget textarea {
+  width:100%; min-height:120px; max-height:200px;
+  border:1px solid #dde3ea; border-radius:6px;
+  padding:8px; font-size:12px; font-family:'Noto Sans KR',sans-serif;
+  resize:vertical; line-height:1.6; color:#333;
+  transition:border .15s;
+}
+.memo-widget textarea:focus { outline:none; border-color:#1a3a5c; box-shadow:0 0 0 2px rgba(26,58,92,.08); }
+.memo-widget .memo-footer { display:flex; justify-content:space-between; align-items:center; gap:6px; }
+.memo-widget .memo-saved { font-size:10px; color:#aaa; }
+.memo-widget .memo-saved.ok { color:#15803d; }
+
+/* ── 사전품의 체크 셀 ── */
+.sanpum-btn {
+  width:26px; height:26px; border-radius:50%;
+  border:1.5px solid #dde3ea; background:#fff;
+  cursor:pointer; font-size:13px; display:flex;
+  align-items:center; justify-content:center;
+  transition:all .15s; margin:0 auto;
+}
+.sanpum-btn.on  { background:#fef3c7; border-color:#f59e0b; }
+.sanpum-btn.off { background:#fff; border-color:#dde3ea; color:#ccc; }
+.sanpum-btn.on::after  { content:"📋"; }
+.sanpum-btn.off::after { content:"📋"; filter:grayscale(1) opacity(.3); }
+
 </style>
 
 <!-- 추가 CSS -->
@@ -915,6 +943,34 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
 .ledger-filter-bar { background:#f8f9fb; border-bottom:2px solid #dde3ea;
   padding:8px 16px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; flex-shrink:0; }
 
+
+/* ── 메모 위젯 ── */
+.memo-widget { display:flex; flex-direction:column; gap:6px; }
+.memo-widget textarea {
+  width:100%; min-height:120px; max-height:200px;
+  border:1px solid #dde3ea; border-radius:6px;
+  padding:8px; font-size:12px; font-family:'Noto Sans KR',sans-serif;
+  resize:vertical; line-height:1.6; color:#333;
+  transition:border .15s;
+}
+.memo-widget textarea:focus { outline:none; border-color:#1a3a5c; box-shadow:0 0 0 2px rgba(26,58,92,.08); }
+.memo-widget .memo-footer { display:flex; justify-content:space-between; align-items:center; gap:6px; }
+.memo-widget .memo-saved { font-size:10px; color:#aaa; }
+.memo-widget .memo-saved.ok { color:#15803d; }
+
+/* ── 사전품의 체크 셀 ── */
+.sanpum-btn {
+  width:26px; height:26px; border-radius:50%;
+  border:1.5px solid #dde3ea; background:#fff;
+  cursor:pointer; font-size:13px; display:flex;
+  align-items:center; justify-content:center;
+  transition:all .15s; margin:0 auto;
+}
+.sanpum-btn.on  { background:#fef3c7; border-color:#f59e0b; }
+.sanpum-btn.off { background:#fff; border-color:#dde3ea; color:#ccc; }
+.sanpum-btn.on::after  { content:"📋"; }
+.sanpum-btn.off::after { content:"📋"; filter:grayscale(1) opacity(.3); }
+
 </style>
 </head>
 
@@ -970,6 +1026,16 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
       <div class="sb-section" style="flex:1;overflow-y:auto">
         <h3>🏪 거래처별</h3>
         <div id="merchantSummary"></div>
+      </div>
+      <div class="sb-section" style="flex-shrink:0">
+        <h3>📝 메모 · 사전품의</h3>
+        <div class="memo-widget">
+          <textarea id="sidebarMemo" placeholder="사전품의 항목, 확인사항, 메모를 자유롭게 입력하세요&#10;&#10;예) 모모스 콜드브루 재발주 필요&#10;TWG 재고 확인 후 품의 작성"></textarea>
+          <div class="memo-footer">
+            <span class="memo-saved" id="memoSavedMsg"></span>
+            <button class="btn btn-primary" style="padding:4px 10px;font-size:11px" onclick="saveMemo()">💾 저장</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1080,6 +1146,7 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
                 <th style="width:26px" class="center">품의<br>작성</th>
                 <th style="width:26px" class="center">결재<br>완료</th>
                 <th style="width:26px" class="center">출고<br>처리</th>
+                <th style="width:36px" title="사전품의">품의</th>
                 <th style="width:36px">삭제</th>
               </tr>
             </thead>
@@ -1377,6 +1444,7 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
                 <th style="min-width:150px">가맹점명</th>
                 <th style="width:130px">세금계산서/법인카드</th>
                 <th style="width:80px">청구여부</th>
+                <th style="width:36px" title="사전품의">품의</th>
                 <th style="width:36px">삭제</th>
               </tr>
             </thead>
@@ -1524,6 +1592,76 @@ function showLoading(on) {
     document.body.appendChild(el);
   }
   el.style.display = on ? 'flex' : 'none';
+}
+
+
+// ══ 메모 위젯 ════════════════════════════════════════════════════════════════
+const MEMO_KEY = 'kc_sidebar_memo_v1';
+let memoSaveTimer = null;
+
+async function loadMemo() {
+  try {
+    const snap = await get(ref(db, 'memo/sidebar'));
+    const val = snap.exists() ? snap.val() : '';
+    const el = document.getElementById('sidebarMemo');
+    if (el) el.value = val;
+  } catch(e) {
+    // Firebase 실패 시 로컬 사용
+    const el = document.getElementById('sidebarMemo');
+    if (el) el.value = localStorage.getItem(MEMO_KEY) || '';
+  }
+  // 자동저장: 타이핑 멈추면 3초 후 저장
+  const el = document.getElementById('sidebarMemo');
+  if (el) {
+    el.addEventListener('input', () => {
+      clearTimeout(memoSaveTimer);
+      const msg = document.getElementById('memoSavedMsg');
+      if(msg) { msg.textContent = '입력 중...'; msg.className = 'memo-saved'; }
+      memoSaveTimer = setTimeout(() => saveMemo(true), 3000);
+    });
+  }
+  // 실시간 동기화
+  onValue(ref(db, 'memo/sidebar'), snap => {
+    const val = snap.exists() ? snap.val() : '';
+    const el = document.getElementById('sidebarMemo');
+    if (el && document.activeElement !== el) el.value = val;
+  });
+}
+
+async function saveMemo(auto = false) {
+  const el = document.getElementById('sidebarMemo');
+  if (!el) return;
+  const val = el.value;
+  const msg = document.getElementById('memoSavedMsg');
+  try {
+    await set(ref(db, 'memo/sidebar'), val);
+    localStorage.setItem(MEMO_KEY, val);
+    if(msg) { msg.textContent = auto ? '자동 저장됨 ✓' : '저장 완료 ✓'; msg.className = 'memo-saved ok'; }
+    setTimeout(() => { if(msg) { msg.textContent = ''; msg.className = 'memo-saved'; } }, 2000);
+  } catch(e) {
+    localStorage.setItem(MEMO_KEY, val);
+    if(msg) { msg.textContent = '로컬 저장됨'; msg.className = 'memo-saved'; }
+  }
+}
+
+// ══ 사전품의 토글 (구매) ══════════════════════════════════════════════════════
+async function toggleSanpum(id) {
+  const data = gc(), row = data.find(r => r.id === id);
+  if (!row) return;
+  row.sanpum = !row.sanpum;
+  await sc2(data);
+  renderTable();
+  toast(row.sanpum ? '📋 사전품의 완료로 표시' : '사전품의 미완료로 변경', 'ok');
+}
+
+// ══ 사전품의 토글 (가계부) ════════════════════════════════════════════════════
+async function toggleLedgerSanpum(id) {
+  const data = glc(), row = data.find(r => r.id === id);
+  if (!row) return;
+  row.sanpum = !row.sanpum;
+  await slc(data);
+  renderLedgerTable();
+  toast(row.sanpum ? '📋 사전품의 완료로 표시' : '사전품의 미완료로 변경', 'ok');
 }
 
 // ══ 페이지 전환 ══
@@ -1812,6 +1950,7 @@ function renderTable(){
       <td class="center" style="font-size:13px">${r.gubun||''}</td>
       <td class="cat-cell-${r.cat}" style="font-size:13px">${r.cat}</td>
       ${checks}
+      <td class="center"><button class="sanpum-btn ${r.sanpum?'on':'off'}" title="사전품의 ${r.sanpum?'완료':'필요'}" onclick="toggleSanpum(${r.id})"></button></td>
       <td class="center"><button class="btn btn-danger btn-sm" onclick="delRow(${r.id})" style="padding:2px 6px">✕</button></td>
     </tr>`;
   }).join('');
@@ -2422,6 +2561,7 @@ function renderLedgerTable() {
     <td>${r.vendor||''}</td>
     <td style="font-size:12px;color:#666;cursor:pointer;text-decoration:underline dotted #aaa" title="클릭하여 세부내용 수정" onclick="editLedgerDoc(${r.id},this)">${r.doc||'-'}</td>
     <td class="lcenter" style="font-size:11px;color:${r.billing==='미청구'?'#dc2626':'#888'}">${r.billing||''}</td>
+    <td class="lcenter"><button class="sanpum-btn ${r.sanpum?'on':'off'}" title="사전품의 ${r.sanpum?'완료':'필요'}" onclick="toggleLedgerSanpum(${r.id})"></button></td>
     <td class="lcenter"><button class="btn btn-danger btn-sm" onclick="delLedgerRow(${r.id})" style="padding:2px 6px">✕</button></td>
   </tr>`;
 
@@ -2664,6 +2804,9 @@ window.addLedgerRow=addLedgerRow; window.resetLedgerForm=resetLedgerForm;
 window.delLedgerRow=delLedgerRow; window.renderLedgerTable=renderLedgerTable;
 window.resetLedgerFilter=resetLedgerFilter; window.exportLedgerXLSX=exportLedgerXLSX;
 window.setupLedgerRealtimeSync=setupLedgerRealtimeSync;
+window.saveMemo=saveMemo;
+window.toggleSanpum=toggleSanpum;
+window.toggleLedgerSanpum=toggleLedgerSanpum;
 window.onLfAccountChange=onLfAccountChange;
 window.onLfPaytypeChange=onLfPaytypeChange;
 window.lCalcFromTotal=lCalcFromTotal;
@@ -2711,6 +2854,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   showLoading(false);
 
+  try { await loadMemo(); } catch(e) { console.error('메모 로드 오류:', e); }
   try { setupRealtimeSync(); } catch(e) { console.error('실시간 동기화 오류:', e); }
 
   // 모바일: 하단 요약 바 표시
