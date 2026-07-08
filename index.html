@@ -570,10 +570,11 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
   align-items:center; justify-content:center;
   transition:all .15s; margin:0 auto;
 }
+/* off = 기본(완료), on = 품의 필요 */
+.sanpum-btn.off { background:#f0fdf4; border-color:#86efac; }
 .sanpum-btn.on  { background:#fef3c7; border-color:#f59e0b; }
-.sanpum-btn.off { background:#fff; border-color:#dde3ea; color:#ccc; }
-.sanpum-btn.on::after  { content:"📋"; }
-.sanpum-btn.off::after { content:"📋"; filter:grayscale(1) opacity(.3); }
+.sanpum-btn.off::after { content:"✅"; font-size:12px; }
+.sanpum-btn.on::after  { content:"📋"; font-size:12px; }
 
 </style>
 
@@ -966,10 +967,11 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
   align-items:center; justify-content:center;
   transition:all .15s; margin:0 auto;
 }
+/* off = 기본(완료), on = 품의 필요 */
+.sanpum-btn.off { background:#f0fdf4; border-color:#86efac; }
 .sanpum-btn.on  { background:#fef3c7; border-color:#f59e0b; }
-.sanpum-btn.off { background:#fff; border-color:#dde3ea; color:#ccc; }
-.sanpum-btn.on::after  { content:"📋"; }
-.sanpum-btn.off::after { content:"📋"; filter:grayscale(1) opacity(.3); }
+.sanpum-btn.off::after { content:"✅"; font-size:12px; }
+.sanpum-btn.on::after  { content:"📋"; font-size:12px; }
 
 </style>
 </head>
@@ -1146,7 +1148,7 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
                 <th style="width:26px" class="center">품의<br>작성</th>
                 <th style="width:26px" class="center">결재<br>완료</th>
                 <th style="width:26px" class="center">출고<br>처리</th>
-                <th style="width:36px" title="사전품의">품의</th>
+                <th style="width:50px">사전품의</th>
                 <th style="width:36px">삭제</th>
               </tr>
             </thead>
@@ -1444,7 +1446,7 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
                 <th style="min-width:150px">가맹점명</th>
                 <th style="width:130px">세금계산서/법인카드</th>
                 <th style="width:80px">청구여부</th>
-                <th style="width:36px" title="사전품의">품의</th>
+                <th style="width:50px">사전품의</th>
                 <th style="width:36px">삭제</th>
               </tr>
             </thead>
@@ -1651,7 +1653,7 @@ async function toggleSanpum(id) {
   row.sanpum = !row.sanpum;
   await sc2(data);
   renderTable();
-  toast(row.sanpum ? '📋 사전품의 완료로 표시' : '사전품의 미완료로 변경', 'ok');
+  toast(row.sanpum ? '📋 사전품의 필요로 표시' : '✅ 사전품의 완료 처리', 'ok');
 }
 
 // ══ 사전품의 토글 (가계부) ════════════════════════════════════════════════════
@@ -1661,7 +1663,7 @@ async function toggleLedgerSanpum(id) {
   row.sanpum = !row.sanpum;
   await slc(data);
   renderLedgerTable();
-  toast(row.sanpum ? '📋 사전품의 완료로 표시' : '사전품의 미완료로 변경', 'ok');
+  toast(row.sanpum ? '📋 사전품의 필요로 표시' : '✅ 사전품의 완료 처리', 'ok');
 }
 
 // ══ 페이지 전환 ══
@@ -1950,7 +1952,7 @@ function renderTable(){
       <td class="center" style="font-size:13px">${r.gubun||''}</td>
       <td class="cat-cell-${r.cat}" style="font-size:13px">${r.cat}</td>
       ${checks}
-      <td class="center"><button class="sanpum-btn ${r.sanpum?'on':'off'}" title="사전품의 ${r.sanpum?'완료':'필요'}" onclick="toggleSanpum(${r.id})"></button></td>
+      <td class="center"><button class="sanpum-btn ${r.sanpum?'on':'off'}" title="${r.sanpum?'사전품의 필요 (클릭시 해제)':'사전품의 완료 (클릭시 품의 필요 표시)'}" onclick="toggleSanpum(${r.id})"></button></td>
       <td class="center"><button class="btn btn-danger btn-sm" onclick="delRow(${r.id})" style="padding:2px 6px">✕</button></td>
     </tr>`;
   }).join('');
@@ -2561,7 +2563,7 @@ function renderLedgerTable() {
     <td>${r.vendor||''}</td>
     <td style="font-size:12px;color:#666;cursor:pointer;text-decoration:underline dotted #aaa" title="클릭하여 세부내용 수정" onclick="editLedgerDoc(${r.id},this)">${r.doc||'-'}</td>
     <td class="lcenter" style="font-size:11px;color:${r.billing==='미청구'?'#dc2626':'#888'}">${r.billing||''}</td>
-    <td class="lcenter"><button class="sanpum-btn ${r.sanpum?'on':'off'}" title="사전품의 ${r.sanpum?'완료':'필요'}" onclick="toggleLedgerSanpum(${r.id})"></button></td>
+    <td class="lcenter"><button class="sanpum-btn ${r.sanpum?'on':'off'}" title="${r.sanpum?'사전품의 필요 (클릭시 해제)':'사전품의 완료 (클릭시 품의 필요 표시)'}" onclick="toggleLedgerSanpum(${r.id})"></button></td>
     <td class="lcenter"><button class="btn btn-danger btn-sm" onclick="delLedgerRow(${r.id})" style="padding:2px 6px">✕</button></td>
   </tr>`;
 
