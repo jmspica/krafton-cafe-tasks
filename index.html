@@ -1253,7 +1253,7 @@ tr.sort-active { background:#fffbeb !important; }
                 </th>
                 <th style="width:36px">순번</th>
                 <th style="width:100px">입고일</th>
-                <th style="min-width:170px" class="left">사이트</th>
+                <th style="min-width:130px;white-space:nowrap" class="left">사이트</th>
                 <th style="width:60px">구분</th>
                 <th style="width:72px">분류</th>
                 <th style="width:90px">상품코드</th>
@@ -1964,15 +1964,20 @@ function getDefaultSortedLedger(data) {
 
 // ── 드래그 앤 드롭 이벤트 핸들러 ──
 function onDragStart(e, type, id) {
-  dragState = { type, dragId: id, overTr: null, overPos: null };
-  e.currentTarget.closest('tr').classList.add('dragging');
+  // id를 숫자로 강제 변환 (문자열 vs 숫자 비교 방지)
+  const numId = Number(id);
+  dragState = { type, dragId: numId, overTr: null, overId: null, overPos: null };
+  const tr = e.currentTarget.closest('tr');
+  if (tr) tr.classList.add('dragging');
   e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/plain', id);
+  e.dataTransfer.setData('text/plain', String(numId));
 }
 
 function onDragOver(e, trEl, id) {
   e.preventDefault();
-  if (!dragState || dragState.dragId === id) return;
+  if (!dragState) return;
+  const numId = Number(id);
+  if (dragState.dragId === numId) return;
   e.dataTransfer.dropEffect = 'move';
 
   // 마우스가 행의 위쪽 절반 / 아래쪽 절반 판별
@@ -1985,7 +1990,7 @@ function onDragOver(e, trEl, id) {
   });
   trEl.classList.add(pos === 'top' ? 'drag-over-top' : 'drag-over-bottom');
   dragState.overTr = trEl;
-  dragState.overId = id;
+  dragState.overId = numId;
   dragState.overPos = pos;
 }
 
@@ -2049,7 +2054,7 @@ let touchGhost = null;
 function onTouchStart(e, type, id) {
   if (!e.cancelable) return;
   const tr = e.currentTarget.closest('tr');
-  touchDrag = { type, id, tr, startY: e.touches[0].clientY };
+  touchDrag = { type, id: Number(id), tr, startY: e.touches[0].clientY };
   tr.classList.add('dragging');
   e.preventDefault();
 }
@@ -2375,8 +2380,8 @@ function renderTable(){
       ${orderHandle}
       <td class="center" style="color:#aaa;font-size:12px">${i+1}</td>
       <td class="center" style="font-family:monospace;font-size:13px;cursor:pointer;text-decoration:underline dotted #aaa" title="클릭하여 날짜 수정" onclick="editDate(${r.id},this)" style="font-size:13px">${r.date}</td>
-      <td style="font-size:13px">${r.site}</td>
-      <td class="center" style="font-size:13px">${r.gubun||''}</td>
+      <td style="font-size:13px;white-space:nowrap">${r.site}</td>
+      <td class="center" style="font-size:13px;white-space:nowrap">${r.gubun||''}</td>
       <td class="cat-cell-${r.cat}">${r.cat}</td>
       <td class="code">${r.code||''}</td>
       <td style="font-size:13px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.item}">${r.item}</td>
@@ -2385,7 +2390,7 @@ function renderTable(){
       <td class="num" style="cursor:pointer;text-decoration:underline dotted #aaa" title="클릭하여 단가 수정" onclick="editPrice(${r.id},this)">${Number.isInteger(r.price)?r.price.toLocaleString():r.price.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:4})}</td>
       <td class="num" style="font-weight:600">${r.amount.toLocaleString()}</td>
       <td class="center" style="font-size:13px">서초</td>
-      <td class="center" style="font-size:13px">${r.gubun||''}</td>
+      <td class="center" style="font-size:13px;white-space:nowrap">${r.gubun||''}</td>
       <td class="cat-cell-${r.cat}" style="font-size:13px">${r.cat}</td>
       ${checks}
       <td class="center"><button class="sanpum-btn ${r.sanpum?'on':'off'}" title="${r.sanpum?'사전품의 필요 (클릭시 해제)':'사전품의 완료 (클릭시 품의 필요 표시)'}" onclick="toggleSanpum(${r.id})"></button></td>
