@@ -635,6 +635,13 @@ tr.drag-over-bottom { border-bottom:3px solid #1a3a5c !important; }
 
 tr.sort-active { background:#fffbeb !important; }
 
+
+/* 순번 셀 안의 핸들 */
+.order-btns-cell {
+  display:flex; align-items:center; justify-content:center;
+  height:100%;
+}
+
 </style>
 
 <!-- 추가 CSS -->
@@ -1248,9 +1255,6 @@ tr.sort-active { background:#fffbeb !important; }
           <table>
             <thead>
               <tr>
-                <th style="width:24px" id="purchaseSortTh">
-                  <button class="sort-mode-btn" id="purchaseSortBtn" onclick="toggleSortMode('purchase')" title="순서 변경 모드">⇅</button>
-                </th>
                 <th style="width:36px">순번</th>
                 <th style="width:100px">입고일</th>
                 <th style="min-width:130px;white-space:nowrap" class="left">사이트</th>
@@ -1264,7 +1268,6 @@ tr.sort-active { background:#fffbeb !important; }
                 <th style="width:100px" class="right">총 입고금액</th>
                 <th style="width:26px" class="center">지점</th>
                 <th style="width:56px">구분1</th>
-                <th style="width:70px">구분2</th>
                 <th style="width:26px" class="center">거래<br>내역서</th>
                 <th style="width:26px" class="center">세금<br>계산서</th>
                 <th style="width:26px" class="center">품의<br>작성</th>
@@ -1557,9 +1560,6 @@ tr.sort-active { background:#fffbeb !important; }
           <table>
             <thead>
               <tr>
-                <th style="width:24px">
-                  <button class="sort-mode-btn" id="ledgerSortBtn" onclick="toggleSortMode('ledger')" title="순서 변경 모드">⇅</button>
-                </th>
                 <th style="width:36px">No</th>
                 <th style="width:55px">지점</th>
                 <th style="width:110px">날짜</th>
@@ -2366,19 +2366,12 @@ function renderTable(){
     const allDone=CK_KEYS.every(k=>r[k]);
     const checks=CK_KEYS.map(k=>`<td class="center"><button class="chk-btn ${r[k]?'on':'off'}" onclick="toggleCk(${r.id},'${k}')">${r[k]?'✓':'·'}</button></td>`).join('');
     const catCls='cat cat-'+r.cat.replace(/\s/g,'');
-    const orderHandle = purchaseSortMode
-      ? `<td class="center" style="width:28px;padding:0 2px">
-          <span class="drag-handle"
-            draggable="true"
-            ondragstart="onDragStart(event,'purchase',${r.id})"
-            ondragend="onDragEnd(event)"
-            ontouchstart="onTouchStart(event,'purchase',${r.id})">⠿</span>
-         </td>`
-      : '';
+
     return `<tr class="${allDone?'done':''}${purchaseSortMode?' sort-active':''}" data-id="${r.id}"
       ondragover="onDragOver(event,this,${r.id})">
-      ${orderHandle}
-      <td class="center" style="color:#aaa;font-size:12px">${i+1}</td>
+      <td class="center" style="color:#aaa;font-size:12px;padding:0">
+        ${purchaseSortMode ? `<div class="order-btns-cell"><span class="drag-handle" draggable="true" ondragstart="onDragStart(event,'purchase',${r.id})" ondragend="onDragEnd(event)" ontouchstart="onTouchStart(event,'purchase',${r.id})">⠿</span></div>` : `<span style="color:#aaa;font-size:12px">${i+1}</span>`}
+      </td>
       <td class="center" style="font-family:monospace;font-size:13px;cursor:pointer;text-decoration:underline dotted #aaa" title="클릭하여 날짜 수정" onclick="editDate(${r.id},this)" style="font-size:13px">${r.date}</td>
       <td style="font-size:13px;white-space:nowrap">${r.site}</td>
       <td class="center" style="font-size:13px;white-space:nowrap">${r.gubun||''}</td>
@@ -2391,7 +2384,6 @@ function renderTable(){
       <td class="num" style="font-weight:600">${r.amount.toLocaleString()}</td>
       <td class="center" style="font-size:13px">서초</td>
       <td class="center" style="font-size:13px;white-space:nowrap">${r.gubun||''}</td>
-      <td class="cat-cell-${r.cat}" style="font-size:13px">${r.cat}</td>
       ${checks}
       <td class="center"><button class="sanpum-btn ${r.sanpum?'on':'off'}" title="${r.sanpum?'사전품의 필요 (클릭시 해제)':'사전품의 완료 (클릭시 품의 필요 표시)'}" onclick="toggleSanpum(${r.id})"></button></td>
       <td class="center"><button class="btn btn-danger btn-sm" onclick="delRow(${r.id})" style="padding:2px 6px">✕</button></td>
@@ -3025,19 +3017,12 @@ function renderLedgerTable() {
   }
 
   const rowHtml = (r, i, arr) => {
-    const orderHandle = ledgerSortMode
-      ? `<td class="lcenter" style="width:28px;padding:0 2px">
-          <span class="drag-handle"
-            draggable="true"
-            ondragstart="onDragStart(event,'ledger',${r.id})"
-            ondragend="onDragEnd(event)"
-            ontouchstart="onTouchStart(event,'ledger',${r.id})">⠿</span>
-         </td>`
-      : '';
+
     return `<tr class="${ledgerSortMode?'sort-active':''}" data-id="${r.id}"
       ondragover="onDragOver(event,this,${r.id})">
-    ${orderHandle}
-    <td class="lcenter" style="color:#aaa;font-size:12px">${i+1}</td>
+    <td class="lcenter" style="color:#aaa;font-size:12px;padding:0">
+      ${ledgerSortMode ? `<div class="order-btns-cell"><span class="drag-handle" draggable="true" ondragstart="onDragStart(event,'ledger',${r.id})" ondragend="onDragEnd(event)" ontouchstart="onTouchStart(event,'ledger',${r.id})">⠿</span></div>` : `<span style="color:#aaa;font-size:12px">${i+1}</span>`}
+    </td>
     <td class="lcenter">${r.jijum||'서초'}</td>
     <td class="lcenter" style="font-family:monospace">${r.date||''}</td>
     <td class="lnum">${r.amt ? Math.round(r.amt).toLocaleString() : '-'}</td>
