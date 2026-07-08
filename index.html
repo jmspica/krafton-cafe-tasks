@@ -2358,14 +2358,18 @@ function switchPage(page) {
   const iP = page==='purchase';
   const iM = page==='master';
   const iL = page==='ledger';
+  const iS = page==='sanpum';
   document.getElementById('appPurchase').classList.toggle('active', iP);
   document.getElementById('appMaster').classList.toggle('active', iM);
   document.getElementById('appLedger').classList.toggle('active', iL);
+  document.getElementById('appSanpum').classList.toggle('active', iS);
   document.getElementById('ptbPurchase').classList.toggle('active', iP);
   document.getElementById('ptbMaster').classList.toggle('active', iM);
   document.getElementById('ptbLedger').classList.toggle('active', iL);
+  document.getElementById('ptbSanpum').classList.toggle('active', iS);
   if(iM) renderMasterTable();
   if(iL) { renderLedgerTabs(); renderLedgerTable(); updateLedgerSidebar(); }
+  if(iS) renderSanpumPage();
 }
 
 // ══ 월 탭 ══
