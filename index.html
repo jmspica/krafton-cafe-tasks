@@ -642,6 +642,42 @@ tr.sort-active { background:#fffbeb !important; }
   height:100%;
 }
 
+
+/* ── 사전품의 페이지 ── */
+.sanpum-section-title {
+  font-size:13px; font-weight:700; color:#1a3a5c;
+  padding:10px 16px; background:#fff;
+  border-bottom:1px solid #dde3ea;
+  display:flex; align-items:center; gap:8px;
+}
+.sanpum-section-title .s-badge {
+  background:#fef3c7; color:#92400e; font-size:11px;
+  padding:2px 8px; border-radius:10px; font-weight:600;
+}
+.sanpum-empty {
+  text-align:center; padding:40px; color:#aaa; font-size:13px;
+}
+.sanpum-tbl-wrap table { width:100%; border-collapse:collapse; font-size:13px; }
+.sanpum-tbl-wrap thead th {
+  background:#f0f4f8; color:#333; font-size:11px; font-weight:700;
+  padding:8px 10px; text-align:left; border:1px solid #d0d7de;
+  white-space:nowrap; position:sticky; top:0; z-index:5;
+}
+.sanpum-tbl-wrap tbody tr { border-bottom:1px solid #e8ecf0; transition:background .1s; }
+.sanpum-tbl-wrap tbody tr:hover { background:#fffbeb; }
+.sanpum-tbl-wrap tbody td { padding:8px 10px; border:1px solid #e8ecf0; font-size:13px; vertical-align:middle; }
+.sanpum-resolve-btn {
+  border:1px solid #86efac; border-radius:5px; background:#f0fdf4;
+  color:#15803d; padding:3px 10px; font-size:11px; cursor:pointer;
+  font-family:'Noto Sans KR',sans-serif; transition:all .15s; white-space:nowrap;
+}
+.sanpum-resolve-btn:hover { background:#dcfce7; }
+.sanpum-month-label {
+  display:inline-block; background:#e0f2fe; color:#0369a1;
+  font-size:10px; font-weight:700; padding:1px 6px; border-radius:3px;
+  margin-right:4px;
+}
+
 </style>
 
 <!-- 추가 CSS -->
@@ -1098,6 +1134,42 @@ tr.drag-over-bottom { border-bottom:3px solid #1a3a5c !important; }
 
 tr.sort-active { background:#fffbeb !important; }
 
+
+/* ── 사전품의 페이지 ── */
+.sanpum-section-title {
+  font-size:13px; font-weight:700; color:#1a3a5c;
+  padding:10px 16px; background:#fff;
+  border-bottom:1px solid #dde3ea;
+  display:flex; align-items:center; gap:8px;
+}
+.sanpum-section-title .s-badge {
+  background:#fef3c7; color:#92400e; font-size:11px;
+  padding:2px 8px; border-radius:10px; font-weight:600;
+}
+.sanpum-empty {
+  text-align:center; padding:40px; color:#aaa; font-size:13px;
+}
+.sanpum-tbl-wrap table { width:100%; border-collapse:collapse; font-size:13px; }
+.sanpum-tbl-wrap thead th {
+  background:#f0f4f8; color:#333; font-size:11px; font-weight:700;
+  padding:8px 10px; text-align:left; border:1px solid #d0d7de;
+  white-space:nowrap; position:sticky; top:0; z-index:5;
+}
+.sanpum-tbl-wrap tbody tr { border-bottom:1px solid #e8ecf0; transition:background .1s; }
+.sanpum-tbl-wrap tbody tr:hover { background:#fffbeb; }
+.sanpum-tbl-wrap tbody td { padding:8px 10px; border:1px solid #e8ecf0; font-size:13px; vertical-align:middle; }
+.sanpum-resolve-btn {
+  border:1px solid #86efac; border-radius:5px; background:#f0fdf4;
+  color:#15803d; padding:3px 10px; font-size:11px; cursor:pointer;
+  font-family:'Noto Sans KR',sans-serif; transition:all .15s; white-space:nowrap;
+}
+.sanpum-resolve-btn:hover { background:#dcfce7; }
+.sanpum-month-label {
+  display:inline-block; background:#e0f2fe; color:#0369a1;
+  font-size:10px; font-weight:700; padding:1px 6px; border-radius:3px;
+  margin-right:4px;
+}
+
 </style>
 </head>
 
@@ -1126,6 +1198,7 @@ tr.sort-active { background:#fffbeb !important; }
   <button class="page-tab-btn active" id="ptbPurchase" onclick="switchPage('purchase')">📋 현지구매 입력</button>
   <button class="page-tab-btn" id="ptbMaster" onclick="switchPage('master')">🗂️ 마스터 관리</button>
   <button class="page-tab-btn" id="ptbLedger" onclick="switchPage('ledger')">📒 가계부</button>
+  <button class="page-tab-btn" id="ptbSanpum" onclick="switchPage('sanpum')">📋 사전품의</button>
 </div>
 
 <!-- ══ 현지구매 입력 페이지 ══ -->
@@ -1584,6 +1657,78 @@ tr.sort-active { background:#fffbeb !important; }
     </div><!-- /ledger-content -->
   </div><!-- /ledger-main -->
 </div><!-- /appLedger -->
+
+
+<!-- ══ 사전품의 페이지 ══ -->
+<div class="app-page" id="appSanpum" style="height:calc(100vh - 54px - 40px); flex-direction:column; overflow-y:auto; background:#f5f5f5; padding:16px;">
+
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+    <div>
+      <div style="font-size:16px; font-weight:700; color:#1a3a5c;">📋 사전품의 현황</div>
+      <div style="font-size:12px; color:#888; margin-top:2px;">품의 필요로 표시된 항목을 한눈에 확인하세요</div>
+    </div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <span id="sanpumTotal" style="font-size:12px; color:#92400e; background:#fef3c7; padding:4px 12px; border-radius:10px; font-weight:600; border:1px solid #fde68a;"></span>
+      <button class="btn btn-secondary" style="font-size:11px" onclick="renderSanpumPage()">🔄 새로고침</button>
+    </div>
+  </div>
+
+  <!-- 현지구매 사전품의 -->
+  <div style="background:#fff; border:1px solid #dde3ea; border-radius:8px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.05); margin-bottom:16px;">
+    <div class="sanpum-section-title">
+      📦 현지구매 사전품의
+      <span class="s-badge" id="sanpumPurchaseCnt">0건</span>
+      <span style="flex:1"></span>
+      <span style="font-size:11px; color:#888;">클릭하면 해당 월로 이동</span>
+    </div>
+    <div class="sanpum-tbl-wrap" id="sanpumPurchaseWrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:80px">월</th>
+            <th style="width:100px">입고일</th>
+            <th style="min-width:130px">사이트</th>
+            <th style="width:70px">분류</th>
+            <th style="width:90px">상품코드</th>
+            <th style="min-width:200px">품목</th>
+            <th style="width:55px">단위</th>
+            <th style="width:80px" class="right">수량</th>
+            <th style="width:100px" class="right">금액</th>
+            <th style="width:90px">처리</th>
+          </tr>
+        </thead>
+        <tbody id="sanpumPurchaseTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 가계부 사전품의 -->
+  <div style="background:#fff; border:1px solid #dde3ea; border-radius:8px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.05);">
+    <div class="sanpum-section-title">
+      📒 가계부 사전품의
+      <span class="s-badge" id="sanpumLedgerCnt">0건</span>
+    </div>
+    <div class="sanpum-tbl-wrap" id="sanpumLedgerWrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:80px">월</th>
+            <th style="width:100px">날짜</th>
+            <th style="width:100px" class="right">금액</th>
+            <th style="width:110px" class="right">Total</th>
+            <th style="min-width:140px">계정명</th>
+            <th style="width:70px">구분</th>
+            <th style="min-width:200px">적요</th>
+            <th style="min-width:140px">가맹점명</th>
+            <th style="width:90px">처리</th>
+          </tr>
+        </thead>
+        <tbody id="sanpumLedgerTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /appSanpum -->
 
 <div class="toast" id="toast"></div>
 
@@ -2098,6 +2243,115 @@ document.addEventListener('touchend', onTouchEnd);
 // ── 더미 함수 (기존 호출 호환) ──
 function movePurchaseRow() {}
 function moveLedgerRow()   {}
+
+
+// ══ 사전품의 페이지 ══════════════════════════════════════════════════════════
+async function renderSanpumPage() {
+  // 모든 월 데이터 로드 (아직 캐시 없는 월)
+  await Promise.all(MONTHS.map((_,i) => loadMonthData(i)));
+  await Promise.all(MONTHS.map((_,i) => loadLedgerData(i)));
+
+  // 현지구매 sanpum=true 항목 수집
+  const purchaseItems = [];
+  MONTHS.forEach((mName, mi) => {
+    const data = localCache[mi] || [];
+    data.filter(r => r.sanpum).forEach(r => {
+      purchaseItems.push({ ...r, _month: mi, _monthName: mName });
+    });
+  });
+
+  // 가계부 sanpum=true 항목 수집
+  const ledgerItems = [];
+  MONTHS.forEach((mName, mi) => {
+    const data = ledgerCache[mi] || [];
+    data.filter(r => r.sanpum).forEach(r => {
+      ledgerItems.push({ ...r, _month: mi, _monthName: mName });
+    });
+  });
+
+  const total = purchaseItems.length + ledgerItems.length;
+  const totalEl = document.getElementById('sanpumTotal');
+  if (totalEl) totalEl.textContent = `총 ${total}건 품의 필요`;
+
+  // 현지구매 테이블
+  const pCnt = document.getElementById('sanpumPurchaseCnt');
+  if (pCnt) pCnt.textContent = purchaseItems.length + '건';
+
+  const pTbody = document.getElementById('sanpumPurchaseTbody');
+  if (pTbody) {
+    if (!purchaseItems.length) {
+      pTbody.innerHTML = `<tr><td colspan="10" class="sanpum-empty">📋 사전품의 필요 항목이 없습니다</td></tr>`;
+    } else {
+      // 월 → 날짜순 정렬
+      purchaseItems.sort((a,b) => a._month - b._month || a.date.localeCompare(b.date));
+      pTbody.innerHTML = purchaseItems.map(r => `<tr>
+        <td><span class="sanpum-month-label">${r._monthName}</span></td>
+        <td style="font-family:monospace;font-size:12px">${r.date}</td>
+        <td style="font-size:12px;white-space:nowrap">${r.site}</td>
+        <td><span class="cat-cell-${r.cat}" style="display:block;text-align:center;font-size:12px">${r.cat}</span></td>
+        <td style="font-family:monospace;font-size:11px;color:#666">${r.code||''}</td>
+        <td style="font-weight:500" title="${r.item}">${r.item}</td>
+        <td style="text-align:center">${r.unit||''}</td>
+        <td style="text-align:right;font-family:monospace">${r.qty.toLocaleString()}</td>
+        <td style="text-align:right;font-family:monospace;font-weight:600">${r.amount.toLocaleString()}</td>
+        <td style="text-align:center">
+          <button class="sanpum-resolve-btn" onclick="resolveSanpum('purchase',${r._month},${r.id})">✅ 완료</button>
+        </td>
+      </tr>`).join('');
+    }
+  }
+
+  // 가계부 테이블
+  const lCnt = document.getElementById('sanpumLedgerCnt');
+  if (lCnt) lCnt.textContent = ledgerItems.length + '건';
+
+  const lTbody = document.getElementById('sanpumLedgerTbody');
+  if (lTbody) {
+    if (!ledgerItems.length) {
+      lTbody.innerHTML = `<tr><td colspan="9" class="sanpum-empty">📋 사전품의 필요 항목이 없습니다</td></tr>`;
+    } else {
+      ledgerItems.sort((a,b) => a._month - b._month || (a.date||'').localeCompare(b.date||''));
+      lTbody.innerHTML = ledgerItems.map(r => `<tr>
+        <td><span class="sanpum-month-label">${r._monthName}</span></td>
+        <td style="font-family:monospace;font-size:12px">${r.date||''}</td>
+        <td style="text-align:right;font-family:monospace">${r.amt ? Math.round(r.amt).toLocaleString() : '-'}</td>
+        <td style="text-align:right;font-family:monospace;font-weight:600;color:#1a3a5c">${r.total ? Math.round(r.total).toLocaleString() : '-'}</td>
+        <td>${r.account||''}</td>
+        <td style="text-align:center"><span class="gbadge-${r.gubun||'비식재'}">${r.gubun||''}</span></td>
+        <td title="${r.desc||''}">${r.desc||''}</td>
+        <td>${r.vendor||''}</td>
+        <td style="text-align:center">
+          <button class="sanpum-resolve-btn" onclick="resolveSanpum('ledger',${r._month},${r.id})">✅ 완료</button>
+        </td>
+      </tr>`).join('');
+    }
+  }
+}
+
+// 사전품의 완료 처리 (해당 월 데이터에서 sanpum 해제)
+async function resolveSanpum(type, month, id) {
+  if (type === 'purchase') {
+    const data = localCache[month] || [];
+    const row = data.find(r => r.id === id);
+    if (!row) return;
+    row.sanpum = false;
+    await saveMonthData(month, data);
+    if (month === CM) renderTable();
+  } else {
+    const data = ledgerCache[month] || [];
+    const row = data.find(r => r.id === id);
+    if (!row) return;
+    row.sanpum = false;
+    await saveLedgerData(month, data);
+    if (month === LCM) renderLedgerTable();
+  }
+  renderLedgerTabs();
+  renderTabs();
+  await renderSanpumPage();
+  toast('✅ 사전품의 완료 처리되었습니다.', 'ok');
+}
+
+
 
 // ══ 페이지 전환 ══
 function switchPage(page) {
@@ -3296,6 +3550,8 @@ window.toggleSanpum=toggleSanpum;
 window.toggleSortMode=toggleSortMode;
 window.startDrag=startDrag;
 window.toggleLedgerSanpum=toggleLedgerSanpum;
+window.renderSanpumPage=renderSanpumPage;
+window.resolveSanpum=resolveSanpum;
 window.onLfAccountChange=onLfAccountChange;
 window.onLfPaytypeChange=onLfPaytypeChange;
 window.lCalcFromTotal=lCalcFromTotal;
