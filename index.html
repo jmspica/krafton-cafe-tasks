@@ -576,6 +576,65 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
 .sanpum-btn.off::after { content:"✅"; font-size:12px; }
 .sanpum-btn.on::after  { content:"📋"; font-size:12px; }
 
+
+/* ── 드래그 핸들 ── */
+.drag-handle {
+  cursor: grab; color: #ccc; font-size: 14px;
+  padding: 0 4px; user-select: none;
+  display: inline-block; line-height: 1;
+  transition: color .15s;
+}
+.drag-handle:hover { color: #1a3a5c; }
+.drag-handle:active { cursor: grabbing; }
+tr.dragging {
+  opacity: 0.4;
+  background: #eff6ff !important;
+}
+tr.drag-over {
+  border-top: 3px solid #1a3a5c !important;
+}
+tr.drag-over td { box-shadow: 0 -2px 0 #1a3a5c; }
+.sort-mode-btn {
+  font-size: 11px; padding: 4px 10px;
+  border: 1px solid #dde3ea; border-radius: 5px;
+  background: #fff; cursor: pointer; color: #666;
+  transition: all .15s;
+}
+.sort-mode-btn.active {
+  background: #1a3a5c; color: #fff; border-color: #1a3a5c;
+}
+
+
+/* ── 순서 변경 모드 ── */
+.sort-mode-btn {
+  border:1px solid #dde3ea; border-radius:5px; background:#fff;
+  color:#666; padding:4px 10px; font-size:11px; cursor:pointer;
+  font-family:'Noto Sans KR',sans-serif; transition:all .15s;
+  white-space:nowrap;
+}
+.sort-mode-btn:hover { background:#f0f4f8; }
+.sort-mode-btn.active { background:#1a3a5c; color:#fff; border-color:#1a3a5c; }
+
+/* 드래그 핸들 */
+.drag-handle {
+  width:28px; cursor:grab; color:#bbb; font-size:16px;
+  text-align:center; user-select:none; touch-action:none;
+  padding:2px 0; display:flex; align-items:center; justify-content:center;
+}
+.drag-handle:hover { color:#1a3a5c; }
+.drag-handle:active { cursor:grabbing; }
+
+/* 드래그 중인 행 */
+tr.dragging {
+  opacity:0.4;
+  background:#e0f2fe !important;
+}
+/* 드롭 대상 위 */
+tr.drag-over-top    { border-top:3px solid #1a3a5c !important; }
+tr.drag-over-bottom { border-bottom:3px solid #1a3a5c !important; }
+
+tr.sort-active { background:#fffbeb !important; }
+
 </style>
 
 <!-- 추가 CSS -->
@@ -973,6 +1032,65 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
 .sanpum-btn.off::after { content:"✅"; font-size:12px; }
 .sanpum-btn.on::after  { content:"📋"; font-size:12px; }
 
+
+/* ── 드래그 핸들 ── */
+.drag-handle {
+  cursor: grab; color: #ccc; font-size: 14px;
+  padding: 0 4px; user-select: none;
+  display: inline-block; line-height: 1;
+  transition: color .15s;
+}
+.drag-handle:hover { color: #1a3a5c; }
+.drag-handle:active { cursor: grabbing; }
+tr.dragging {
+  opacity: 0.4;
+  background: #eff6ff !important;
+}
+tr.drag-over {
+  border-top: 3px solid #1a3a5c !important;
+}
+tr.drag-over td { box-shadow: 0 -2px 0 #1a3a5c; }
+.sort-mode-btn {
+  font-size: 11px; padding: 4px 10px;
+  border: 1px solid #dde3ea; border-radius: 5px;
+  background: #fff; cursor: pointer; color: #666;
+  transition: all .15s;
+}
+.sort-mode-btn.active {
+  background: #1a3a5c; color: #fff; border-color: #1a3a5c;
+}
+
+
+/* ── 순서 변경 모드 ── */
+.sort-mode-btn {
+  border:1px solid #dde3ea; border-radius:5px; background:#fff;
+  color:#666; padding:4px 10px; font-size:11px; cursor:pointer;
+  font-family:'Noto Sans KR',sans-serif; transition:all .15s;
+  white-space:nowrap;
+}
+.sort-mode-btn:hover { background:#f0f4f8; }
+.sort-mode-btn.active { background:#1a3a5c; color:#fff; border-color:#1a3a5c; }
+
+/* 드래그 핸들 */
+.drag-handle {
+  width:28px; cursor:grab; color:#bbb; font-size:16px;
+  text-align:center; user-select:none; touch-action:none;
+  padding:2px 0; display:flex; align-items:center; justify-content:center;
+}
+.drag-handle:hover { color:#1a3a5c; }
+.drag-handle:active { cursor:grabbing; }
+
+/* 드래그 중인 행 */
+tr.dragging {
+  opacity:0.4;
+  background:#e0f2fe !important;
+}
+/* 드롭 대상 위 */
+tr.drag-over-top    { border-top:3px solid #1a3a5c !important; }
+tr.drag-over-bottom { border-bottom:3px solid #1a3a5c !important; }
+
+tr.sort-active { background:#fffbeb !important; }
+
 </style>
 </head>
 
@@ -1091,6 +1209,7 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
           <h3 id="tblTitle">구매 내역</h3>
           <div class="tbl-header-right">
             <span class="tbl-cnt" id="rowCnt">0건</span>
+            <button class="sort-mode-btn" id="purchaseSortModeBtn" onclick="togglePurchaseSortMode()">⇅ 순서 변경</button>
             <button class="btn btn-excel btn-sm" onclick="exportXLSX()">📊 Excel</button>
           </div>
         </div>
@@ -1129,6 +1248,9 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
           <table>
             <thead>
               <tr>
+                <th style="width:24px" id="purchaseSortTh">
+                  <button class="sort-mode-btn" id="purchaseSortBtn" onclick="toggleSortMode('purchase')" title="순서 변경 모드">⇅</button>
+                </th>
                 <th style="width:36px">순번</th>
                 <th style="width:100px">입고일</th>
                 <th style="min-width:170px" class="left">사이트</th>
@@ -1412,6 +1534,7 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
           <h3 id="ltblTitle">가계부 내역</h3>
           <div style="display:flex;gap:8px;align-items:center">
             <span class="tbl-cnt" id="lRowCnt">0건</span>
+            <button class="sort-mode-btn" id="ledgerSortModeBtn" onclick="toggleLedgerSortMode()">⇅ 순서 변경</button>
             <button class="btn btn-excel btn-sm" onclick="exportLedgerXLSX()">📊 Excel</button>
           </div>
         </div>
@@ -1434,6 +1557,9 @@ tbody td.code{font-family:monospace;font-size:12px;color:#666;text-align:center}
           <table>
             <thead>
               <tr>
+                <th style="width:24px">
+                  <button class="sort-mode-btn" id="ledgerSortBtn" onclick="toggleSortMode('ledger')" title="순서 변경 모드">⇅</button>
+                </th>
                 <th style="width:36px">No</th>
                 <th style="width:55px">지점</th>
                 <th style="width:110px">날짜</th>
@@ -1665,6 +1791,308 @@ async function toggleLedgerSanpum(id) {
   renderLedgerTable();
   toast(row.sanpum ? '📋 사전품의 필요로 표시' : '✅ 사전품의 완료 처리', 'ok');
 }
+
+
+// ══ 순서 변경 (드래그) ════════════════════════════════════════════════════════
+window._purchaseSortMode = false;
+window._ledgerSortMode = false;
+let _dragSrcId = null;
+let _dragType  = null;
+
+function toggleSortMode(type) {
+  if (type === 'purchase') {
+    window._purchaseSortMode = !window._purchaseSortMode;
+    const btn = document.getElementById('purchaseSortBtn');
+    if (btn) btn.classList.toggle('active', window._purchaseSortMode);
+    renderTable();
+    toast(window._purchaseSortMode ? '✋ 핸들을 드래그해서 순서를 변경하세요' : '순서 변경 모드 종료', 'ok');
+  } else {
+    window._ledgerSortMode = !window._ledgerSortMode;
+    const btn = document.getElementById('ledgerSortBtn');
+    if (btn) btn.classList.toggle('active', window._ledgerSortMode);
+    renderLedgerTable();
+    toast(window._ledgerSortMode ? '✋ 핸들을 드래그해서 순서를 변경하세요' : '순서 변경 모드 종료', 'ok');
+  }
+}
+
+function startDrag(e, type, id) {
+  e.preventDefault();
+  _dragType = type;
+  _dragSrcId = id;
+  const srcRow = e.target.closest('tr');
+  if (!srcRow) return;
+  srcRow.classList.add('dragging');
+
+  const tbody = srcRow.parentElement;
+  let targetRow = null;
+
+  const onMouseMove = (ev) => {
+    // 현재 마우스 위치의 행 찾기
+    const rows = Array.from(tbody.querySelectorAll('tr:not(.dragging):not(.ltbl-sum):not(.ltbl-subtotal):not(.ltbl-section):not(.sum-row)'));
+    rows.forEach(r => r.classList.remove('drag-over'));
+    const el = document.elementFromPoint(ev.clientX, ev.clientY);
+    if (!el) return;
+    const row = el.closest('tr');
+    if (row && row !== srcRow && tbody.contains(row) &&
+        !row.classList.contains('ltbl-sum') &&
+        !row.classList.contains('ltbl-subtotal') &&
+        !row.classList.contains('ltbl-section') &&
+        !row.classList.contains('sum-row')) {
+      row.classList.add('drag-over');
+      targetRow = row;
+    }
+  };
+
+  const onMouseUp = async () => {
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+    srcRow.classList.remove('dragging');
+    if (tbody) Array.from(tbody.querySelectorAll('tr')).forEach(r => r.classList.remove('drag-over'));
+
+    if (!targetRow || !_dragSrcId) return;
+    const targetId = parseInt(targetRow.dataset.id);
+    if (!targetId || targetId === _dragSrcId) return;
+
+    if (_dragType === 'purchase') {
+      await reorderPurchase(_dragSrcId, targetId);
+    } else {
+      await reorderLedger(_dragSrcId, targetId);
+    }
+    _dragSrcId = null;
+    _dragType  = null;
+    targetRow  = null;
+  };
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup',   onMouseUp);
+}
+
+// ══ 드래그 앤 드롭 순서 변경 ═════════════════════════════════════════════════
+let purchaseSortMode = false;
+let ledgerSortMode   = false;
+let purchaseManualOrder = null;
+let ledgerManualOrder   = null;
+
+// 드래그 상태
+let dragState = null; // { type:'purchase'|'ledger', dragId, overTr, overPos }
+
+// ── 순서 변경 모드 토글 ──
+function togglePurchaseSortMode() {
+  purchaseSortMode = !purchaseSortMode;
+  const btn = document.getElementById('purchaseSortModeBtn');
+  if (btn) {
+    btn.textContent = purchaseSortMode ? '✓ 완료' : '⇅ 순서 변경';
+    btn.classList.toggle('active', purchaseSortMode);
+  }
+  if (!purchaseSortMode) savePurchaseOrder();
+  renderTable();
+}
+
+function toggleLedgerSortMode() {
+  ledgerSortMode = !ledgerSortMode;
+  const btn = document.getElementById('ledgerSortModeBtn');
+  if (btn) {
+    btn.textContent = ledgerSortMode ? '✓ 완료' : '⇅ 순서 변경';
+    btn.classList.toggle('active', ledgerSortMode);
+  }
+  if (!ledgerSortMode) saveLedgerOrder();
+  renderLedgerTable();
+}
+
+// ── Firebase 저장/로드 ──
+async function savePurchaseOrder() {
+  if (!purchaseManualOrder) return;
+  try { await set(ref(db, `manualOrder/purchase/${YEAR}/${CM}`), purchaseManualOrder); }
+  catch(e) { console.warn('구매 순서 저장 실패:', e); }
+}
+async function loadPurchaseOrder() {
+  try {
+    const snap = await get(ref(db, `manualOrder/purchase/${YEAR}/${CM}`));
+    purchaseManualOrder = snap.exists() ? snap.val() : null;
+  } catch(e) { purchaseManualOrder = null; }
+}
+async function saveLedgerOrder() {
+  if (!ledgerManualOrder) return;
+  try { await set(ref(db, `manualOrder/ledger/${LYEAR}/${LCM}`), ledgerManualOrder); }
+  catch(e) { console.warn('가계부 순서 저장 실패:', e); }
+}
+async function loadLedgerOrder() {
+  try {
+    const snap = await get(ref(db, `manualOrder/ledger/${LYEAR}/${LCM}`));
+    ledgerManualOrder = snap.exists() ? snap.val() : null;
+  } catch(e) { ledgerManualOrder = null; }
+}
+
+// ── 기본 정렬 함수 ──
+function getDefaultSortedPurchase(data) {
+  const CAT_SORT = {'네스프레소':0,'펍':1,'서초주류':2,'웰니스':3,'식재':4,'콜라보':5};
+  const SITE_SORT = {'크래프톤서초카페점 라운지':0,'크래프톤서초카페점 카페':1};
+  const getBrand = item => item.includes('_') ? item.split('_')[0] : item;
+  return [...data].sort((a,b) => {
+    const ca=CAT_SORT[a.cat]??9, cb=CAT_SORT[b.cat]??9;
+    if(ca!==cb) return ca-cb;
+    if(a.cat==='식재'&&b.cat==='식재'){
+      const bc=getBrand(a.item).localeCompare(getBrand(b.item),'ko');
+      if(bc!==0) return bc;
+      const dc=a.date.localeCompare(b.date);
+      if(dc!==0) return dc;
+      return a.item.localeCompare(b.item,'ko');
+    }
+    const dc=a.date.localeCompare(b.date);
+    if(dc!==0) return dc;
+    return (SITE_SORT[a.site]??9)-(SITE_SORT[b.site]??9);
+  });
+}
+
+function getDefaultSortedLedger(data) {
+  const TAX_ORDER  = ['식재','도서인쇄비-서식인쇄','소모품비-주방용품','용역수수료-기타용역',
+    '수선비-공기구비품','전산용역비','신용카드수수료','세금과공과','복사기렌탈','기타수수료','여비교통비'];
+  const CARD_ORDER = ['용역수수료-기타용역','통신비','기타수수료','도서인쇄비-서식인쇄',
+    '소모품비-주방용품','식재','회의비','수선비-공기구비품','전산용역비'];
+  const BOTTOM_KEYS = ['sqi','cardfee','tax','itsvc','copier'];
+  const getAccRank = (order, acc) => { const i=order.indexOf(acc); return i>=0?i:order.length; };
+  const sortGrp = (arr, order) => [...arr].sort((a,b) => {
+    const aB=BOTTOM_KEYS.includes(a.fixedKey)?1:0, bB=BOTTOM_KEYS.includes(b.fixedKey)?1:0;
+    if(aB!==bB) return aB-bB;
+    const ra=getAccRank(order,a.account), rb=getAccRank(order,b.account);
+    if(ra!==rb) return ra-rb;
+    return (a.date||'').localeCompare(b.date||'');
+  });
+  return [...sortGrp(data.filter(r=>r.paytype!=='법인카드'),TAX_ORDER),
+          ...sortGrp(data.filter(r=>r.paytype==='법인카드'),CARD_ORDER)];
+}
+
+// ── 드래그 앤 드롭 이벤트 핸들러 ──
+function onDragStart(e, type, id) {
+  dragState = { type, dragId: id, overTr: null, overPos: null };
+  e.currentTarget.closest('tr').classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', id);
+}
+
+function onDragOver(e, trEl, id) {
+  e.preventDefault();
+  if (!dragState || dragState.dragId === id) return;
+  e.dataTransfer.dropEffect = 'move';
+
+  // 마우스가 행의 위쪽 절반 / 아래쪽 절반 판별
+  const rect = trEl.getBoundingClientRect();
+  const pos = e.clientY < rect.top + rect.height / 2 ? 'top' : 'bottom';
+
+  // 이전 표시 제거
+  document.querySelectorAll('.drag-over-top, .drag-over-bottom').forEach(el => {
+    el.classList.remove('drag-over-top', 'drag-over-bottom');
+  });
+  trEl.classList.add(pos === 'top' ? 'drag-over-top' : 'drag-over-bottom');
+  dragState.overTr = trEl;
+  dragState.overId = id;
+  dragState.overPos = pos;
+}
+
+function onDragEnd(e) {
+  document.querySelectorAll('.dragging, .drag-over-top, .drag-over-bottom').forEach(el => {
+    el.classList.remove('dragging', 'drag-over-top', 'drag-over-bottom');
+  });
+  if (!dragState || !dragState.overId || dragState.dragId === dragState.overId) {
+    dragState = null; return;
+  }
+
+  const { type, dragId, overId, overPos } = dragState;
+  dragState = null;
+
+  if (type === 'purchase') reorderPurchase(dragId, overId, overPos);
+  else reorderLedger(dragId, overId, overPos);
+}
+
+function reorderPurchase(dragId, overId, pos) {
+  const data = getFilteredData();
+  let order = purchaseManualOrder
+    ? purchaseManualOrder.map(id => data.find(r=>r.id===id)).filter(Boolean)
+    : getDefaultSortedPurchase(data);
+
+  const fromIdx = order.findIndex(r => r.id === dragId);
+  const toIdx   = order.findIndex(r => r.id === overId);
+  if (fromIdx < 0 || toIdx < 0) return;
+
+  const [moved] = order.splice(fromIdx, 1);
+  const insertAt = pos === 'top' ? toIdx : toIdx + 1;
+  const adjusted = insertAt > fromIdx ? insertAt - 1 : insertAt;
+  order.splice(adjusted, 0, moved);
+
+  purchaseManualOrder = order.map(r => r.id);
+  renderTable();
+}
+
+function reorderLedger(dragId, overId, pos) {
+  const all = glc();
+  let order = ledgerManualOrder
+    ? ledgerManualOrder.map(id => all.find(r=>r.id===id)).filter(Boolean)
+    : getDefaultSortedLedger(all);
+
+  const fromIdx = order.findIndex(r => r.id === dragId);
+  const toIdx   = order.findIndex(r => r.id === overId);
+  if (fromIdx < 0 || toIdx < 0) return;
+
+  const [moved] = order.splice(fromIdx, 1);
+  const insertAt = pos === 'top' ? toIdx : toIdx + 1;
+  const adjusted = insertAt > fromIdx ? insertAt - 1 : insertAt;
+  order.splice(adjusted, 0, moved);
+
+  ledgerManualOrder = order.map(r => r.id);
+  renderLedgerTable();
+}
+
+// ── 터치 드래그 지원 ──
+let touchDrag = null;
+let touchGhost = null;
+
+function onTouchStart(e, type, id) {
+  if (!e.cancelable) return;
+  const tr = e.currentTarget.closest('tr');
+  touchDrag = { type, id, tr, startY: e.touches[0].clientY };
+  tr.classList.add('dragging');
+  e.preventDefault();
+}
+
+function onTouchMove(e) {
+  if (!touchDrag) return;
+  e.preventDefault();
+  const y = e.touches[0].clientY;
+  const trs = document.querySelectorAll(touchDrag.type==='purchase' ? '#tbody tr' : '#ltbody tr');
+  document.querySelectorAll('.drag-over-top,.drag-over-bottom').forEach(el=>el.classList.remove('drag-over-top','drag-over-bottom'));
+
+  trs.forEach(tr => {
+    if (tr === touchDrag.tr) return;
+    const rect = tr.getBoundingClientRect();
+    if (y >= rect.top && y <= rect.bottom) {
+      const pos = y < rect.top + rect.height/2 ? 'top' : 'bottom';
+      tr.classList.add(pos==='top'?'drag-over-top':'drag-over-bottom');
+      touchDrag.overTr = tr;
+      touchDrag.overId = parseInt(tr.dataset.id);
+      touchDrag.overPos = pos;
+    }
+  });
+}
+
+function onTouchEnd(e) {
+  if (!touchDrag) return;
+  document.querySelectorAll('.dragging,.drag-over-top,.drag-over-bottom').forEach(el=>{
+    el.classList.remove('dragging','drag-over-top','drag-over-bottom');
+  });
+  if (touchDrag.overId && touchDrag.overId !== touchDrag.id) {
+    if (touchDrag.type==='purchase') reorderPurchase(touchDrag.id, touchDrag.overId, touchDrag.overPos);
+    else reorderLedger(touchDrag.id, touchDrag.overId, touchDrag.overPos);
+  }
+  touchDrag = null;
+}
+
+// 터치 이벤트 전역 등록
+document.addEventListener('touchmove', onTouchMove, {passive:false});
+document.addEventListener('touchend', onTouchEnd);
+
+// ── 더미 함수 (기존 호출 호환) ──
+function movePurchaseRow() {}
+function moveLedgerRow()   {}
 
 // ══ 페이지 전환 ══
 function switchPage(page) {
@@ -1914,33 +2342,41 @@ function renderTable(){
   }
   document.getElementById('emptyState').classList.add('hidden');
 
-  const CAT_SORT={'네스프레소':0,'펍':1,'서초주류':2,'웰니스':3,'식재':4,'콜라보':5};
-  const SITE_SORT={'크래프톤서초카페점 라운지':0,'크래프톤서초카페점 카페':1};
-  const getBrand=item=>item.includes('_')?item.split('_')[0]:item;
-  const sorted=[...data].sort((a,b)=>{
-    const catA=CAT_SORT[a.cat]??9,catB=CAT_SORT[b.cat]??9;
-    if(catA!==catB) return catA-catB;
-    if(a.cat==='식재'&&b.cat==='식재'){
-      const bc=getBrand(a.item).localeCompare(getBrand(b.item),'ko');
-      if(bc!==0) return bc;
-      const dc=a.date.localeCompare(b.date);
-      if(dc!==0) return dc;
-      return a.item.localeCompare(b.item,'ko');
-    }
-    const dc=a.date.localeCompare(b.date);
-    if(dc!==0) return dc;
-    return (SITE_SORT[a.site]??9)-(SITE_SORT[b.site]??9);
-  });
+  // 정렬 모드 활성 시 _order 기준으로 정렬
+  if (window._purchaseSortMode && data.some(r => r.hasOwnProperty('_order'))) {
+    data.sort((a,b) => (a._order??999) - (b._order??999));
+  }
+  let sorted;
+  if (purchaseSortMode && purchaseManualOrder) {
+    const orderMap = new Map(purchaseManualOrder.map((id,i)=>[id,i]));
+    sorted = [...data].sort((a,b)=>(orderMap.get(a.id)??9999)-(orderMap.get(b.id)??9999));
+  } else if (purchaseSortMode) {
+    sorted = getDefaultSortedPurchase(data);
+    purchaseManualOrder = sorted.map(r=>r.id);
+  } else {
+    sorted = getDefaultSortedPurchase(data);
+  }
 
   tbody.innerHTML=sorted.map((r,i)=>{
     const allDone=CK_KEYS.every(k=>r[k]);
     const checks=CK_KEYS.map(k=>`<td class="center"><button class="chk-btn ${r[k]?'on':'off'}" onclick="toggleCk(${r.id},'${k}')">${r[k]?'✓':'·'}</button></td>`).join('');
     const catCls='cat cat-'+r.cat.replace(/\s/g,'');
-    return `<tr class="${allDone?'done':''}">
+    const orderHandle = purchaseSortMode
+      ? `<td class="center" style="width:28px;padding:0 2px">
+          <span class="drag-handle"
+            draggable="true"
+            ondragstart="onDragStart(event,'purchase',${r.id})"
+            ondragend="onDragEnd(event)"
+            ontouchstart="onTouchStart(event,'purchase',${r.id})">⠿</span>
+         </td>`
+      : '';
+    return `<tr class="${allDone?'done':''}${purchaseSortMode?' sort-active':''}" data-id="${r.id}"
+      ondragover="onDragOver(event,this,${r.id})">
+      ${orderHandle}
       <td class="center" style="color:#aaa;font-size:12px">${i+1}</td>
-      <td class="center" style="font-family:monospace;font-size:11px;cursor:pointer;text-decoration:underline dotted #aaa" title="클릭하여 날짜 수정" onclick="editDate(${r.id},this)" style="font-size:13px">${r.date}</td>
+      <td class="center" style="font-family:monospace;font-size:13px;cursor:pointer;text-decoration:underline dotted #aaa" title="클릭하여 날짜 수정" onclick="editDate(${r.id},this)" style="font-size:13px">${r.date}</td>
       <td style="font-size:13px">${r.site}</td>
-      <td class="center">${r.gubun||''}</td>
+      <td class="center" style="font-size:13px">${r.gubun||''}</td>
       <td class="cat-cell-${r.cat}">${r.cat}</td>
       <td class="code">${r.code||''}</td>
       <td style="font-size:13px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.item}">${r.item}</td>
@@ -2535,6 +2971,16 @@ function renderLedgerTable() {
   const taxGroup  = data.filter(r => r.paytype !== '법인카드');
   const cardGroup = data.filter(r => r.paytype === '법인카드');
 
+  // 수동 순서 모드 처리
+  let allSorted;
+  if (ledgerSortMode && ledgerManualOrder) {
+    const orderMap = new Map(ledgerManualOrder.map((id,i)=>[id,i]));
+    allSorted = [...data].sort((a,b)=>(orderMap.get(a.id)??9999)-(orderMap.get(b.id)??9999));
+  } else if (ledgerSortMode) {
+    allSorted = getDefaultSortedLedger(data);
+    ledgerManualOrder = allSorted.map(r=>r.id);
+  }
+
   // 각 그룹 내 정렬: 고정비 우선순위 → 날짜순
   const TAX_ORDER  = ['식재','도서인쇄비-서식인쇄','소모품비-주방용품','용역수수료-기타용역',
     '수선비-공기구비품','전산용역비','신용카드수수료','세금과공과','복사기렌탈','기타수수료','여비교통비'];
@@ -2564,10 +3010,28 @@ function renderLedgerTable() {
     return (a.date||'').localeCompare(b.date||'');
   });
 
-  const sortedTax  = sortGroup(taxGroup, TAX_ORDER);
-  const sortedCard = sortGroup(cardGroup, CARD_ORDER);
+  let sortedTax, sortedCard;
+  if (ledgerSortMode && allSorted) {
+    sortedTax  = allSorted.filter(r => r.paytype !== '법인카드');
+    sortedCard = allSorted.filter(r => r.paytype === '법인카드');
+  } else {
+    sortedTax  = sortGroup(taxGroup, TAX_ORDER);
+    sortedCard = sortGroup(cardGroup, CARD_ORDER);
+  }
 
-  const rowHtml = (r, i) => `<tr>
+  const rowHtml = (r, i, arr) => {
+    const orderHandle = ledgerSortMode
+      ? `<td class="lcenter" style="width:28px;padding:0 2px">
+          <span class="drag-handle"
+            draggable="true"
+            ondragstart="onDragStart(event,'ledger',${r.id})"
+            ondragend="onDragEnd(event)"
+            ontouchstart="onTouchStart(event,'ledger',${r.id})">⠿</span>
+         </td>`
+      : '';
+    return `<tr class="${ledgerSortMode?'sort-active':''}" data-id="${r.id}"
+      ondragover="onDragOver(event,this,${r.id})">
+    ${orderHandle}
     <td class="lcenter" style="color:#aaa;font-size:12px">${i+1}</td>
     <td class="lcenter">${r.jijum||'서초'}</td>
     <td class="lcenter" style="font-family:monospace">${r.date||''}</td>
@@ -2583,6 +3047,7 @@ function renderLedgerTable() {
     <td class="lcenter"><button class="sanpum-btn ${r.sanpum?'on':'off'}" title="${r.sanpum?'사전품의 필요 (클릭시 해제)':'사전품의 완료 (클릭시 품의 필요 표시)'}" onclick="toggleLedgerSanpum(${r.id})"></button></td>
     <td class="lcenter"><button class="btn btn-danger btn-sm" onclick="delLedgerRow(${r.id})" style="padding:2px 6px">✕</button></td>
   </tr>`;
+  };
 
   const sectionHeader = (title, count, color) => `<tr class="ltbl-section">
     <td colspan="13" style="background:${color};font-weight:700;font-size:12px;padding:7px 10px;color:#1a3a5c">
@@ -2609,12 +3074,12 @@ function renderLedgerTable() {
   let html = '';
   // 세금계산서 섹션
   html += sectionHeader('📄 세금계산서', sortedTax.length, '#eff6ff');
-  html += sortedTax.map(rowHtml).join('');
+  html += sortedTax.map((r,i)=>rowHtml(r,i,sortedTax)).join('');
   if (sortedTax.length) html += subtotalRow(sortedTax, '세금계산서');
 
   // 법인카드 섹션
   html += sectionHeader('💳 법인카드', sortedCard.length, '#fef3c7');
-  html += sortedCard.map(rowHtml).join('');
+  html += sortedCard.map((r,i)=>rowHtml(r,i,sortedCard)).join('');
   if (sortedCard.length) html += subtotalRow(sortedCard, '법인카드');
 
   tbody.innerHTML = html;
@@ -2833,7 +3298,13 @@ window.delLedgerRow=delLedgerRow; window.renderLedgerTable=renderLedgerTable;
 window.resetLedgerFilter=resetLedgerFilter; window.exportLedgerXLSX=exportLedgerXLSX;
 window.setupLedgerRealtimeSync=setupLedgerRealtimeSync;
 window.saveMemo=saveMemo;
+window.togglePurchaseSortMode=togglePurchaseSortMode;
+window.movePurchaseRow=movePurchaseRow;
+window.toggleLedgerSortMode=toggleLedgerSortMode;
+window.moveLedgerRow=moveLedgerRow;
 window.toggleSanpum=toggleSanpum;
+window.toggleSortMode=toggleSortMode;
+window.startDrag=startDrag;
 window.toggleLedgerSanpum=toggleLedgerSanpum;
 window.onLfAccountChange=onLfAccountChange;
 window.onLfPaytypeChange=onLfPaytypeChange;
@@ -2852,6 +3323,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   try {
     await loadMasterData();
     await loadMonthData(CM);
+    await loadPurchaseOrder();
     Promise.all(MONTHS.map((_, i) => i !== CM ? loadMonthData(i) : Promise.resolve()));
   } catch(e) {
     console.error('구매 데이터 초기화 오류:', e);
@@ -2871,6 +3343,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   try {
     renderDocList();
     await loadLedgerData(LCM);
+    await loadLedgerOrder();
     await ensureFixedExpenses(LCM);
     Promise.all(MONTHS.map((_,i) => i!==LCM ? loadLedgerData(i) : Promise.resolve()));
     renderLedgerTabs();
