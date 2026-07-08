@@ -2536,19 +2536,36 @@ function renderLedgerTable() {
   const cardGroup = data.filter(r => r.paytype === '법인카드');
 
   // 각 그룹 내 정렬: 고정비 우선순위 → 날짜순
-  const TOP_KEYS = ['spotify','skt'];
+  const TAX_ORDER  = ['식재','도서인쇄비-서식인쇄','소모품비-주방용품','용역수수료-기타용역',
+    '수선비-공기구비품','전산용역비','신용카드수수료','세금과공과','복사기렌탈','기타수수료','여비교통비'];
+  const CARD_ORDER = ['용역수수료-기타용역','통신비','기타수수료','도서인쇄비-서식인쇄',
+    '소모품비-주방용품','식재','회의비','수선비-공기구비품','전산용역비'];
+
+  // 고정비 키 - 세금계산서 하단 고정항목
   const BOTTOM_KEYS = ['sqi','cardfee','tax','itsvc','copier'];
-  const sortGroup = arr => [...arr].sort((a,b) => {
-    const ra = TOP_KEYS.includes(a.fixedKey) ? 0 : BOTTOM_KEYS.includes(a.fixedKey) ? 2 : 1;
-    const rb = TOP_KEYS.includes(b.fixedKey) ? 0 : BOTTOM_KEYS.includes(b.fixedKey) ? 2 : 1;
+
+  const getAccountRank = (order, account) => {
+    const idx = order.indexOf(account);
+    return idx >= 0 ? idx : order.length;
+  };
+
+  const sortGroup = (arr, order) => [...arr].sort((a, b) => {
+    // 고정비(세금계산서 하단)는 항상 맨 아래
+    const aBot = BOTTOM_KEYS.includes(a.fixedKey) ? 1 : 0;
+    const bBot = BOTTOM_KEYS.includes(b.fixedKey) ? 1 : 0;
+    if (aBot !== bBot) return aBot - bBot;
+
+    // 계정명 순서 비교
+    const ra = getAccountRank(order, a.account);
+    const rb = getAccountRank(order, b.account);
     if (ra !== rb) return ra - rb;
-    if (ra === 0) return TOP_KEYS.indexOf(a.fixedKey) - TOP_KEYS.indexOf(b.fixedKey);
-    if (ra === 2) return BOTTOM_KEYS.indexOf(a.fixedKey) - BOTTOM_KEYS.indexOf(b.fixedKey);
+
+    // 같은 계정 내에서는 날짜순
     return (a.date||'').localeCompare(b.date||'');
   });
 
-  const sortedTax  = sortGroup(taxGroup);
-  const sortedCard = sortGroup(cardGroup);
+  const sortedTax  = sortGroup(taxGroup, TAX_ORDER);
+  const sortedCard = sortGroup(cardGroup, CARD_ORDER);
 
   const rowHtml = (r, i) => `<tr>
     <td class="lcenter" style="color:#aaa;font-size:12px">${i+1}</td>
@@ -2679,19 +2696,28 @@ function exportLedgerXLSX() {
   const data = getLedgerFiltered();
   if (!data.length) { toast('내보낼 데이터가 없습니다.', 'err'); return; }
 
-  const TOP_KEYS_X = ['spotify','skt'];
+  const TAX_ORDER_X  = ['식재','도서인쇄비-서식인쇄','소모품비-주방용품','용역수수료-기타용역',
+    '수선비-공기구비품','전산용역비','신용카드수수료','세금과공과','복사기렌탈','기타수수료','여비교통비'];
+  const CARD_ORDER_X = ['용역수수료-기타용역','통신비','기타수수료','도서인쇄비-서식인쇄',
+    '소모품비-주방용품','식재','회의비','수선비-공기구비품','전산용역비'];
   const BOTTOM_KEYS_X = ['sqi','cardfee','tax','itsvc','copier'];
-  const sortGroupX = arr => [...arr].sort((a,b) => {
-    const ra = TOP_KEYS_X.includes(a.fixedKey) ? 0 : BOTTOM_KEYS_X.includes(a.fixedKey) ? 2 : 1;
-    const rb = TOP_KEYS_X.includes(b.fixedKey) ? 0 : BOTTOM_KEYS_X.includes(b.fixedKey) ? 2 : 1;
+
+  const getAccRankX = (order, account) => {
+    const idx = order.indexOf(account);
+    return idx >= 0 ? idx : order.length;
+  };
+  const sortGroupX = (arr, order) => [...arr].sort((a, b) => {
+    const aBot = BOTTOM_KEYS_X.includes(a.fixedKey) ? 1 : 0;
+    const bBot = BOTTOM_KEYS_X.includes(b.fixedKey) ? 1 : 0;
+    if (aBot !== bBot) return aBot - bBot;
+    const ra = getAccRankX(order, a.account);
+    const rb = getAccRankX(order, b.account);
     if (ra !== rb) return ra - rb;
-    if (ra === 0) return TOP_KEYS_X.indexOf(a.fixedKey) - TOP_KEYS_X.indexOf(b.fixedKey);
-    if (ra === 2) return BOTTOM_KEYS_X.indexOf(a.fixedKey) - BOTTOM_KEYS_X.indexOf(b.fixedKey);
     return (a.date||'').localeCompare(b.date||'');
   });
 
-  const taxGroup  = sortGroupX(data.filter(r => r.paytype !== '법인카드'));
-  const cardGroup = sortGroupX(data.filter(r => r.paytype === '법인카드'));
+  const taxGroup  = sortGroupX(data.filter(r => r.paytype !== '법인카드'), TAX_ORDER_X);
+  const cardGroup = sortGroupX(data.filter(r => r.paytype === '법인카드'), CARD_ORDER_X);
 
   const monthName = MONTHS[LCM];
   const wb = XLSX.utils.book_new();
