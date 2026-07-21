@@ -1636,9 +1636,9 @@ tr.sort-active { background:#fffbeb !important; }
                 <th style="width:36px">No</th>
                 <th style="width:55px">지점</th>
                 <th style="width:110px">날짜</th>
-                <th style="width:100px" class="right">금액</th>
+                <th style="width:110px" class="right" title="클릭하여 수정 가능">Total ✎</th>
                 <th style="width:90px" class="right">부가세</th>
-                <th style="width:110px" class="right">Total</th>
+                <th style="width:100px" class="right">금액</th>
                 <th style="min-width:150px">계정명</th>
                 <th style="width:70px">구분</th>
                 <th style="min-width:200px">적요</th>
@@ -2993,6 +2993,121 @@ function onLfAccountChange() {
 }
 
 
+
+// ── 가계부 인라인 편집 함수들 ─────────────────────────────────────────────────
+
+// 공통: 텍스트 필드 편집 (날짜, 적요, 가맹점명)
+function editLedgerField(id, field, cell) {
+  const data = glc(), row = data.find(r => r.id === id);
+  if (!row) return;
+  const val = row[field] || '';
+  const isDate = field === 'date';
+  cell.innerHTML = `<input type="${isDate?'date':'text'}" value="${val}"
+    style="width:100%;border:1.5px solid #1a3a5c;border-radius:4px;
+           padding:2px 5px;font-size:12px;font-family:'Noto Sans KR',sans-serif;"
+    id="lEdit_${id}_${field}"
+    onblur="saveLedgerField(${id},'${field}',this)"
+    onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape')renderLedgerTable()">`;
+  const inp = document.getElementById(`lEdit_${id}_${field}`);
+  inp.focus();
+  if (isDate) { try { inp.showPicker(); } catch(e) {} }
+  else inp.select();
+}
+
+async function saveLedgerField(id, field, input) {
+  const newVal = input.value.trim();
+  const data = glc(), row = data.find(r => r.id === id);
+  if (!row) { renderLedgerTable(); return; }
+  if (newVal === (row[field]||'')) { renderLedgerTable(); return; }
+  row[field] = newVal;
+  await slc(data);
+  renderLedgerTable();
+  updateLedgerSidebar();
+  toast(`수정되었습니다.`, 'ok');
+}
+
+// Total 수정 → 금액/부가세 역산
+function editLedgerTotal(id, cell) {
+  const data = glc(), row = data.find(r => r.id === id);
+  if (!row) return;
+  cell.innerHTML = `<input type="number" value="${row.total||0}"
+    style="width:100px;border:1.5px solid #1a3a5c;border-radius:4px;
+           padding:2px 5px;font-size:12px;text-align:right;"
+    id="lEditTotal_${id}"
+    onblur="saveLedgerTotal(${id},this)"
+    onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape')renderLedgerTable()">`;
+  const inp = document.getElementById(`lEditTotal_${id}`);
+  inp.focus(); inp.select();
+}
+
+async function saveLedgerTotal(id, input) {
+  const newTotal = parseFloat(input.value) || 0;
+  const data = glc(), row = data.find(r => r.id === id);
+  if (!row) { renderLedgerTable(); return; }
+  if (newTotal === row.total) { renderLedgerTable(); return; }
+  const newAmt = newTotal / 1.1;
+  const newVat = newTotal - newAmt;
+  row.total = newTotal;
+  row.amt   = newAmt;
+  row.vat   = newVat;
+  await slc(data);
+  renderLedgerTable();
+  updateLedgerSidebar();
+  toast(`Total ${Math.round(newTotal).toLocaleString()}원으로 수정 (금액/부가세 자동계산)`, 'ok');
+}
+
+// 계정명 수정 → 구분 자동 연동
+function editLedgerAccount(id, cell) {
+  const data = glc(), row = data.find(r => r.id === id);
+  if (!row) return;
+  const accounts = ['기타수수료','복사기렌탈','세금과공과','소모품비-주방용품','회의비','식재',
+    '신용카드수수료','수선비-공기구비품','전산용역비','여비교통비','통신비','도서인쇄비-서식인쇄','용역수수료-기타용역'];
+  const opts = accounts.map(a => `<option value="${a}"${a===row.account?' selected':''}>${a}</option>`).join('');
+  cell.innerHTML = `<select id="lEditAcc_${id}" style="border:1.5px solid #1a3a5c;border-radius:4px;
+      padding:2px 4px;font-size:11px;font-family:'Noto Sans KR',sans-serif;width:100%"
+      onchange="saveLedgerAccount(${id},this)" onblur="saveLedgerAccount(${id},this)">
+      ${opts}
+    </select>`;
+  const sel = document.getElementById(`lEditAcc_${id}`);
+  sel.focus();
+}
+
+async function saveLedgerAccount(id, select) {
+  const newAcc = select.value;
+  const data = glc(), row = data.find(r => r.id === id);
+  if (!row || newAcc === row.account) { renderLedgerTable(); return; }
+  row.account = newAcc;
+  row.gubun   = newAcc === '식재' ? '식재' : '비식재';
+  await slc(data);
+  renderLedgerTable();
+  updateLedgerSidebar();
+  toast(`계정명 "${newAcc}"으로 수정`, 'ok');
+}
+
+// 청구여부 수정
+function editLedgerBilling(id, cell) {
+  const data = glc(), row = data.find(r => r.id === id);
+  if (!row) return;
+  cell.innerHTML = `<select id="lEditBill_${id}" style="border:1.5px solid #1a3a5c;border-radius:4px;
+      padding:2px 4px;font-size:11px;font-family:'Noto Sans KR',sans-serif;"
+      onchange="saveLedgerBilling(${id},this)" onblur="renderLedgerTable()">
+      <option value="">-</option>
+      <option value="미청구"${row.billing==='미청구'?' selected':''}>미청구</option>
+      <option value="청구"${row.billing==='청구'?' selected':''}>청구</option>
+    </select>`;
+  document.getElementById(`lEditBill_${id}`).focus();
+}
+
+async function saveLedgerBilling(id, select) {
+  const newVal = select.value;
+  const data = glc(), row = data.find(r => r.id === id);
+  if (!row) { renderLedgerTable(); return; }
+  row.billing = newVal;
+  await slc(data);
+  renderLedgerTable();
+  toast(`청구여부 "${newVal||'-'}"으로 수정`, 'ok');
+}
+
 // ── 가계부 세부내용(doc) 인라인 편집 ──
 function editLedgerDoc(id, cell) {
   const data = glc(), row = data.find(r => r.id === id);
@@ -3275,23 +3390,24 @@ function renderLedgerTable() {
   }
 
   const rowHtml = (r, i, arr) => {
-
+    const editStyle = 'cursor:pointer;text-decoration:underline dotted #aaa';
     return `<tr class="${ledgerSortMode?'sort-active':''}" data-id="${r.id}"
       ondragover="onDragOver(event,this,${r.id})">
     <td class="lcenter" style="color:#aaa;font-size:12px;padding:0">
       ${ledgerSortMode ? `<div class="order-btns-cell"><span class="drag-handle" draggable="true" ondragstart="onDragStart(event,'ledger',${r.id})" ondragend="onDragEnd(event)" ontouchstart="onTouchStart(event,'ledger',${r.id})">⠿</span></div>` : `<span style="color:#aaa;font-size:12px">${i+1}</span>`}
     </td>
-    <td class="lcenter">${r.jijum||'서초'}</td>
-    <td class="lcenter" style="font-family:monospace">${r.date||''}</td>
-    <td class="lnum">${r.amt ? Math.round(r.amt).toLocaleString() : '-'}</td>
+    <td class="lcenter" style="${editStyle}" title="클릭하여 날짜 수정" onclick="editLedgerField(${r.id},'date',this)">${r.date||'-'}</td>
+    <td class="lnum" style="${editStyle}" title="클릭하여 Total 수정" onclick="editLedgerTotal(${r.id},this)">${r.total ? Math.round(r.total).toLocaleString() : '-'}</td>
     <td class="lnum" style="color:#888">${r.vat ? Math.round(r.vat).toLocaleString() : '-'}</td>
-    <td class="lnum" style="font-weight:700;color:#1a3a5c">${r.total ? Math.round(r.total).toLocaleString() : '-'}</td>
-    <td>${r.account||''}</td>
+    <td class="lnum" style="color:#888">${r.amt ? Math.round(r.amt).toLocaleString() : '-'}</td>
+    <td style="${editStyle}" title="클릭하여 계정명 수정" onclick="editLedgerAccount(${r.id},this)">${r.account||'-'}</td>
     <td class="lcenter"><span class="gbadge-${r.gubun||'비식재'}">${r.gubun||''}</span></td>
-    <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.desc||''}">${r.desc||''}</td>
-    <td>${r.vendor||''}</td>
-    <td style="font-size:12px;color:#666;cursor:pointer;text-decoration:underline dotted #aaa" title="클릭하여 세부내용 수정" onclick="editLedgerDoc(${r.id},this)">${r.doc||'-'}</td>
-    <td class="lcenter" style="font-size:11px;color:${r.billing==='미청구'?'#dc2626':'#888'}">${r.billing||''}</td>
+    <td style="${editStyle};max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.desc||''} (클릭하여 수정)" onclick="editLedgerField(${r.id},'desc',this)">${r.desc||'-'}</td>
+    <td style="${editStyle}" title="클릭하여 가맹점명 수정" onclick="editLedgerField(${r.id},'vendor',this)">${r.vendor||'-'}</td>
+    <td style="font-size:12px;color:#666;${editStyle}" title="클릭하여 세부내용 수정" onclick="editLedgerDoc(${r.id},this)">${r.doc||'-'}</td>
+    <td class="lcenter" style="${editStyle}" title="클릭하여 청구여부 수정" onclick="editLedgerBilling(${r.id},this)">
+      <span style="color:${r.billing==='미청구'?'#dc2626':'#888'};font-size:11px">${r.billing||'-'}</span>
+    </td>
     <td class="lcenter"><button class="sanpum-btn ${r.sanpum?'on':'off'}" title="${r.sanpum?'사전품의 필요 (클릭시 해제)':'사전품의 완료 (클릭시 품의 필요 표시)'}" onclick="toggleLedgerSanpum(${r.id})"></button></td>
     <td class="lcenter"><button class="btn btn-danger btn-sm" onclick="delLedgerRow(${r.id})" style="padding:2px 6px">✕</button></td>
   </tr>`;
@@ -3562,6 +3678,10 @@ window.lCalcFromTotal=lCalcFromTotal;
 window.registerDocValue=registerDocValue;
 window.renderDocList=renderDocList;
 window.editLedgerDoc=editLedgerDoc;
+window.editLedgerField=editLedgerField; window.saveLedgerField=saveLedgerField;
+window.editLedgerTotal=editLedgerTotal; window.saveLedgerTotal=saveLedgerTotal;
+window.editLedgerAccount=editLedgerAccount; window.saveLedgerAccount=saveLedgerAccount;
+window.editLedgerBilling=editLedgerBilling; window.saveLedgerBilling=saveLedgerBilling;
 window.saveLedgerDoc=saveLedgerDoc;
 window.ensureFixedExpenses=ensureFixedExpenses;
 
