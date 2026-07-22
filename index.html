@@ -678,6 +678,67 @@ tr.sort-active { background:#fffbeb !important; }
   margin-right:4px;
 }
 
+
+/* ── 로그인 화면 ── */
+#loginScreen {
+  position:fixed; inset:0; background:#f0f4f8;
+  display:flex; align-items:center; justify-content:center;
+  z-index:9999; flex-direction:column; gap:0;
+}
+#loginScreen .login-card {
+  background:#fff; border-radius:14px; padding:40px 36px;
+  box-shadow:0 4px 24px rgba(0,0,0,.10);
+  width:100%; max-width:360px;
+  display:flex; flex-direction:column; gap:18px;
+}
+#loginScreen .login-logo {
+  display:flex; align-items:center; gap:10px;
+  margin-bottom:4px;
+}
+#loginScreen .login-logo-icon {
+  width:40px; height:40px; border-radius:10px;
+  background:#1a3a5c; display:flex; align-items:center;
+  justify-content:center; font-size:20px;
+}
+#loginScreen .login-title {
+  font-size:17px; font-weight:700; color:#1a3a5c;
+}
+#loginScreen .login-sub {
+  font-size:12px; color:#888; margin-top:1px;
+}
+#loginScreen .login-field {
+  display:flex; flex-direction:column; gap:5px;
+}
+#loginScreen .login-field label {
+  font-size:11px; font-weight:600; color:#555; text-transform:uppercase;
+}
+#loginScreen .login-field input {
+  border:1.5px solid #dde3ea; border-radius:7px;
+  padding:10px 12px; font-size:14px;
+  font-family:'Noto Sans KR',sans-serif;
+  color:#222; transition:border .15s; outline:none;
+  width:100%;
+}
+#loginScreen .login-field input:focus {
+  border-color:#1a3a5c;
+  box-shadow:0 0 0 3px rgba(26,58,92,.08);
+}
+#loginScreen .login-btn {
+  background:#1a3a5c; color:#fff; border:none;
+  border-radius:8px; padding:12px; font-size:14px;
+  font-weight:600; font-family:'Noto Sans KR',sans-serif;
+  cursor:pointer; transition:background .15s; width:100%;
+}
+#loginScreen .login-btn:hover { background:#162f4a; }
+#loginScreen .login-btn:disabled { background:#94a3b8; cursor:not-allowed; }
+#loginScreen .login-error {
+  font-size:12px; color:#dc2626; text-align:center;
+  min-height:16px;
+}
+#loginScreen .login-spinner {
+  display:none; text-align:center; font-size:12px; color:#888;
+}
+
 </style>
 
 <!-- 추가 CSS -->
@@ -1170,12 +1231,99 @@ tr.sort-active { background:#fffbeb !important; }
   margin-right:4px;
 }
 
+
+/* ── 로그인 화면 ── */
+#loginScreen {
+  position:fixed; inset:0; background:#f0f4f8;
+  display:flex; align-items:center; justify-content:center;
+  z-index:9999; flex-direction:column; gap:0;
+}
+#loginScreen .login-card {
+  background:#fff; border-radius:14px; padding:40px 36px;
+  box-shadow:0 4px 24px rgba(0,0,0,.10);
+  width:100%; max-width:360px;
+  display:flex; flex-direction:column; gap:18px;
+}
+#loginScreen .login-logo {
+  display:flex; align-items:center; gap:10px;
+  margin-bottom:4px;
+}
+#loginScreen .login-logo-icon {
+  width:40px; height:40px; border-radius:10px;
+  background:#1a3a5c; display:flex; align-items:center;
+  justify-content:center; font-size:20px;
+}
+#loginScreen .login-title {
+  font-size:17px; font-weight:700; color:#1a3a5c;
+}
+#loginScreen .login-sub {
+  font-size:12px; color:#888; margin-top:1px;
+}
+#loginScreen .login-field {
+  display:flex; flex-direction:column; gap:5px;
+}
+#loginScreen .login-field label {
+  font-size:11px; font-weight:600; color:#555; text-transform:uppercase;
+}
+#loginScreen .login-field input {
+  border:1.5px solid #dde3ea; border-radius:7px;
+  padding:10px 12px; font-size:14px;
+  font-family:'Noto Sans KR',sans-serif;
+  color:#222; transition:border .15s; outline:none;
+  width:100%;
+}
+#loginScreen .login-field input:focus {
+  border-color:#1a3a5c;
+  box-shadow:0 0 0 3px rgba(26,58,92,.08);
+}
+#loginScreen .login-btn {
+  background:#1a3a5c; color:#fff; border:none;
+  border-radius:8px; padding:12px; font-size:14px;
+  font-weight:600; font-family:'Noto Sans KR',sans-serif;
+  cursor:pointer; transition:background .15s; width:100%;
+}
+#loginScreen .login-btn:hover { background:#162f4a; }
+#loginScreen .login-btn:disabled { background:#94a3b8; cursor:not-allowed; }
+#loginScreen .login-error {
+  font-size:12px; color:#dc2626; text-align:center;
+  min-height:16px;
+}
+#loginScreen .login-spinner {
+  display:none; text-align:center; font-size:12px; color:#888;
+}
+
 </style>
 </head>
 
 
 
 <body>
+
+<!-- ══ 로그인 화면 ══ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">☕</div>
+      <div>
+        <div class="login-title">KRAFTON CAFE</div>
+        <div class="login-sub">크래프톤카페 휴게실 상세내역 및 가계부</div>
+      </div>
+    </div>
+    <div class="login-field">
+      <label>이메일</label>
+      <input type="email" id="loginEmail" placeholder="이메일 주소 입력"
+        onkeydown="if(event.key==='Enter')document.getElementById('loginPw').focus()">
+    </div>
+    <div class="login-field">
+      <label>비밀번호</label>
+      <input type="password" id="loginPw" placeholder="비밀번호 입력"
+        onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-error" id="loginError"></div>
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">로그인</button>
+    <div class="login-spinner" id="loginSpinner">⏳ 로그인 중...</div>
+  </div>
+</div>
 
 <!-- ── 헤더 ── -->
 <div class="header">
@@ -1185,6 +1333,8 @@ tr.sort-active { background:#fffbeb !important; }
     <span class="sub">2026</span>
   </div>
   <div class="header-actions">
+    <span id="headerUser" style="display:none;font-size:11px;color:rgba(255,255,255,.7);"></span>
+    <button class="btn" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);padding:4px 10px;font-size:11px;" onclick="doLogout()">로그아웃</button>
     <button class="btn btn-excel" onclick="exportXLSX()">📊 Excel 내보내기</button>
     <button class="btn btn-secondary" onclick="exportCSV()">📥 CSV</button>
     <button class="btn btn-secondary" onclick="backupAll()">💾 전체백업</button>
@@ -1736,6 +1886,7 @@ tr.sort-active { background:#fffbeb !important; }
 // ── Firebase SDK ──────────────────────────────────────────────────────────────
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, get, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA3YyGQ12bpVJyLY0MXURdqQPLtvqFEN8M",
@@ -1747,7 +1898,8 @@ const firebaseConfig = {
   appId: "1:967418964499:web:c16a60c43bf0f449956de6"
 };
 const app = initializeApp(firebaseConfig);
-const db  = getDatabase(app);
+const db   = getDatabase(app);
+const auth = getAuth(app);
 
 // ── 마스터 데이터 ─────────────────────────────────────────────────────────────
 const MASTER = [{"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "135435", "item": "엠즈베이커스_프로마쥬클래식(6EA)", "unit": "EA", "price": 2950, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "287026", "item": "엠즈베이커스_밀크롤(6EA)", "unit": "EA", "price": 2200, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "489319", "item": "네이처티 우베 파우더 800g", "unit": "EA", "price": 13091, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "AW00128", "item": "모모스커피_콜드브루 원액 디카페인(1000ml)", "unit": "EA", "price": 21818.18181818182, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "AW00387", "item": "커피리브레_콜롬비아 엘 타블론 디카페인 500g", "unit": "EA", "price": 21818, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "AW00403", "item": "모모스커피_코스타리카 모모스컬렉션 디카페인 500g", "unit": "EA", "price": 17100, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "AW00405", "item": "모모스_코스타리카 모모스셀렉션 디카페인 1kg", "unit": "EA", "price": 30600, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "AW00406", "item": "180커피로스터스_콜롬비아 엘 레나세르 디카페인_500g", "unit": "EA", "price": 28582, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "AW00428", "item": "180커피로스터스_디카페인 블렌드 커피 율 500g", "unit": "EA", "price": 15273, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "H000011", "item": "광양매실청", "unit": "EA", "price": 285000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "M100010", "item": "엠즈베이커스_미니바스크치즈케이크(6EA)", "unit": "EA", "price": 2300, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "M100011", "item": "엠즈베이커스_초코밀크롤(6EA)", "unit": "EA", "price": 2400, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "M100012", "item": "엠즈베이커스_오트롤(6EA)", "unit": "EA", "price": 2583, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "M100014", "item": "파미유_말렌카 위드 코코아(1BOX)", "unit": "EA", "price": 19650, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "M100015", "item": "파미유_말렌카 위드 월넛(1BOX)", "unit": "EA", "price": 19650, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "M100016", "item": "파미유_말렌카 위드 레몬(1BOX)", "unit": "EA", "price": 19650, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "M100017", "item": "파미유_말렌카 위드 살구(1BOX)", "unit": "EA", "price": 17850, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "M100019", "item": "파미유_말렌카 위드 시나몬(1BOX)", "unit": "EA", "price": 17850, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0035", "item": "모닌 월넛브라우니 시럽", "unit": "EA", "price": 14909, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0036", "item": "아사이베리 파우더", "unit": "EA", "price": 17273, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0038", "item": "비비고 김스낵", "unit": "EA", "price": 1836, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0042", "item": "타바론_루이보스밀크티 베이스", "unit": "EA", "price": 20000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0043", "item": "맥파이앤타이거_감잎차(100EA)", "unit": "EA", "price": 76000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0044", "item": "맥파이앤타이거_쑥차(100EA)", "unit": "EA", "price": 76000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0045", "item": "타바론_후르츠드림", "unit": "EA", "price": 30000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0048", "item": "마이노말 저당 저칼로리 얼그레이 시럽", "unit": "EA", "price": 7682, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0055", "item": "바닐라빈파우더", "unit": "EA", "price": 75091, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100019", "item": "TWG_카모마일(200EA)", "unit": "BOX", "price": 210000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100020", "item": "TWG_프렌치얼그레이(200EA)", "unit": "BOX", "price": 210000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100051", "item": "TWG_그랜드웨딩(200EA)", "unit": "BOX", "price": 210000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100052", "item": "TWG_루이보스 자스민(200EA)", "unit": "BOX", "price": 210000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100053", "item": "오테라_배그쿠키", "unit": "EA", "price": 1500, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100055", "item": "TWG_크림카라멜(200EA)", "unit": "BOX", "price": 210000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100058", "item": "TWG_그나와 민트(200EA)", "unit": "BOX", "price": 210000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100060", "item": "트렌디저트_밀크빙수 240ml(1Box 18ea)", "unit": "EA", "price": 1500, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100096", "item": "파미유_P떠먹는티라미수(8p)", "unit": "EA", "price": 3700, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100097", "item": "파미유_떠먹는 오레오케익(8p)", "unit": "EA", "price": 3700, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100110", "item": "파미유_떠먹는 우유케익(8p)", "unit": "EA", "price": 3700, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100111", "item": "파미유_떠먹는 고구마케익(6p)", "unit": "EA", "price": 2700, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100125", "item": "홀블렌딩_식물성 단백질 쉐이크 블랙빈", "unit": "EA", "price": 22727.27272727273, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100126", "item": "홀블렌딩_식물성 단백질 쉐이크 쑥", "unit": "EA", "price": 21818.18181818182, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100145", "item": "알트하우스_레드 후룻 프레쉬 15티백", "unit": "EA", "price": 15000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100154", "item": "티어스_쌍화차 오리진 패밀리팩(1kg)", "unit": "EA", "price": 40909, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100179", "item": "트렌디저트_초코빙수 240ml(1Box 18ea)", "unit": "EA", "price": 1500, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "OT0024", "item": "비브리브_꼬박꼬밥 고단저당 스윗콘맛(7EA)", "unit": "EA", "price": 2071.428571428571, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "OT0025", "item": "비브리브_애사비젤리(14EA)", "unit": "BOX", "price": 7000, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "OT0030", "item": "비브리브_꼬박꼬밥 말차맛(7EA)", "unit": "EA", "price": 2071.428571428571, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "OT0033", "item": "맥파이앤타이거_호지차(100EA)", "unit": "BOX", "price": 380, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "OT0034", "item": "마이노멀_땅콩버터 크런치(10EA)", "unit": "PACK", "price": 5409, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "OT0041", "item": "비브리브_꼬박꼬밥 자색고구마맛(7EA)", "unit": "PACK", "price": 2071.428571428571, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "OT0052", "item": "헤븐리바이트 푸룬앤월넛_8개입", "unit": "EA", "price": 2300, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "TS100173", "item": "레미레미_땅콩버터 크런치(10EA)", "unit": "EA", "price": 8500, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "TS100174", "item": "비브리브_레몬즙(14EA)", "unit": "EA", "price": 6800, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "TS100175", "item": "이야이야_엑스트라버진 올리브오일 스틱형(15EA)", "unit": "EA", "price": 20200, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00003", "item": "우성_아사히", "unit": "EA", "price": 2175, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00004", "item": "우성_기린이치방캔", "unit": "EA", "price": 1725, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00006", "item": "우성_에딩거 바이스비어", "unit": "EA", "price": 3108, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00007", "item": "우성_크로넨버그 블랑 1664", "unit": "EA", "price": 2208.333333333333, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00009", "item": "우성_제주위트에일캔", "unit": "EA", "price": 1695.833333333333, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00047", "item": "우성_탱커레이 진", "unit": "EA", "price": 30100, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00068", "item": "우성_기네스", "unit": "EA", "price": 3141.666666666667, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00101", "item": "우성_짐빔하이볼 레몬", "unit": "EA", "price": 2104.166666666667, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00127", "item": "우성_빅웨이브캔", "unit": "EA", "price": 3108.333333333333, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00128", "item": "카발란하이볼위스키소다캔", "unit": "EA", "price": 3683, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00129", "item": "우성_카스", "unit": "EA", "price": 1558.333333333333, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00131", "item": "속초맥주 자니 라거", "unit": "EA", "price": 4733, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00132", "item": "우성_에비스캔", "unit": "EA", "price": 2854.166666666667, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00134", "item": "우성_페냐솔 틴토 팩와인 3L", "unit": "EA", "price": 18000, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00136", "item": "우성_필스너우르켈", "unit": "EA", "price": 3625, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00011", "item": "우성_헤쿨라 모나스트렐", "unit": "EA", "price": 13800, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00013", "item": "우성_러시안잭 쇼비뇽블랑", "unit": "EA", "price": 19600, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00019", "item": "우성_미도리", "unit": "EA", "price": 32100, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00036", "item": "우성_디카이퍼 피치트리", "unit": "EA", "price": 23000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00043", "item": "수영유통_지평막걸리", "unit": "EA", "price": 3300, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00046", "item": "우성_스미노프 보드카", "unit": "EA", "price": 24000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00051", "item": "우성_제임슨", "unit": "EA", "price": 32200, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00075", "item": "우성_콰페이리치", "unit": "EA", "price": 31500, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00078", "item": "우성_라 스피네타 모스카토 다스티", "unit": "EA", "price": 29400, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00085", "item": "우성_짐빔 위스키", "unit": "EA", "price": 27400, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00109", "item": "우성_바카디 카르타블랑카", "unit": "EA", "price": 20800, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00110", "item": "우성_잭 다니엘 애플", "unit": "EA", "price": 43500, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00113", "item": "우성_생제르맹", "unit": "EA", "price": 59300, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00117", "item": "우성_우드브릿지 쇼비뇽블랑", "unit": "EA", "price": 17300, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00126", "item": "우성_타베르네로 보띠아 이탈리아(피스코)", "unit": "EA", "price": 34500, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00133", "item": "우성_디카이퍼 크림드카시스", "unit": "EA", "price": 18200, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "라빠르쉐 스틱설탕", "unit": "EA", "price": 55736, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "통참깨", "unit": "EA", "price": 3555, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "티어스_시나몬프레소 패밀리팩(900g)", "unit": "EA", "price": 45455, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "한국야쿠르트 장집중케어MPRO4(130ml)", "unit": "EA", "price": 2000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "한국야쿠르트 장피부듀얼케어MPRO4(130ml)", "unit": "EA", "price": 2000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "향미사_볼리비아 핀카 이사벨 나랑할 게이샤 내추럴 100g", "unit": "EA", "price": 25455, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "향미사_코스타리카 산 이시드로 라브라도르 까사 베르데 티피카 허니 200g", "unit": "EA", "price": 22727, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "홀블렌딩_식물성 단백질 쉐이크 카카오", "unit": "EA", "price": 21818.18181818182, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "", "item": "우성_디카이퍼 트리플색", "unit": "EA", "price": 23000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "", "item": "우성_스텔라생(20L)", "unit": "EA", "price": 109000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "", "item": "우성_호가든생(20L)", "unit": "EA", "price": 96500, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "네스프레소", "code": "", "item": "네스프레소", "unit": "EA", "price": 2720000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_보난자 블렌드 1kg", "unit": "EA", "price": 28000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_다크 브라질 1kg", "unit": "EA", "price": 27000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_엘 엘칸토 콜롬비아 1kg", "unit": "EA", "price": 40000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_고고구 에티오피아 1kg", "unit": "EA", "price": 43000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_시티오 베르잼 그란데 브라질 1kg", "unit": "EA", "price": 37000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_라 라하 멕시코 1kg", "unit": "EA", "price": 46000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_핀카 단토 라이트 허니 코스타리카 1kg", "unit": "EA", "price": 66000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_알라인 내추럴 HASD 인도네시아 1kg", "unit": "EA", "price": 72000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_레쿠 에티오피아 1kg", "unit": "EA", "price": 54000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_핀카 하트만 카투라 파나마 1kg", "unit": "EA", "price": 70000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_미엘레스 게이샤 콜롬비아 1kg", "unit": "EA", "price": 84000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_핀카 몬테비디오 엘살바도르 1kg", "unit": "EA", "price": 65000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_파젠다 엄 펄프드 내추럴 브라질 1kg", "unit": "EA", "price": 58000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_체체레 아나에어로빅 내추럴 에티오피아 1kg", "unit": "EA", "price": 69000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_아프로카시 디카페인 페루 1kg", "unit": "EA", "price": 40909, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_산가브리엘 아나에어로빅 허니 콜롬비아 1kg", "unit": "EA", "price": 74000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "285801", "item": "엠즈베이커스_프로마쥬블랑(6EA)", "unit": "EA", "price": 2950, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "W00077", "item": "엠케이펍_제주누보", "unit": "EA", "price": 1936, "remark": ""}];
@@ -2071,21 +2223,20 @@ async function loadLedgerOrder() {
 // ── 기본 정렬 함수 ──
 function getDefaultSortedPurchase(data) {
   const CAT_SORT = {'네스프레소':0,'펍':1,'서초주류':2,'웰니스':3,'식재':4,'콜라보':5};
-  const SITE_SORT = {'크래프톤서초카페점 라운지':0,'크래프톤서초카페점 카페':1};
+  // 브랜드 추출: '_' 앞 부분, 없으면 품목명 전체
   const getBrand = item => item.includes('_') ? item.split('_')[0] : item;
   return [...data].sort((a,b) => {
+    // 1) 분류 순서
     const ca=CAT_SORT[a.cat]??9, cb=CAT_SORT[b.cat]??9;
     if(ca!==cb) return ca-cb;
-    if(a.cat==='식재'&&b.cat==='식재'){
-      const bc=getBrand(a.item).localeCompare(getBrand(b.item),'ko');
-      if(bc!==0) return bc;
-      const dc=a.date.localeCompare(b.date);
-      if(dc!==0) return dc;
-      return a.item.localeCompare(b.item,'ko');
-    }
+    // 2) 모든 분류에서 브랜드순
+    const bc=getBrand(a.item).localeCompare(getBrand(b.item),'ko');
+    if(bc!==0) return bc;
+    // 3) 같은 브랜드 내에서 날짜순
     const dc=a.date.localeCompare(b.date);
     if(dc!==0) return dc;
-    return (SITE_SORT[a.site]??9)-(SITE_SORT[b.site]??9);
+    // 4) 날짜도 같으면 품목명순
+    return a.item.localeCompare(b.item,'ko');
   });
 }
 
@@ -2698,21 +2849,15 @@ function exportXLSX(){
   const data=gc();
   if(!data.length){toast('내보낼 데이터가 없습니다.','err');return;}
   const CAT_SORT_X={'네스프레소':0,'펍':1,'서초주류':2,'웰니스':3,'식재':4,'콜라보':5};
-  const SITE_SORT_X={'크래프톤서초카페점 라운지':0,'크래프톤서초카페점 카페':1};
   const getBrandX=item=>item.includes('_')?item.split('_')[0]:item;
   const sorted=[...data].sort((a,b)=>{
     const catA=CAT_SORT_X[a.cat]??9, catB=CAT_SORT_X[b.cat]??9;
     if(catA!==catB) return catA-catB;
-    if(a.cat==='식재'&&b.cat==='식재'){
-      const bc=getBrandX(a.item).localeCompare(getBrandX(b.item),'ko');
-      if(bc!==0) return bc;
-      const dc=a.date.localeCompare(b.date);
-      if(dc!==0) return dc;
-      return a.item.localeCompare(b.item,'ko');
-    }
+    const bc=getBrandX(a.item).localeCompare(getBrandX(b.item),'ko');
+    if(bc!==0) return bc;
     const dc=a.date.localeCompare(b.date);
     if(dc!==0) return dc;
-    return (SITE_SORT_X[a.site]??9)-(SITE_SORT_X[b.site]??9);
+    return a.item.localeCompare(b.item,'ko');
   });
   const monthName=MONTHS[CM];
   const wb=XLSX.utils.book_new();
@@ -3656,6 +3801,7 @@ window.editMasterRow=editMasterRow; window.saveMasterRow=saveMasterRow;
 window.deleteMasterItem=deleteMasterItem;
 window.exportMasterJSON=exportMasterJSON; window.importMasterJSON=importMasterJSON;
 window.setupRealtimeSync=setupRealtimeSync;
+window.doLogin=doLogin; window.doLogout=doLogout;
 window.switchLedgerMonth=switchLedgerMonth;
 window.addLedgerRow=addLedgerRow; window.resetLedgerForm=resetLedgerForm;
 window.delLedgerRow=delLedgerRow; window.renderLedgerTable=renderLedgerTable;
@@ -3686,6 +3832,72 @@ window.saveLedgerDoc=saveLedgerDoc;
 window.ensureFixedExpenses=ensureFixedExpenses;
 
 // ══ 초기화 ══════════════════════════════════════════════════════════════════
+
+// ══ 인증 ══════════════════════════════════════════════════════════════════════
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pw    = document.getElementById('loginPw').value;
+  const errEl = document.getElementById('loginError');
+  const btn   = document.getElementById('loginBtn');
+  const spin  = document.getElementById('loginSpinner');
+
+  if (!email || !pw) { errEl.textContent = '이메일과 비밀번호를 입력하세요.'; return; }
+
+  errEl.textContent = '';
+  btn.disabled = true;
+  spin.style.display = 'block';
+
+  try {
+    await signInWithEmailAndPassword(auth, email, pw);
+    // 성공 시 onAuthStateChanged가 처리
+  } catch(e) {
+    spin.style.display = 'none';
+    btn.disabled = false;
+    const msg = {
+      'auth/user-not-found'  : '등록되지 않은 이메일입니다.',
+      'auth/wrong-password'  : '비밀번호가 올바르지 않습니다.',
+      'auth/invalid-email'   : '이메일 형식이 올바르지 않습니다.',
+      'auth/too-many-requests': '로그인 시도가 너무 많습니다. 잠시 후 다시 시도해주세요.',
+      'auth/invalid-credential': '이메일 또는 비밀번호가 올바르지 않습니다.',
+    }[e.code] || '로그인 실패: ' + e.message;
+    document.getElementById('loginError').textContent = msg;
+  }
+}
+
+async function doLogout() {
+  if (!confirm('로그아웃 하시겠습니까?')) return;
+  await signOut(auth);
+}
+
+function showApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+}
+
+function hideApp() {
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginPw').value = '';
+  document.getElementById('loginError').textContent = '';
+  document.getElementById('loginBtn').disabled = false;
+  document.getElementById('loginSpinner').style.display = 'none';
+}
+
+// ── 인증 상태 감지 → 앱 초기화 ──
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    hideApp();
+    return;
+  }
+  // 로그인 성공
+  showApp();
+
+  // 헤더에 사용자 정보 + 로그아웃 버튼 표시
+  const userEl = document.getElementById('headerUser');
+  if (userEl) {
+    userEl.textContent = user.email;
+    userEl.style.display = 'inline';
+  }
+});
+
 window.addEventListener('DOMContentLoaded', async () => {
   showLoading(true);
 
