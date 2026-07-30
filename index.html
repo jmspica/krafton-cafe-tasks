@@ -2706,6 +2706,35 @@ async function unlockMasterSync(id) {
   toast('마스터와 다시 연동되었습니다.', 'ok');
 }
 
+
+// ══ 상품코드 인라인 편집 ════════════════════════════════════════════════════
+function editCode(id, cell) {
+  const data = gc(), row = data.find(r => r.id === id);
+  if (!row) return;
+  const origVal = withMasterSync(row).code || '';
+  cell.innerHTML = `<input type="text" value="${origVal}"
+    style="width:80px;border:1.5px solid #1a3a5c;border-radius:4px;
+           padding:2px 5px;font-size:11px;font-family:monospace;"
+    id="codeInput_${id}"
+    onblur="saveCode(${id},this)"
+    onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape')renderTable()">`;
+  const inp = document.getElementById('codeInput_' + id);
+  inp.focus(); inp.select();
+}
+
+async function saveCode(id, input) {
+  const newCode = input.value.trim();
+  const data = gc(), row = data.find(r => r.id === id);
+  if (!row) { renderTable(); return; }
+  const displayedCode = withMasterSync(row).code || '';
+  if (newCode === displayedCode) { renderTable(); return; }
+  row.code = newCode;
+  row.masterLocked = true; // 직접 수정 후에는 마스터 변경에 영향받지 않음
+  await sc2(data);
+  renderTable(); updateSidebar();
+  toast(`상품코드 "${newCode||'(빈값)'}"로 수정 (이 건은 이후 마스터 변경과 무관하게 유지됩니다)`, 'ok');
+}
+
 async function savePrice(id, input) {
   const newPrice = parseFloat(input.value);
   if (isNaN(newPrice) || newPrice < 0) { renderTable(); return; }
@@ -2825,7 +2854,7 @@ function renderTable(){
       <td style="font-size:13px;white-space:nowrap">${r.site}</td>
       <td class="center" style="font-size:13px;white-space:nowrap">${r.gubun||''}</td>
       <td class="cat-cell-${r.cat}">${r.cat}</td>
-      <td class="code">${r.code||''}</td>
+      <td class="code" style="cursor:pointer;text-decoration:underline dotted #aaa" title="${r.masterLocked?'🔒 이 건은 직접 수정되어 마스터 변경과 무관하게 고정됨. 더블클릭하면 마스터와 다시 연동':'클릭하여 상품코드 수정'}" onclick="editCode(${r.id},this)" ondblclick="${r.masterLocked?`unlockMasterSync(${r.id})`:''}">${r.masterLocked?'🔒 ':''}${r.code||''}</td>
       <td style="font-size:13px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.item}">${r.item}</td>
       <td class="center">${r.unit||''}</td>
       <td class="num" style="cursor:pointer;text-decoration:underline dotted #aaa" title="클릭하여 수량 수정" onclick="editQty(${r.id},this)">${r.qty.toLocaleString()}</td>
@@ -3864,7 +3893,7 @@ window.closeDropdown=closeDropdown; window.selectItem=selectItem;
 window.addRow=addRow; window.resetForm=resetForm;
 window.toggleCk=toggleCk; window.delRow=delRow; window.clearMonth=clearMonth;
 window.editQty=editQty; window.saveQty=saveQty;
-window.editPrice=editPrice; window.savePrice=savePrice; window.unlockMasterSync=unlockMasterSync;
+window.editPrice=editPrice; window.savePrice=savePrice; window.unlockMasterSync=unlockMasterSync; window.editCode=editCode; window.saveCode=saveCode;
 window.editDate=editDate; window.saveDate=saveDate;
 window.applyFilter=applyFilter; window.resetFilter=resetFilter;
 window.exportXLSX=exportXLSX; window.exportCSV=exportCSV;
