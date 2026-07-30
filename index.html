@@ -2972,10 +2972,10 @@ function exportXLSX(){
   const doneStyle={font:{bold:true,sz:11,name:'맑은 고딕',color:{rgb:'155724'}},fill:{fgColor:{rgb:'D4EDDA'}},alignment:{horizontal:'center',vertical:'center'},border};
   const pendStyle={font:{bold:true,sz:11,name:'맑은 고딕',color:{rgb:'856404'}},fill:{fgColor:{rgb:'FFF3CD'}},alignment:{horizontal:'center',vertical:'center'},border};
   const totalStyle={font:{bold:true,sz:10,name:'맑은 고딕'},fill:{fgColor:{rgb:'D9E1F2'}},alignment:{horizontal:'right',vertical:'center'},numFmt:'#,##0',border};
-  const wsData=[['순번','입고일','사이트','구분','분류','상품코드','품목','단위','총 입고량','공급단가','총 입고금액','지점','구분1']];
-  sorted.forEach((r,i)=>{wsData.push([i+1,r.date,r.site,r.gubun||'',r.cat,r.code||'',r.item,r.unit||'',r.qty,r.price,r.amount,'서초',r.gubun||'']);});
+  const wsData=[['순번','입고일','사이트','구분','분류','상품코드','품목','단위','총 입고량','공급단가','총 입고금액','지점','구분1','구분2']];
+  sorted.forEach((r,i)=>{wsData.push([i+1,r.date,r.site,r.gubun||'',r.cat,r.code||'',r.item,r.unit||'',r.qty,r.price,r.amount,'서초',r.gubun||'',r.cat]);});
   const total=sorted.reduce((s,r)=>s+r.amount,0);
-  wsData.push(['합계','','','','','','','','','',total,'','']);
+  wsData.push(['합계','','','','','','','','','',total,'','','']);
   const ws=XLSX.utils.aoa_to_sheet(wsData);
   // 날짜 셀: 텍스트로 강제 (앞에 ' 이미 포함됨)
   // 금액 수식 셀 직접 설정
@@ -2994,10 +2994,10 @@ function exportXLSX(){
   // 합계행 수식
   const sumCell=`K${sorted.length+2}`;
   ws[sumCell]={t:'n',f:`SUM(K2:K${sorted.length+1})`,v:sorted.reduce((s,r)=>s+r.amount,0),s:ws[sumCell]?.s};
-  ws['!cols']=[{wch:5},{wch:12},{wch:22},{wch:8},{wch:10},{wch:11},{wch:42},{wch:6},{wch:9},{wch:11},{wch:13},{wch:6},{wch:8}];
+  ws['!cols']=[{wch:5},{wch:12},{wch:22},{wch:8},{wch:10},{wch:11},{wch:42},{wch:6},{wch:9},{wch:11},{wch:13},{wch:6},{wch:8},{wch:10}];
   ws['!rows']=[{hpt:28}];sorted.forEach(()=>ws['!rows'].push({hpt:20}));ws['!rows'].push({hpt:22});
   const cols='ABCDEFGHIJKLMNOPQRS'.split('');
-  for(let c=0;c<13;c++){const a=`${cols[c]}1`;if(!ws[a])ws[a]={v:'',t:'s'};ws[a].s=hdrStyle;}
+  for(let c=0;c<14;c++){const a=`${cols[c]}1`;if(!ws[a])ws[a]={v:'',t:'s'};ws[a].s=hdrStyle;}
   sorted.forEach((r,i)=>{
     const row=i+2;const bg=i%2===0?'FFFFFF':'F7F9FC';
     const sd=(h='left')=>{return {font:{sz:10,name:'맑은 고딕'},fill:{fgColor:{rgb:bg}},alignment:{horizontal:h,vertical:'center'},border};}
@@ -3012,17 +3012,17 @@ function exportXLSX(){
     ws[`J${row}`]={t:'n', v:sorted[i].price, s:{...sd('right'),numFmt:'#,##0'}};
   });
   const tr2=sorted.length+2;
-  for(let c=0;c<13;c++){const a=`${cols[c]}${tr2}`;if(!ws[a])ws[a]={v:'',t:'s'};ws[a].s=totalStyle;}
+  for(let c=0;c<14;c++){const a=`${cols[c]}${tr2}`;if(!ws[a])ws[a]={v:'',t:'s'};ws[a].s=totalStyle;}
   if(ws[`K${tr2}`])ws[`K${tr2}`].t='n';
-  ws['!autofilter']={ref:'A1:M1'};
+  ws['!autofilter']={ref:'A1:N1'};
   XLSX.utils.book_append_sheet(wb,ws,monthName);
   XLSX.writeFile(wb,`크래프톤_현지구매_${monthName}.xlsx`);
   toast(`${monthName} Excel 저장 완료`,'ok');
 }
 function exportCSV(){
   const data=gc();if(!data.length){toast('데이터 없음','err');return;}
-  const h=['순번','입고일','사이트','구분','분류','상품코드','품목','단위','총입고량','공급단가','총입고금액','지점','구분1'];
-  const rows=data.map((r,i)=>[i+1,r.date,r.site,r.gubun||'',r.cat,r.code||'',r.item,r.unit||'',r.qty,r.price,r.amount,'서초',r.gubun||'']);
+  const h=['순번','입고일','사이트','구분','분류','상품코드','품목','단위','총입고량','공급단가','총입고금액','지점','구분1','구분2'];
+  const rows=data.map((r,i)=>[i+1,r.date,r.site,r.gubun||'',r.cat,r.code||'',r.item,r.unit||'',r.qty,r.price,r.amount,'서초',r.gubun||'',r.cat]);
   const csv='\uFEFF'+[h,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
   const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),download:`현지구매_${MONTHS[CM]}.csv`});
   a.click();toast('CSV 저장 완료','ok');
