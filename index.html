@@ -1946,6 +1946,8 @@ async function saveMasterToFirebase() {
     masterData.forEach((m, i) => { obj['item_' + i] = m; });
     await set(ref(db, 'master'), obj);
   } catch(e) { console.error('마스터 저장 실패:', e); }
+  // 같은 세션에서도 현지구매 화면에 즉시 반영 (분류/코드/단위/단가 실시간 연동)
+  if (document.getElementById('tbody')) { renderTable(); updateSidebar(); }
 }
 
 // 구매 데이터 로드
@@ -2504,6 +2506,26 @@ async function resolveSanpum(type, month, id) {
 
 
 
+
+// ── 마스터 실시간 연동: 구매내역 행에 마스터의 최신 분류/코드/단위/단가 적용 ──
+function getMasterMatch(r) {
+  if (r.code) {
+    const byCode = masterData.find(m => m.code && m.code === r.code);
+    if (byCode) return byCode;
+  }
+  return masterData.find(m => m.item === r.item) || null;
+}
+
+// 원본 행(r)에 마스터 최신값을 덮어씌운 "표시용" 행을 반환 (원본 데이터는 불변)
+function withMasterSync(r) {
+  if (r.masterLocked) return r; // 사용자가 직접 수정한 건은 마스터 연동 제외
+  const m = getMasterMatch(r);
+  if (!m) return r;
+  const price  = m.price;
+  const amount = Math.round(r.qty * price);
+  return { ...r, cat: m.cat, code: m.code || r.code, unit: m.unit || r.unit, price, amount };
+}
+
 // ══ 페이지 전환 ══
 function switchPage(page) {
   const iP = page==='purchase';
@@ -2672,16 +2694,32 @@ function editPrice(id, cell) {
   inp.focus(); inp.select();
 }
 
+
+// 마스터 연동 다시 활성화 (수동 잠금 해제)
+async function unlockMasterSync(id) {
+  const data = gc(), row = data.find(r => r.id === id);
+  if (!row || !row.masterLocked) return;
+  if (!confirm('이 항목을 다시 마스터 가격과 연동하시겠습니까?')) return;
+  delete row.masterLocked;
+  await sc2(data);
+  renderTable(); updateSidebar();
+  toast('마스터와 다시 연동되었습니다.', 'ok');
+}
+
 async function savePrice(id, input) {
   const newPrice = parseFloat(input.value);
   if (isNaN(newPrice) || newPrice < 0) { renderTable(); return; }
   const data = gc(), row = data.find(r => r.id === id);
-  if (!row || newPrice === row.price) { renderTable(); return; }
+  if (!row) { renderTable(); return; }
+  // 마스터 동기화로 표시되던 값 기준으로 실제 변경 여부 체크
+  const displayedPrice = withMasterSync(row).price;
+  if (newPrice === displayedPrice) { renderTable(); return; }
   row.price  = newPrice;
   row.amount = Math.round(row.qty * newPrice);
+  row.masterLocked = true; // 직접 수정 후에는 마스터 변경에 영향받지 않음
   await sc2(data);
   renderTable(); updateSidebar();
-  toast(`단가 ${newPrice.toLocaleString()}원으로 수정 (금액 자동 재계산)`, 'ok');
+  toast(`단가 ${newPrice.toLocaleString()}원으로 수정 (이 건은 이후 마스터 변경과 무관하게 유지됩니다)`, 'ok');
 }
 
 async function saveQty(id,input){
@@ -2725,7 +2763,9 @@ function resetFilter(){
   activeFilter={dateFrom:'',dateTo:'',site:'',cat:'',item:''};renderTable();
 }
 function getFilteredData(){
-  let data=gc();const f=activeFilter;
+  // 마스터 최신값(분류/코드/단위/단가) 실시간 반영
+  let data=gc().map(withMasterSync);
+  const f=activeFilter;
   if(f.dateFrom) data=data.filter(r=>r.date>=f.dateFrom);
   if(f.dateTo)   data=data.filter(r=>r.date<=f.dateTo);
   if(f.site)     data=data.filter(r=>r.site===f.site);
@@ -2789,7 +2829,7 @@ function renderTable(){
       <td style="font-size:13px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.item}">${r.item}</td>
       <td class="center">${r.unit||''}</td>
       <td class="num" style="cursor:pointer;text-decoration:underline dotted #aaa" title="클릭하여 수량 수정" onclick="editQty(${r.id},this)">${r.qty.toLocaleString()}</td>
-      <td class="num" style="cursor:pointer;text-decoration:underline dotted #aaa" title="클릭하여 단가 수정" onclick="editPrice(${r.id},this)">${Number.isInteger(r.price)?r.price.toLocaleString():r.price.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:4})}</td>
+      <td class="num" style="cursor:pointer;text-decoration:underline dotted #aaa" title="${r.masterLocked?'🔒 이 건은 직접 수정되어 마스터 변경과 무관하게 고정됨. 더블클릭하면 마스터와 다시 연동':'클릭하여 단가 수정'}" onclick="editPrice(${r.id},this)" ondblclick="${r.masterLocked?`unlockMasterSync(${r.id})`:''}">${r.masterLocked?'🔒 ':''}${Number.isInteger(r.price)?r.price.toLocaleString():r.price.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:4})}</td>
       <td class="num" style="font-weight:600">${r.amount.toLocaleString()}</td>
       <td class="center" style="font-size:13px">서초</td>
       <td class="center" style="font-size:13px;white-space:nowrap">${r.gubun||''}</td>
@@ -2818,7 +2858,7 @@ function updateFooter(){
 
 // ══ 사이드바 ══
 function updateSidebar(){
-  const data=gc();
+  const data=gc().map(withMasterSync);
   const total=data.reduce((s,r)=>s+r.amount,0);
   const inc=data.filter(r=>CK_KEYS.some(k=>!r[k])).length;
   document.getElementById('sa').textContent='₩ '+total.toLocaleString('ko-KR');
@@ -2846,7 +2886,7 @@ function updateSidebar(){
 
 // ══ Excel 내보내기 ══
 function exportXLSX(){
-  const data=gc();
+  const data=gc().map(withMasterSync);
   if(!data.length){toast('내보낼 데이터가 없습니다.','err');return;}
   const CAT_SORT_X={'네스프레소':0,'펍':1,'서초주류':2,'웰니스':3,'식재':4,'콜라보':5};
   const getBrandX=item=>item.includes('_')?item.split('_')[0]:item;
@@ -3082,6 +3122,8 @@ function setupRealtimeSync() {
       if (JSON.stringify(newMaster) !== JSON.stringify(masterData)) {
         masterData = newMaster;
         if (document.getElementById('masterTbody')) renderMasterTable();
+        // 마스터 변경 → 현지구매 화면에도 즉시 반영(분류/코드/단위/단가 실시간 연동)
+        if (document.getElementById('tbody')) { renderTable(); updateSidebar(); }
       }
     }
   });
@@ -3572,7 +3614,8 @@ function renderLedgerTable() {
     <td class="lcenter" style="color:#aaa;font-size:12px;padding:0">
       ${ledgerSortMode ? `<div class="order-btns-cell"><span class="drag-handle" draggable="true" ondragstart="onDragStart(event,'ledger',${r.id})" ondragend="onDragEnd(event)" ontouchstart="onTouchStart(event,'ledger',${r.id})">⠿</span></div>` : `<span style="color:#aaa;font-size:12px">${i+1}</span>`}
     </td>
-    <td class="lcenter" style="${editStyle}" title="클릭하여 날짜 수정" onclick="editLedgerField(${r.id},'date',this)">${r.date||'-'}</td>
+    <td class="lcenter" style="white-space:nowrap">${r.jijum||'서초'}</td>
+    <td class="lcenter" style="${editStyle};font-family:monospace;white-space:nowrap" title="클릭하여 날짜 수정" onclick="editLedgerField(${r.id},'date',this)">${r.date||'-'}</td>
     <td class="lnum" style="${editStyle}" title="클릭하여 Total 수정" onclick="editLedgerTotal(${r.id},this)">${r.total ? Math.round(r.total).toLocaleString() : '-'}</td>
     <td class="lnum" style="color:#888">${r.vat ? Math.round(r.vat).toLocaleString() : '-'}</td>
     <td class="lnum" style="color:#888">${r.amt ? Math.round(r.amt).toLocaleString() : '-'}</td>
@@ -3821,7 +3864,7 @@ window.closeDropdown=closeDropdown; window.selectItem=selectItem;
 window.addRow=addRow; window.resetForm=resetForm;
 window.toggleCk=toggleCk; window.delRow=delRow; window.clearMonth=clearMonth;
 window.editQty=editQty; window.saveQty=saveQty;
-window.editPrice=editPrice; window.savePrice=savePrice;
+window.editPrice=editPrice; window.savePrice=savePrice; window.unlockMasterSync=unlockMasterSync;
 window.editDate=editDate; window.saveDate=saveDate;
 window.applyFilter=applyFilter; window.resetFilter=resetFilter;
 window.exportXLSX=exportXLSX; window.exportCSV=exportCSV;
