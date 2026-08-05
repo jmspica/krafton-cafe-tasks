@@ -743,6 +743,79 @@ tr.sort-active { background:#fffbeb !important; }
 /* 지점/구분1: 화면에서 숨김 (엑셀 내보내기엔 포함됨) */
 .hidden-col { display:none; }
 
+
+/* ── 첨부파일 버튼/모달 ── */
+.attach-btn {
+  position:relative; border:1px solid #dde3ea; border-radius:6px;
+  background:#fff; padding:4px 8px; font-size:13px; cursor:pointer;
+  transition:all .15s;
+}
+.attach-btn:hover { background:#f0f4f8; }
+.attach-btn.has-files { background:#e0f2fe; border-color:#7dd3fc; }
+.attach-cnt {
+  display:inline-block; background:#0369a1; color:#fff;
+  font-size:9px; font-weight:700; border-radius:8px;
+  padding:0 4px; margin-left:2px; vertical-align:top;
+}
+
+#attachModalOverlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.5);
+  display:none; align-items:center; justify-content:center; z-index:9000;
+}
+#attachModalOverlay.open { display:flex; }
+.attach-modal {
+  background:#fff; border-radius:12px; width:100%; max-width:480px;
+  max-height:80vh; display:flex; flex-direction:column;
+  box-shadow:0 8px 32px rgba(0,0,0,.2);
+}
+.attach-modal-header {
+  padding:16px 20px; border-bottom:1px solid #eef0f3;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.attach-modal-header h3 { font-size:14px; font-weight:700; color:#1a3a5c; }
+.attach-modal-close {
+  border:none; background:none; font-size:18px; cursor:pointer; color:#888;
+  width:28px; height:28px; border-radius:6px;
+}
+.attach-modal-close:hover { background:#f0f4f8; }
+.attach-modal-body { padding:16px 20px; overflow-y:auto; flex:1; }
+.attach-upload-zone {
+  border:2px dashed #dde3ea; border-radius:8px; padding:20px;
+  text-align:center; cursor:pointer; transition:all .15s; margin-bottom:14px;
+}
+.attach-upload-zone:hover { border-color:#1a3a5c; background:#f8fbff; }
+.attach-upload-zone.dragover { border-color:#1a3a5c; background:#e0f2fe; }
+.attach-upload-zone .icon { font-size:28px; margin-bottom:6px; }
+.attach-upload-zone .txt { font-size:12px; color:#666; }
+.attach-upload-zone .sub { font-size:10px; color:#aaa; margin-top:2px; }
+.attach-list { display:flex; flex-direction:column; gap:8px; }
+.attach-item {
+  display:flex; align-items:center; gap:10px;
+  border:1px solid #eef0f3; border-radius:8px; padding:8px 10px;
+}
+.attach-item .thumb {
+  width:40px; height:40px; border-radius:6px; object-fit:cover;
+  background:#f0f4f8; flex-shrink:0; display:flex; align-items:center;
+  justify-content:center; font-size:18px;
+}
+.attach-item .info { flex:1; min-width:0; }
+.attach-item .name { font-size:12px; font-weight:500; color:#333;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.attach-item .meta { font-size:10px; color:#aaa; }
+.attach-item .actions { display:flex; gap:4px; flex-shrink:0; }
+.attach-item .actions a, .attach-item .actions button {
+  border:1px solid #dde3ea; background:#fff; border-radius:5px;
+  padding:4px 8px; font-size:11px; cursor:pointer; text-decoration:none;
+  color:#333; font-family:'Noto Sans KR',sans-serif;
+}
+.attach-item .actions button.del { color:#dc2626; border-color:#fecaca; }
+.attach-item .actions a:hover, .attach-item .actions button:hover { background:#f0f4f8; }
+.attach-progress {
+  height:4px; background:#eef0f3; border-radius:2px; overflow:hidden; margin-top:8px;
+}
+.attach-progress-bar { height:100%; background:#1a3a5c; width:0%; transition:width .2s; }
+.attach-empty { text-align:center; color:#aaa; font-size:12px; padding:16px 0; }
+
 </style>
 
 <!-- 추가 CSS -->
@@ -1300,6 +1373,79 @@ tr.sort-active { background:#fffbeb !important; }
 /* 지점/구분1: 화면에서 숨김 (엑셀 내보내기엔 포함됨) */
 .hidden-col { display:none; }
 
+
+/* ── 첨부파일 버튼/모달 ── */
+.attach-btn {
+  position:relative; border:1px solid #dde3ea; border-radius:6px;
+  background:#fff; padding:4px 8px; font-size:13px; cursor:pointer;
+  transition:all .15s;
+}
+.attach-btn:hover { background:#f0f4f8; }
+.attach-btn.has-files { background:#e0f2fe; border-color:#7dd3fc; }
+.attach-cnt {
+  display:inline-block; background:#0369a1; color:#fff;
+  font-size:9px; font-weight:700; border-radius:8px;
+  padding:0 4px; margin-left:2px; vertical-align:top;
+}
+
+#attachModalOverlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.5);
+  display:none; align-items:center; justify-content:center; z-index:9000;
+}
+#attachModalOverlay.open { display:flex; }
+.attach-modal {
+  background:#fff; border-radius:12px; width:100%; max-width:480px;
+  max-height:80vh; display:flex; flex-direction:column;
+  box-shadow:0 8px 32px rgba(0,0,0,.2);
+}
+.attach-modal-header {
+  padding:16px 20px; border-bottom:1px solid #eef0f3;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.attach-modal-header h3 { font-size:14px; font-weight:700; color:#1a3a5c; }
+.attach-modal-close {
+  border:none; background:none; font-size:18px; cursor:pointer; color:#888;
+  width:28px; height:28px; border-radius:6px;
+}
+.attach-modal-close:hover { background:#f0f4f8; }
+.attach-modal-body { padding:16px 20px; overflow-y:auto; flex:1; }
+.attach-upload-zone {
+  border:2px dashed #dde3ea; border-radius:8px; padding:20px;
+  text-align:center; cursor:pointer; transition:all .15s; margin-bottom:14px;
+}
+.attach-upload-zone:hover { border-color:#1a3a5c; background:#f8fbff; }
+.attach-upload-zone.dragover { border-color:#1a3a5c; background:#e0f2fe; }
+.attach-upload-zone .icon { font-size:28px; margin-bottom:6px; }
+.attach-upload-zone .txt { font-size:12px; color:#666; }
+.attach-upload-zone .sub { font-size:10px; color:#aaa; margin-top:2px; }
+.attach-list { display:flex; flex-direction:column; gap:8px; }
+.attach-item {
+  display:flex; align-items:center; gap:10px;
+  border:1px solid #eef0f3; border-radius:8px; padding:8px 10px;
+}
+.attach-item .thumb {
+  width:40px; height:40px; border-radius:6px; object-fit:cover;
+  background:#f0f4f8; flex-shrink:0; display:flex; align-items:center;
+  justify-content:center; font-size:18px;
+}
+.attach-item .info { flex:1; min-width:0; }
+.attach-item .name { font-size:12px; font-weight:500; color:#333;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.attach-item .meta { font-size:10px; color:#aaa; }
+.attach-item .actions { display:flex; gap:4px; flex-shrink:0; }
+.attach-item .actions a, .attach-item .actions button {
+  border:1px solid #dde3ea; background:#fff; border-radius:5px;
+  padding:4px 8px; font-size:11px; cursor:pointer; text-decoration:none;
+  color:#333; font-family:'Noto Sans KR',sans-serif;
+}
+.attach-item .actions button.del { color:#dc2626; border-color:#fecaca; }
+.attach-item .actions a:hover, .attach-item .actions button:hover { background:#f0f4f8; }
+.attach-progress {
+  height:4px; background:#eef0f3; border-radius:2px; overflow:hidden; margin-top:8px;
+}
+.attach-progress-bar { height:100%; background:#1a3a5c; width:0%; transition:width .2s; }
+.attach-empty { text-align:center; color:#aaa; font-size:12px; padding:16px 0; }
+
 </style>
 </head>
 
@@ -1803,6 +1949,7 @@ tr.sort-active { background:#fffbeb !important; }
                 <th style="min-width:150px">가맹점명</th>
                 <th style="width:130px">세금계산서/법인카드</th>
                 <th style="width:80px">청구여부</th>
+                <th style="width:44px" title="영수증/거래내역서 첨부">첨부</th>
                 <th style="width:50px">사전품의</th>
                 <th style="width:36px">삭제</th>
               </tr>
@@ -1888,6 +2035,29 @@ tr.sort-active { background:#fffbeb !important; }
 
 </div><!-- /appSanpum -->
 
+
+<!-- 첨부파일 모달 -->
+<div id="attachModalOverlay" onclick="if(event.target===this)closeAttachModal()">
+  <div class="attach-modal">
+    <div class="attach-modal-header">
+      <h3>📎 영수증 / 거래내역서 첨부</h3>
+      <button class="attach-modal-close" onclick="closeAttachModal()">✕</button>
+    </div>
+    <div class="attach-modal-body">
+      <div class="attach-upload-zone" id="attachDropZone" onclick="document.getElementById('attachFileInput').click()">
+        <div class="icon">📤</div>
+        <div class="txt">클릭하거나 파일을 끌어다 놓으세요</div>
+        <div class="sub">이미지(JPG, PNG) / PDF · 최대 10MB</div>
+        <input type="file" id="attachFileInput" accept="image/*,.pdf" multiple style="display:none" onchange="handleAttachFiles(this.files)">
+      </div>
+      <div class="attach-progress" id="attachProgressWrap" style="display:none">
+        <div class="attach-progress-bar" id="attachProgressBar"></div>
+      </div>
+      <div class="attach-list" id="attachList"></div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -1895,6 +2065,7 @@ tr.sort-active { background:#fffbeb !important; }
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, get, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA3YyGQ12bpVJyLY0MXURdqQPLtvqFEN8M",
@@ -1908,6 +2079,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db   = getDatabase(app);
 const auth = getAuth(app);
+const storage = getStorage(app);
 
 // ── 마스터 데이터 ─────────────────────────────────────────────────────────────
 const MASTER = [{"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "135435", "item": "엠즈베이커스_프로마쥬클래식(6EA)", "unit": "EA", "price": 2950, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "287026", "item": "엠즈베이커스_밀크롤(6EA)", "unit": "EA", "price": 2200, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "489319", "item": "네이처티 우베 파우더 800g", "unit": "EA", "price": 13091, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "AW00128", "item": "모모스커피_콜드브루 원액 디카페인(1000ml)", "unit": "EA", "price": 21818.18181818182, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "AW00387", "item": "커피리브레_콜롬비아 엘 타블론 디카페인 500g", "unit": "EA", "price": 21818, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "AW00403", "item": "모모스커피_코스타리카 모모스컬렉션 디카페인 500g", "unit": "EA", "price": 17100, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "AW00405", "item": "모모스_코스타리카 모모스셀렉션 디카페인 1kg", "unit": "EA", "price": 30600, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "AW00406", "item": "180커피로스터스_콜롬비아 엘 레나세르 디카페인_500g", "unit": "EA", "price": 28582, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "AW00428", "item": "180커피로스터스_디카페인 블렌드 커피 율 500g", "unit": "EA", "price": 15273, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "H000011", "item": "광양매실청", "unit": "EA", "price": 285000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "M100010", "item": "엠즈베이커스_미니바스크치즈케이크(6EA)", "unit": "EA", "price": 2300, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "M100011", "item": "엠즈베이커스_초코밀크롤(6EA)", "unit": "EA", "price": 2400, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "M100012", "item": "엠즈베이커스_오트롤(6EA)", "unit": "EA", "price": 2583, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "M100014", "item": "파미유_말렌카 위드 코코아(1BOX)", "unit": "EA", "price": 19650, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "M100015", "item": "파미유_말렌카 위드 월넛(1BOX)", "unit": "EA", "price": 19650, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "M100016", "item": "파미유_말렌카 위드 레몬(1BOX)", "unit": "EA", "price": 19650, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "M100017", "item": "파미유_말렌카 위드 살구(1BOX)", "unit": "EA", "price": 17850, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "M100019", "item": "파미유_말렌카 위드 시나몬(1BOX)", "unit": "EA", "price": 17850, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0035", "item": "모닌 월넛브라우니 시럽", "unit": "EA", "price": 14909, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0036", "item": "아사이베리 파우더", "unit": "EA", "price": 17273, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0038", "item": "비비고 김스낵", "unit": "EA", "price": 1836, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0042", "item": "타바론_루이보스밀크티 베이스", "unit": "EA", "price": 20000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0043", "item": "맥파이앤타이거_감잎차(100EA)", "unit": "EA", "price": 76000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0044", "item": "맥파이앤타이거_쑥차(100EA)", "unit": "EA", "price": 76000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0045", "item": "타바론_후르츠드림", "unit": "EA", "price": 30000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0048", "item": "마이노말 저당 저칼로리 얼그레이 시럽", "unit": "EA", "price": 7682, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "OT0055", "item": "바닐라빈파우더", "unit": "EA", "price": 75091, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100019", "item": "TWG_카모마일(200EA)", "unit": "BOX", "price": 210000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100020", "item": "TWG_프렌치얼그레이(200EA)", "unit": "BOX", "price": 210000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100051", "item": "TWG_그랜드웨딩(200EA)", "unit": "BOX", "price": 210000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100052", "item": "TWG_루이보스 자스민(200EA)", "unit": "BOX", "price": 210000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100053", "item": "오테라_배그쿠키", "unit": "EA", "price": 1500, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100055", "item": "TWG_크림카라멜(200EA)", "unit": "BOX", "price": 210000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100058", "item": "TWG_그나와 민트(200EA)", "unit": "BOX", "price": 210000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100060", "item": "트렌디저트_밀크빙수 240ml(1Box 18ea)", "unit": "EA", "price": 1500, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100096", "item": "파미유_P떠먹는티라미수(8p)", "unit": "EA", "price": 3700, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100097", "item": "파미유_떠먹는 오레오케익(8p)", "unit": "EA", "price": 3700, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100110", "item": "파미유_떠먹는 우유케익(8p)", "unit": "EA", "price": 3700, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100111", "item": "파미유_떠먹는 고구마케익(6p)", "unit": "EA", "price": 2700, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100125", "item": "홀블렌딩_식물성 단백질 쉐이크 블랙빈", "unit": "EA", "price": 22727.27272727273, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100126", "item": "홀블렌딩_식물성 단백질 쉐이크 쑥", "unit": "EA", "price": 21818.18181818182, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100145", "item": "알트하우스_레드 후룻 프레쉬 15티백", "unit": "EA", "price": 15000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100154", "item": "티어스_쌍화차 오리진 패밀리팩(1kg)", "unit": "EA", "price": 40909, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "TS100179", "item": "트렌디저트_초코빙수 240ml(1Box 18ea)", "unit": "EA", "price": 1500, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "OT0024", "item": "비브리브_꼬박꼬밥 고단저당 스윗콘맛(7EA)", "unit": "EA", "price": 2071.428571428571, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "OT0025", "item": "비브리브_애사비젤리(14EA)", "unit": "BOX", "price": 7000, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "OT0030", "item": "비브리브_꼬박꼬밥 말차맛(7EA)", "unit": "EA", "price": 2071.428571428571, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "OT0033", "item": "맥파이앤타이거_호지차(100EA)", "unit": "BOX", "price": 380, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "OT0034", "item": "마이노멀_땅콩버터 크런치(10EA)", "unit": "PACK", "price": 5409, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "OT0041", "item": "비브리브_꼬박꼬밥 자색고구마맛(7EA)", "unit": "PACK", "price": 2071.428571428571, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "OT0052", "item": "헤븐리바이트 푸룬앤월넛_8개입", "unit": "EA", "price": 2300, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "TS100173", "item": "레미레미_땅콩버터 크런치(10EA)", "unit": "EA", "price": 8500, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "TS100174", "item": "비브리브_레몬즙(14EA)", "unit": "EA", "price": 6800, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "웰니스", "code": "TS100175", "item": "이야이야_엑스트라버진 올리브오일 스틱형(15EA)", "unit": "EA", "price": 20200, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00003", "item": "우성_아사히", "unit": "EA", "price": 2175, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00004", "item": "우성_기린이치방캔", "unit": "EA", "price": 1725, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00006", "item": "우성_에딩거 바이스비어", "unit": "EA", "price": 3108, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00007", "item": "우성_크로넨버그 블랑 1664", "unit": "EA", "price": 2208.333333333333, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00009", "item": "우성_제주위트에일캔", "unit": "EA", "price": 1695.833333333333, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00047", "item": "우성_탱커레이 진", "unit": "EA", "price": 30100, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00068", "item": "우성_기네스", "unit": "EA", "price": 3141.666666666667, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00101", "item": "우성_짐빔하이볼 레몬", "unit": "EA", "price": 2104.166666666667, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00127", "item": "우성_빅웨이브캔", "unit": "EA", "price": 3108.333333333333, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00128", "item": "카발란하이볼위스키소다캔", "unit": "EA", "price": 3683, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00129", "item": "우성_카스", "unit": "EA", "price": 1558.333333333333, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00131", "item": "속초맥주 자니 라거", "unit": "EA", "price": 4733, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00132", "item": "우성_에비스캔", "unit": "EA", "price": 2854.166666666667, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00134", "item": "우성_페냐솔 틴토 팩와인 3L", "unit": "EA", "price": 18000, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "서초주류", "code": "W00136", "item": "우성_필스너우르켈", "unit": "EA", "price": 3625, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00011", "item": "우성_헤쿨라 모나스트렐", "unit": "EA", "price": 13800, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00013", "item": "우성_러시안잭 쇼비뇽블랑", "unit": "EA", "price": 19600, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00019", "item": "우성_미도리", "unit": "EA", "price": 32100, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00036", "item": "우성_디카이퍼 피치트리", "unit": "EA", "price": 23000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00043", "item": "수영유통_지평막걸리", "unit": "EA", "price": 3300, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00046", "item": "우성_스미노프 보드카", "unit": "EA", "price": 24000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00051", "item": "우성_제임슨", "unit": "EA", "price": 32200, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00075", "item": "우성_콰페이리치", "unit": "EA", "price": 31500, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00078", "item": "우성_라 스피네타 모스카토 다스티", "unit": "EA", "price": 29400, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00085", "item": "우성_짐빔 위스키", "unit": "EA", "price": 27400, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00109", "item": "우성_바카디 카르타블랑카", "unit": "EA", "price": 20800, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00110", "item": "우성_잭 다니엘 애플", "unit": "EA", "price": 43500, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00113", "item": "우성_생제르맹", "unit": "EA", "price": 59300, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00117", "item": "우성_우드브릿지 쇼비뇽블랑", "unit": "EA", "price": 17300, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00126", "item": "우성_타베르네로 보띠아 이탈리아(피스코)", "unit": "EA", "price": 34500, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "W00133", "item": "우성_디카이퍼 크림드카시스", "unit": "EA", "price": 18200, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "라빠르쉐 스틱설탕", "unit": "EA", "price": 55736, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "통참깨", "unit": "EA", "price": 3555, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "티어스_시나몬프레소 패밀리팩(900g)", "unit": "EA", "price": 45455, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "한국야쿠르트 장집중케어MPRO4(130ml)", "unit": "EA", "price": 2000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "한국야쿠르트 장피부듀얼케어MPRO4(130ml)", "unit": "EA", "price": 2000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "향미사_볼리비아 핀카 이사벨 나랑할 게이샤 내추럴 100g", "unit": "EA", "price": 25455, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "향미사_코스타리카 산 이시드로 라브라도르 까사 베르데 티피카 허니 200g", "unit": "EA", "price": 22727, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "홀블렌딩_식물성 단백질 쉐이크 카카오", "unit": "EA", "price": 21818.18181818182, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "", "item": "우성_디카이퍼 트리플색", "unit": "EA", "price": 23000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "", "item": "우성_스텔라생(20L)", "unit": "EA", "price": 109000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "펍", "code": "", "item": "우성_호가든생(20L)", "unit": "EA", "price": 96500, "remark": ""}, {"site": "크래프톤서초카페점 라운지", "gubun": "라운지", "cat": "네스프레소", "code": "", "item": "네스프레소", "unit": "EA", "price": 2720000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_보난자 블렌드 1kg", "unit": "EA", "price": 28000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_다크 브라질 1kg", "unit": "EA", "price": 27000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_엘 엘칸토 콜롬비아 1kg", "unit": "EA", "price": 40000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_고고구 에티오피아 1kg", "unit": "EA", "price": 43000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_시티오 베르잼 그란데 브라질 1kg", "unit": "EA", "price": 37000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_라 라하 멕시코 1kg", "unit": "EA", "price": 46000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_핀카 단토 라이트 허니 코스타리카 1kg", "unit": "EA", "price": 66000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_알라인 내추럴 HASD 인도네시아 1kg", "unit": "EA", "price": 72000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_레쿠 에티오피아 1kg", "unit": "EA", "price": 54000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_핀카 하트만 카투라 파나마 1kg", "unit": "EA", "price": 70000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_미엘레스 게이샤 콜롬비아 1kg", "unit": "EA", "price": 84000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_핀카 몬테비디오 엘살바도르 1kg", "unit": "EA", "price": 65000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_파젠다 엄 펄프드 내추럴 브라질 1kg", "unit": "EA", "price": 58000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_체체레 아나에어로빅 내추럴 에티오피아 1kg", "unit": "EA", "price": 69000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_아프로카시 디카페인 페루 1kg", "unit": "EA", "price": 40909, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "", "item": "보난자_산가브리엘 아나에어로빅 허니 콜롬비아 1kg", "unit": "EA", "price": 74000, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "285801", "item": "엠즈베이커스_프로마쥬블랑(6EA)", "unit": "EA", "price": 2950, "remark": ""}, {"site": "크래프톤서초카페점 카페", "gubun": "카페", "cat": "식재", "code": "W00077", "item": "엠케이펍_제주누보", "unit": "EA", "price": 1936, "remark": ""}];
@@ -2533,6 +2705,161 @@ function withMasterSync(r) {
   const amount = Math.round(r.qty * price);
   return { ...r, cat: m.cat, code: m.code || r.code, unit: m.unit || r.unit, price, amount };
 }
+
+
+// ══ 첨부파일 (영수증/거래내역서) ══════════════════════════════════════════════
+let currentAttachRowId = null;
+
+function openAttachModal(id) {
+  currentAttachRowId = id;
+  document.getElementById('attachModalOverlay').classList.add('open');
+  renderAttachList();
+}
+
+function closeAttachModal() {
+  document.getElementById('attachModalOverlay').classList.remove('open');
+  currentAttachRowId = null;
+  document.getElementById('attachProgressWrap').style.display = 'none';
+}
+
+function renderAttachList() {
+  const data = glc();
+  const row = data.find(r => r.id === currentAttachRowId);
+  const list = document.getElementById('attachList');
+  if (!row) { list.innerHTML = ''; return; }
+  const files = row.attachments || [];
+  if (!files.length) {
+    list.innerHTML = `<div class="attach-empty">아직 첨부된 파일이 없습니다.</div>`;
+    return;
+  }
+  list.innerHTML = files.map((f, i) => {
+    const isImg = /\.(jpe?g|png|gif|webp)$/i.test(f.name);
+    const thumb = isImg
+      ? `<img class="thumb" src="${f.url}" alt="${f.name}">`
+      : `<div class="thumb">📄</div>`;
+    const sizeStr = f.size ? (f.size/1024).toFixed(0)+'KB' : '';
+    return `<div class="attach-item">
+      ${thumb}
+      <div class="info">
+        <div class="name" title="${f.name}">${f.name}</div>
+        <div class="meta">${sizeStr}${f.uploadedAt ? ' · ' + f.uploadedAt : ''}</div>
+      </div>
+      <div class="actions">
+        <a href="${f.url}" target="_blank" rel="noopener">보기</a>
+        <button onclick="downloadAttachment(${i})">⬇ 다운로드</button>
+        <button class="del" onclick="deleteAttachment(${i})">삭제</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function handleAttachFiles(fileList) {
+  if (!currentAttachRowId || !fileList.length) return;
+  const maxSize = 10 * 1024 * 1024; // 10MB
+  const progWrap = document.getElementById('attachProgressWrap');
+  const progBar  = document.getElementById('attachProgressBar');
+  progWrap.style.display = 'block';
+
+  const data = glc();
+  const row = data.find(r => r.id === currentAttachRowId);
+  if (!row) return;
+  if (!row.attachments) row.attachments = [];
+
+  const files = Array.from(fileList);
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    if (file.size > maxSize) {
+      toast(`"${file.name}" 파일이 10MB를 초과합니다.`, 'err');
+      continue;
+    }
+    progBar.style.width = Math.round((i / files.length) * 100) + '%';
+    try {
+      const path = `ledger-attachments/${LYEAR}/${LCM}/${currentAttachRowId}/${Date.now()}_${file.name}`;
+      const fileRef = storageRef(storage, path);
+      await uploadBytes(fileRef, file);
+      const url = await getDownloadURL(fileRef);
+      row.attachments.push({
+        name: file.name,
+        url,
+        path,
+        size: file.size,
+        uploadedAt: new Date().toISOString().split('T')[0],
+      });
+    } catch(e) {
+      console.error('업로드 실패:', e);
+      toast(`"${file.name}" 업로드 실패`, 'err');
+    }
+  }
+  progBar.style.width = '100%';
+  await slc(data);
+  setTimeout(() => { progWrap.style.display = 'none'; progBar.style.width = '0%'; }, 500);
+
+  renderAttachList();
+  renderLedgerTable();
+  toast('첨부파일이 저장되었습니다.', 'ok');
+  document.getElementById('attachFileInput').value = '';
+}
+
+
+async function downloadAttachment(idx) {
+  const data = glc();
+  const row = data.find(r => r.id === currentAttachRowId);
+  if (!row || !row.attachments || !row.attachments[idx]) return;
+  const file = row.attachments[idx];
+  try {
+    toast('다운로드 준비 중...', 'ok');
+    const res = await fetch(file.url);
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = file.name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 3000);
+  } catch(e) {
+    console.error('다운로드 실패:', e);
+    // 실패 시 새 탭으로라도 열기
+    window.open(file.url, '_blank');
+    toast('직접 다운로드가 안 되어 새 탭으로 열었습니다. 우클릭 후 "다른 이름으로 저장"을 이용해주세요.', 'err');
+  }
+}
+
+async function deleteAttachment(idx) {
+  if (!confirm('이 첨부파일을 삭제하시겠습니까?')) return;
+  const data = glc();
+  const row = data.find(r => r.id === currentAttachRowId);
+  if (!row || !row.attachments || !row.attachments[idx]) return;
+  const file = row.attachments[idx];
+  try {
+    if (file.path) await deleteObject(storageRef(storage, file.path));
+  } catch(e) { console.warn('스토리지 파일 삭제 실패(무시):', e); }
+  row.attachments.splice(idx, 1);
+  await slc(data);
+  renderAttachList();
+  renderLedgerTable();
+  toast('첨부파일이 삭제되었습니다.', 'ok');
+}
+
+// ── 드래그 앤 드롭 업로드 ──
+(function setupAttachDropZone() {
+  document.addEventListener('DOMContentLoaded', () => {
+    const zone = document.getElementById('attachDropZone');
+    if (!zone) return;
+    ['dragenter','dragover'].forEach(evt => zone.addEventListener(evt, e => {
+      e.preventDefault(); zone.classList.add('dragover');
+    }));
+    ['dragleave','drop'].forEach(evt => zone.addEventListener(evt, e => {
+      e.preventDefault(); zone.classList.remove('dragover');
+    }));
+    zone.addEventListener('drop', e => {
+      if (e.dataTransfer.files.length) handleAttachFiles(e.dataTransfer.files);
+    });
+  });
+})();
+
+
 
 // ══ 페이지 전환 ══
 function switchPage(page) {
@@ -3692,6 +4019,11 @@ function renderLedgerTable() {
     <td class="lcenter" style="${editStyle}" title="클릭하여 청구여부 수정" onclick="editLedgerBilling(${r.id},this)">
       <span style="color:${r.billing==='미청구'?'#dc2626':'#888'};font-size:11px">${r.billing||'-'}</span>
     </td>
+    <td class="lcenter">
+      <button class="attach-btn ${(r.attachments&&r.attachments.length)?'has-files':''}" onclick="openAttachModal(${r.id})" title="${(r.attachments&&r.attachments.length)?r.attachments.length+'개 첨부됨':'영수증/거래내역서 첨부'}">
+        📎${(r.attachments&&r.attachments.length)?`<span class="attach-cnt">${r.attachments.length}</span>`:''}
+      </button>
+    </td>
     <td class="lcenter"><button class="sanpum-btn ${r.sanpum?'on':'off'}" title="${r.sanpum?'사전품의 필요 (클릭시 해제)':'사전품의 완료 (클릭시 품의 필요 표시)'}" onclick="toggleLedgerSanpum(${r.id})"></button></td>
     <td class="lcenter"><button class="btn btn-danger btn-sm" onclick="delLedgerRow(${r.id})" style="padding:2px 6px">✕</button></td>
   </tr>`;
@@ -3947,6 +4279,8 @@ window.addLedgerRow=addLedgerRow; window.resetLedgerForm=resetLedgerForm;
 window.delLedgerRow=delLedgerRow; window.renderLedgerTable=renderLedgerTable;
 window.resetLedgerFilter=resetLedgerFilter; window.exportLedgerXLSX=exportLedgerXLSX;
 window.setupLedgerRealtimeSync=setupLedgerRealtimeSync;
+window.openAttachModal=openAttachModal; window.closeAttachModal=closeAttachModal;
+window.handleAttachFiles=handleAttachFiles; window.deleteAttachment=deleteAttachment; window.downloadAttachment=downloadAttachment;
 window.saveMemo=saveMemo;
 window.togglePurchaseSortMode=togglePurchaseSortMode;
 window.movePurchaseRow=movePurchaseRow;
